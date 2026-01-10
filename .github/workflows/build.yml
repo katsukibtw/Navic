@@ -1,6 +1,22 @@
 name: Build Navic
 
 on:
+  push:
+    paths:
+      - composeApp/**
+      - gradle/**
+      - iosApp/**
+      - subsonic/**
+      - build.gradle.kts
+      - settings.gradle.kts
+  pull_request:
+    paths:
+      - composeApp/**
+      - gradle/**
+      - iosApp/**
+      - subsonic/**
+      - build.gradle.kts
+      - settings.gradle.kts
   workflow_dispatch:
 
 concurrency:
@@ -8,7 +24,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-apk:
     name: Build Android APK
     runs-on: ubuntu-latest
     steps:
@@ -41,3 +57,36 @@ jobs:
         with:
           name: navic-release
           path: composeApp/build/outputs/apk/release/*.apk
+  build-ipa:
+    name: Build iOS IPA
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Check Theos cache
+        run: |
+          echo upstream_heads=`git ls-remote https://github.com/theos/theos | head -n 1 | cut -f 1`-`git ls-remote https://github.com/theos/sdks | head -n 1 | cut -f 1` >> $GITHUB_ENV
+
+      - name: Cache Theos
+        id: cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/theos
+          key: ${{ runner.os }}-${{ env.upstream_heads }}
+
+      - name: Install Theos
+        uses: Randomblock1/theos-action@f129528eb3034b088b3eb43f7f935c46ddbdc40c
+
+      - name: Build IPA with Theos
+        working-directory: ./iosApp
+        run: |
+          echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH
+          rm -rf packages
+          make package
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: navic-release
+          path: packages/*.ipa
