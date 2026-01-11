@@ -85,61 +85,64 @@ fun DeletionDialog(
 	val scrollState = rememberScrollState()
 	val state by viewModel.state.collectAsState()
 
-	if (id == null) return
-
 	LaunchedEffect(state) {
-		if (state !is UiState.Success) return@LaunchedEffect
-		viewModel.viewModelScope.launch {
-			onIdClear()
-			snackbarState.showSnackbar(
-				getString(endpoint.deletedText)
-			)
+		if (state is UiState.Success && id != null) {
+			viewModel.viewModelScope.launch {
+				onIdClear()
+				snackbarState.showSnackbar(
+					getString(endpoint.deletedText)
+				)
+			}
 		}
 	}
 
-	AlertDialog(
-		title = { Text(stringResource(endpoint.questionText)) },
-		text = {
-			Column(Modifier.verticalScroll(scrollState)) {
-				Text(stringResource(
-					if (state !is UiState.Error)
-						Res.string.info_action_is_permanent
-					else Res.string.info_error
-				))
-				(state as? UiState.Error)?.error?.let {
-					SelectionContainer {
-						Text("$it")
+	id?.let {
+		AlertDialog(
+			title = { Text(stringResource(endpoint.questionText)) },
+			text = {
+				Column(Modifier.verticalScroll(scrollState)) {
+					Text(
+						stringResource(
+							if (state !is UiState.Error)
+								Res.string.info_action_is_permanent
+							else Res.string.info_error
+						)
+					)
+					(state as? UiState.Error)?.error?.let {
+						SelectionContainer {
+							Text("$it")
+						}
 					}
 				}
-			}
-		},
-		onDismissRequest = {
-			if (state !is UiState.Loading) {
-				onIdClear()
-			}
-		},
-		confirmButton = {
-			Button(
-				onClick = { viewModel.delete(endpoint, id)},
-				enabled = state !is UiState.Loading,
-				colors = ButtonDefaults.buttonColors(
-					containerColor = MaterialTheme.colorScheme.error
-				),
-				shape = ContinuousCapsule
-			) {
+			},
+			onDismissRequest = {
 				if (state !is UiState.Loading) {
-					Text(stringResource(Res.string.action_delete))
-				} else {
-					CircularProgressIndicator(Modifier.size(20.dp))
+					onIdClear()
 				}
-			}
-		},
-		dismissButton = {
-			TextButton(
-				enabled = state !is UiState.Loading,
-				onClick = onIdClear,
-			) { Text(stringResource(Res.string.action_cancel)) }
-		},
-		shape = ContinuousRoundedRectangle(42.dp)
-	)
+			},
+			confirmButton = {
+				Button(
+					onClick = { viewModel.delete(endpoint, id) },
+					enabled = state !is UiState.Loading,
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.error
+					),
+					shape = ContinuousCapsule
+				) {
+					if (state !is UiState.Loading) {
+						Text(stringResource(Res.string.action_delete))
+					} else {
+						CircularProgressIndicator(Modifier.size(20.dp))
+					}
+				}
+			},
+			dismissButton = {
+				TextButton(
+					enabled = state !is UiState.Loading,
+					onClick = onIdClear,
+				) { Text(stringResource(Res.string.action_cancel)) }
+			},
+			shape = ContinuousRoundedRectangle(42.dp)
+		)
+	}
 }
