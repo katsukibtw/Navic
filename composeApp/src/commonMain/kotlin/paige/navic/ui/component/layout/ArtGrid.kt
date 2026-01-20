@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -28,6 +29,8 @@ import com.kyant.capsule.ContinuousCapsule
 import com.kyant.capsule.ContinuousRoundedRectangle
 import dev.burnoo.compose.remembersetting.rememberFloatSetting
 import paige.navic.LocalImageBuilder
+import paige.navic.ui.component.common.ErrorBox
+import paige.navic.util.UiState
 import paige.navic.util.shimmerLoading
 
 @Composable
@@ -93,58 +96,57 @@ fun ArtGridItem(
 			text = subtitle,
 			style = MaterialTheme.typography.bodySmall,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
-			modifier = Modifier.fillMaxWidth()
+			modifier = Modifier.fillMaxWidth(),
+			maxLines = 2
 		)
 	}
 }
 
 @Composable
 fun ArtGridPlaceholder(
-	modifier: Modifier = Modifier,
+	modifier: Modifier = Modifier
+) {
+	Column(modifier = modifier) {
+		Box(
+			modifier = Modifier
+				.fillMaxWidth()
+				.aspectRatio(1f)
+				.clip(ContinuousRoundedRectangle(16.dp))
+				.shimmerLoading()
+		)
+		Box(
+			modifier = Modifier
+				.padding(top = 6.dp)
+				.fillMaxWidth(0.8f)
+				.height(16.dp)
+				.clip(ContinuousCapsule)
+				.shimmerLoading()
+		)
+		Box(
+			modifier = Modifier
+				.padding(top = 4.dp)
+				.fillMaxWidth(0.6f)
+				.height(14.dp)
+				.clip(ContinuousCapsule)
+				.shimmerLoading()
+		)
+	}
+}
+fun LazyGridScope.artGridPlaceholder(
 	itemCount: Int = 8
 ) {
-	LazyVerticalGrid(
-		columns = GridCells.Adaptive(150.dp),
-		modifier = modifier.fillMaxSize(),
-		userScrollEnabled = false,
-		contentPadding = PaddingValues(
-			start = 16.dp,
-			top = 16.dp,
-			end = 16.dp,
-			bottom = 200.dp,
-		),
-		verticalArrangement = Arrangement.spacedBy(12.dp),
-		horizontalArrangement = Arrangement.spacedBy(12.dp),
-	) {
-		items(itemCount) {
-			Column(
-				modifier = Modifier
-					.fillMaxWidth()
-			) {
-				Box(
-					modifier = Modifier
-						.fillMaxWidth()
-						.aspectRatio(1f)
-						.clip(ContinuousRoundedRectangle(16.dp))
-						.shimmerLoading()
-				)
-				Box(
-					modifier = Modifier
-						.padding(top = 6.dp)
-						.fillMaxWidth(0.8f)
-						.height(16.dp)
-						.clip(ContinuousCapsule)
-						.shimmerLoading()
-				)
-				Box(
-					modifier = Modifier
-						.padding(top = 4.dp)
-						.fillMaxWidth(0.6f)
-						.height(14.dp)
-						.clip(ContinuousCapsule)
-						.shimmerLoading()
-				)
-			}
-		}
+	items(itemCount) {
+		ArtGridPlaceholder(Modifier.fillMaxWidth())
+	}
+}
+
+fun LazyGridScope.artGridError(
+	state: UiState.Error
+) {
+	item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+		ErrorBox(
+			modifier = Modifier.animateItem(),
+			error = state
+		)
 	}
 }

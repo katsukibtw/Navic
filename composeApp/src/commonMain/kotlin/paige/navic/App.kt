@@ -12,13 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
-import androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -41,6 +41,7 @@ import paige.navic.shared.rememberMediaPlayer
 import paige.navic.ui.component.layout.BottomBar
 import paige.navic.ui.component.layout.MainScaffold
 import paige.navic.ui.component.layout.TopBar
+import paige.navic.ui.screen.AlbumsScreen
 import paige.navic.ui.screen.ArtistsScreen
 import paige.navic.ui.screen.LibraryScreen
 import paige.navic.ui.screen.PlaylistsScreen
@@ -50,10 +51,14 @@ import paige.navic.ui.screen.SettingsBehaviourScreen
 import paige.navic.ui.screen.SettingsScreen
 import paige.navic.ui.screen.TracksScreen
 import paige.navic.ui.theme.NavicTheme
+import paige.navic.ui.viewmodel.AlbumsViewModel
+import paige.subsonic.api.model.ListType
 import paige.subsonic.api.model.TrackCollection
 
 @Serializable
 data object Library : NavKey
+@Serializable
+data object Albums : NavKey
 @Serializable
 data object Playlists : NavKey
 @Serializable
@@ -68,11 +73,14 @@ data object SettingsBehaviour : NavKey
 data object Search : NavKey
 @Serializable
 data class Tracks(val partialCollection: TrackCollection) : NavKey
+@Serializable
+data class SortedAlbums(val listType: ListType) : NavKey
 
 private val config = SavedStateConfiguration {
 	serializersModule = SerializersModule {
 		polymorphic(NavKey::class) {
 			subclass(Library::class, Library.serializer())
+			subclass(Albums::class, Albums.serializer())
 			subclass(Playlists::class, Playlists.serializer())
 			subclass(Artists::class, Artists.serializer())
 			subclass(Settings::class, Settings.serializer())
@@ -80,6 +88,7 @@ private val config = SavedStateConfiguration {
 			subclass(SettingsBehaviour::class, SettingsBehaviour.serializer())
 			subclass(Search::class, Search.serializer())
 			subclass(Tracks::class, Tracks.serializer())
+			subclass(SortedAlbums::class, SortedAlbums.serializer())
 		}
 	}
 }
@@ -146,6 +155,9 @@ fun App() {
 								entry<Library>(metadata = metadata + ListDetailSceneStrategy.listPane("root")) {
 									LibraryScreen()
 								}
+								entry<Albums>(metadata = metadata + ListDetailSceneStrategy.listPane("root")) {
+									AlbumsScreen()
+								}
 								entry<Playlists>(metadata = metadata + ListDetailSceneStrategy.listPane("root")) {
 									PlaylistsScreen()
 								}
@@ -166,6 +178,11 @@ fun App() {
 								}
 								entry<Search> {
 									SearchScreen()
+								}
+								entry<SortedAlbums> { key ->
+									AlbumsScreen(viewModel = viewModel(key = key.listType.value) {
+										AlbumsViewModel(key.listType)
+									})
 								}
 							},
 							transitionSpec = {

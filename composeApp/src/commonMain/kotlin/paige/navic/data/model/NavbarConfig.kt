@@ -13,6 +13,7 @@ data class NavbarConfig(
 		val default = NavbarConfig(
 			tabs = listOf(
 				NavbarTab(NavbarTab.Id.LIBRARY, true),
+				NavbarTab(NavbarTab.Id.ALBUMS, false),
 				NavbarTab(NavbarTab.Id.PLAYLISTS, true),
 				NavbarTab(NavbarTab.Id.ARTISTS, false)
 			),

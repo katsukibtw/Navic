@@ -13,6 +13,11 @@
 	<string name="title_albums">Albums</string>
 	<string name="title_songs">Songs</string>
 	<string name="title_artists">Artists</string>
+	<string name="title_recently_added">Recently added</string>
+	<string name="title_random">Random</string>
+	<string name="title_starred">Starred</string>
+	<string name="title_recently_played">Recently played</string>
+	<string name="title_frequently_played">Frequently played</string>
 
 	<string name="subtitle_appearance">Customise how things look</string>
 	<string name="subtitle_behaviour">Change how things work</string>
@@ -68,6 +73,7 @@
 	<string name="action_clear_search">Clear</string>
 	<string name="action_more">More</string>
 	<string name="action_add_to_playlist">Add to Playlist</string>
+	<string name="action_see_all">See all</string>
 
 	<string name="notice_deleted_playlist">Deleted playlist.</string>
 	<string name="notice_deleted_share">Deleted share.</string>
@@ -81,4 +87,5 @@
 	<string name="info_error_hide">Hide details</string>
 	<string name="info_unknown_album">Unknown Album</string>
 	<string name="info_unknown_artist">Unknown Artist</string>
+	<string name="info_needs_log_in">You need to log in first. Tap the account button in the top right.</string>
 </resources>

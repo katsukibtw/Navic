@@ -66,7 +66,8 @@ import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.Tracks
 import paige.navic.ui.component.common.ErrorBox
-import paige.navic.ui.component.layout.ArtGridPlaceholder
+import paige.navic.ui.component.layout.ArtGrid
+import paige.navic.ui.component.layout.artGridPlaceholder
 import paige.navic.ui.viewmodel.SearchViewModel
 import paige.navic.util.UiState
 import paige.subsonic.api.model.Album
@@ -90,7 +91,9 @@ fun SearchScreen(
 		)
 		AnimatedContent(state) {
 			when (it) {
-				is UiState.Loading -> ArtGridPlaceholder()
+				is UiState.Loading -> ArtGrid {
+					artGridPlaceholder()
+				}
 				is UiState.Error -> ErrorBox(it)
 				is UiState.Success -> {
 					val results = it.data

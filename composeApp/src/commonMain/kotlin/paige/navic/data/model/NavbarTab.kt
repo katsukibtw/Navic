@@ -10,6 +10,7 @@ data class NavbarTab(
 	@Serializable
 	enum class Id {
 		LIBRARY,
+		ALBUMS,
 		PLAYLISTS,
 		ARTISTS
 	}

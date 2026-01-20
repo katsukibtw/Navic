@@ -4,10 +4,12 @@ import paige.navic.data.session.SessionManager
 import paige.subsonic.api.model.Album
 import paige.subsonic.api.model.ListType
 
-class LibraryRepository {
-	suspend fun getAlbums(): List<Album> {
+open class AlbumsRepository {
+	open suspend fun getAlbums(
+		listType: ListType = ListType.ALPHABETICAL_BY_ARTIST
+	): List<Album> {
 		return SessionManager.api
-			.getAlbumList(type = ListType.ALPHABETICAL_BY_ARTIST, size = 500)
+			.getAlbumList(type = listType, size = 500)
 			.data.albumList.album.orEmpty().map { album ->
 				album.copy(
 					coverArt = SessionManager.api

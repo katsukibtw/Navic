@@ -23,6 +23,7 @@ import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.account_circle
 import navic.composeapp.generated.resources.library_music
 import navic.composeapp.generated.resources.playlist_play
+import navic.composeapp.generated.resources.title_albums
 import navic.composeapp.generated.resources.title_artists
 import navic.composeapp.generated.resources.title_library
 import navic.composeapp.generated.resources.title_playlists
@@ -30,6 +31,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import paige.navic.Albums
 import paige.navic.Artists
 import paige.navic.Library
 import paige.navic.LocalCtx
@@ -46,6 +48,7 @@ private enum class NavItem(
 	val label: StringResource
 ) {
 	LIBRARY(Library, Res.drawable.library_music, Res.string.title_library),
+	ALBUMS(Albums, Res.drawable.library_music, Res.string.title_albums),
 	PLAYLISTS(Playlists, Res.drawable.playlist_play, Res.string.title_playlists),
 	ARTISTS(Artists, Res.drawable.account_circle, Res.string.title_artists)
 }
@@ -71,6 +74,7 @@ fun BottomBar(
 				tabs.forEach { tab ->
 					val item = when (tab.id) {
 						NavbarTab.Id.LIBRARY -> NavItem.LIBRARY
+						NavbarTab.Id.ALBUMS -> NavItem.ALBUMS
 						NavbarTab.Id.PLAYLISTS -> NavItem.PLAYLISTS
 						NavbarTab.Id.ARTISTS -> NavItem.ARTISTS
 					}
@@ -96,6 +100,7 @@ fun BottomBar(
 				tabs.forEach { tab ->
 					val item = when (tab.id) {
 						NavbarTab.Id.LIBRARY -> NavItem.LIBRARY
+						NavbarTab.Id.ALBUMS -> NavItem.ALBUMS
 						NavbarTab.Id.PLAYLISTS -> NavItem.PLAYLISTS
 						NavbarTab.Id.ARTISTS -> NavItem.ARTISTS
 					}

@@ -1,17 +1,28 @@
 package paige.navic.ui.screen
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,140 +33,120 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
+import com.kyant.capsule.ContinuousRoundedRectangle
 import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.action_remove_star
-import navic.composeapp.generated.resources.action_share
-import navic.composeapp.generated.resources.action_star
-import navic.composeapp.generated.resources.count_albums
-import navic.composeapp.generated.resources.info_unknown_album
-import navic.composeapp.generated.resources.info_unknown_artist
-import navic.composeapp.generated.resources.share
-import navic.composeapp.generated.resources.sort
+import navic.composeapp.generated.resources.action_see_all
+import navic.composeapp.generated.resources.history
+import navic.composeapp.generated.resources.info_needs_log_in
+import navic.composeapp.generated.resources.library_add
+import navic.composeapp.generated.resources.shuffle
+import navic.composeapp.generated.resources.title_artists
+import navic.composeapp.generated.resources.title_frequently_played
+import navic.composeapp.generated.resources.title_playlists
+import navic.composeapp.generated.resources.title_random
+import navic.composeapp.generated.resources.title_recently_added
+import navic.composeapp.generated.resources.title_recently_played
+import navic.composeapp.generated.resources.title_starred
 import navic.composeapp.generated.resources.unstar
-import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
-import paige.navic.Tracks
-import paige.navic.ui.component.common.Dropdown
-import paige.navic.ui.component.common.DropdownItem
-import paige.navic.ui.component.common.ErrorBox
+import paige.navic.Playlists
+import paige.navic.SortedAlbums
+import paige.navic.data.session.SessionManager
 import paige.navic.ui.component.common.RefreshBox
+import paige.navic.ui.component.dialog.DeletionDialog
+import paige.navic.ui.component.dialog.DeletionEndpoint
 import paige.navic.ui.component.dialog.ShareDialog
-import paige.navic.ui.component.layout.ArtGrid
-import paige.navic.ui.component.layout.ArtGridItem
 import paige.navic.ui.component.layout.ArtGridPlaceholder
-import paige.navic.ui.viewmodel.LibraryViewModel
+import paige.navic.ui.component.layout.artGridError
+import paige.navic.ui.viewmodel.AlbumsViewModel
+import paige.navic.ui.viewmodel.ArtistsViewModel
+import paige.navic.ui.viewmodel.PlaylistsViewModel
 import paige.navic.util.UiState
+import paige.subsonic.api.model.Album
+import paige.subsonic.api.model.ListType
+import paige.subsonic.api.model.Playlist
 import kotlin.time.Duration
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(viewModel: LibraryViewModel = viewModel { LibraryViewModel() }) {
-	val ctx = LocalCtx.current
-	val backStack = LocalNavStack.current
-
-	val albumsState by viewModel.albumsState.collectAsState()
-	val selection by viewModel.selectedAlbum.collectAsState()
-
+fun LibraryScreen(
+	albumsViewModel: AlbumsViewModel = viewModel { AlbumsViewModel() },
+	playlistsViewModel: PlaylistsViewModel = viewModel { PlaylistsViewModel() },
+	artistsViewModel: ArtistsViewModel = viewModel { ArtistsViewModel() },
+) {
+	val recentsState by albumsViewModel.albumsState.collectAsState()
+	val playlistsState by playlistsViewModel.playlistsState.collectAsState()
+	val artistsState by artistsViewModel.artistsState.collectAsState()
 	var shareId by remember { mutableStateOf<String?>(null) }
 	var shareExpiry by remember { mutableStateOf<Duration?>(null) }
-
-	val starredState by viewModel.starredState.collectAsState()
+	var deletionId by remember { mutableStateOf<String?>(null) }
+	val isLoggedIn by SessionManager.isLoggedIn.collectAsState()
 
 	RefreshBox(
 		modifier = Modifier.background(MaterialTheme.colorScheme.surface),
-		isRefreshing = albumsState is UiState.Loading,
-		onRefresh = { viewModel.refreshAlbums() }
-	) {
-		AnimatedContent(albumsState) {
-			when (it) {
-				is UiState.Loading -> ArtGridPlaceholder()
-				is UiState.Success -> ArtGrid {
-					stickyHeader { _ ->
-						Row(
-							Modifier
-								.background(MaterialTheme.colorScheme.surface)
-								.padding(bottom = 8.dp),
-							verticalAlignment = Alignment.CenterVertically
-						) {
-							Text(
-								pluralStringResource(
-									Res.plurals.count_albums,
-									it.data.count(),
-									it.data.count()
-								),
-								color = MaterialTheme.colorScheme.onSurfaceVariant
-							)
-							Spacer(Modifier.weight(1f))
-							IconButton(onClick = {
-
-							}) {
-								Icon(
-									vectorResource(Res.drawable.sort),
-									contentDescription = null,
-									tint = MaterialTheme.colorScheme.onSurfaceVariant
-								)
-							}
-						}
-					}
-					items(it.data) { album ->
-						Box {
-							ArtGridItem(
-								imageModifier = Modifier.combinedClickable(
-									onClick = {
-										ctx.clickSound()
-										backStack.add(Tracks(album))
-									},
-									onLongClick = {
-										viewModel.selectAlbum(album)
-									}
-								),
-								imageUrl = album.coverArt,
-								title = album.name
-									?: stringResource(Res.string.info_unknown_album),
-								subtitle = (album.artist
-									?: stringResource(Res.string.info_unknown_artist)) + "\n",
-							)
-							Dropdown(
-								expanded = selection == album,
-								onDismissRequest = {
-									viewModel.clearSelection()
-								}
-							) {
-								DropdownItem(
-									text = Res.string.action_share,
-									leadingIcon = Res.drawable.share,
-									onClick = {
-										shareId = album.id
-										viewModel.clearSelection()
-									},
-								)
-								val starred =
-									(starredState as? UiState.Success)?.data
-								DropdownItem(
-									text = if (starred == true)
-										Res.string.action_remove_star
-									else Res.string.action_star,
-									leadingIcon = Res.drawable.unstar,
-									onClick = {
-										if (starred == true)
-											viewModel.unstarSelectedAlbum()
-										else viewModel.starSelectedAlbum()
-										viewModel.clearSelection()
-									},
-									enabled = starred != null
-								)
-							}
-						}
-					}
+		isRefreshing = recentsState is UiState.Loading
+			|| artistsState is UiState.Loading,
+		onRefresh = {
+			if (!isLoggedIn) return@RefreshBox
+			albumsViewModel.refreshAlbums()
+			playlistsViewModel.refreshPlaylists()
+			artistsViewModel.refreshArtists()
+		}
+	) { topPadding ->
+		LazyVerticalGrid(
+			columns = GridCells.Fixed(2),
+			contentPadding = PaddingValues(
+				start = 16.dp,
+				top = topPadding + 16.dp,
+				end = 16.dp,
+				bottom = 200.dp,
+			),
+			verticalArrangement = Arrangement.spacedBy(6.dp),
+			horizontalArrangement = Arrangement.spacedBy(6.dp),
+		) {
+			overviewButton(
+				icon = Res.drawable.library_add,
+				label = Res.string.title_recently_added,
+				destination = SortedAlbums(ListType.NEWEST)
+			)
+			overviewButton(
+				icon = Res.drawable.shuffle,
+				label = Res.string.title_random,
+				destination = SortedAlbums(ListType.RANDOM)
+			)
+			overviewButton(
+				icon = Res.drawable.unstar,
+				label = Res.string.title_starred,
+				destination = SortedAlbums(ListType.STARRED)
+			)
+			overviewButton(
+				icon = Res.drawable.history,
+				label = Res.string.title_frequently_played,
+				destination = SortedAlbums(ListType.FREQUENT)
+			)
+			if (!isLoggedIn) {
+				item(span = { GridItemSpan(maxLineSpan) }) {
+					Text(
+						stringResource(Res.string.info_needs_log_in),
+						color = MaterialTheme.colorScheme.onSurfaceVariant
+					)
 				}
-
-				is UiState.Error -> ErrorBox(it)
+				return@LazyVerticalGrid
 			}
+			horizontalAlbums(recentsState, albumsViewModel, { shareId = it })
+			horizontalPlaylists(playlistsState, playlistsViewModel, { shareId = it }, { deletionId = it })
+			horizontalArtists(artistsState, artistsViewModel)
 		}
 	}
 
@@ -166,4 +157,213 @@ fun LibraryScreen(viewModel: LibraryViewModel = viewModel { LibraryViewModel() }
 		expiry = shareExpiry,
 		onExpiryChange = { shareExpiry = it }
 	)
+
+	@Suppress("AssignedValueIsNeverRead")
+	DeletionDialog(
+		endpoint = DeletionEndpoint.PLAYLIST,
+		id = deletionId,
+		onIdClear = { deletionId = null }
+	)
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun LazyGridScope.header(
+	title: StringResource,
+	vararg formatArgs: Any,
+	destination: NavKey
+) {
+	item(span = { GridItemSpan(1) }) {
+		Text(
+			stringResource(title, formatArgs),
+			style = MaterialTheme.typography.titleMediumEmphasized,
+			fontWeight = FontWeight(600),
+			modifier = Modifier.height(32.dp).padding(top = 8.dp)
+		)
+	}
+	item(span = { GridItemSpan(1) }) {
+		val ctx = LocalCtx.current
+		val backStack = LocalNavStack.current
+		Text(
+			stringResource(Res.string.action_see_all),
+			fontSize = 12.sp,
+			color = MaterialTheme.colorScheme.primary,
+			textAlign = TextAlign.Right,
+			modifier = Modifier
+				.height(32.dp)
+				.padding(top = 8.dp)
+				.clickable(
+					interactionSource = null,
+					indication = null
+				) {
+					ctx.clickSound()
+					backStack.add(destination)
+				}
+		)
+	}
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterialApi::class)
+private fun LazyGridScope.overviewButton(
+	icon: DrawableResource,
+	label: StringResource,
+	destination: NavKey
+) {
+	item(span = { GridItemSpan(1) }) {
+		val ctx = LocalCtx.current
+		val backStack = LocalNavStack.current
+		Button(
+			modifier = Modifier.fillMaxWidth().height(42.dp),
+			contentPadding = PaddingValues(horizontal = 12.dp),
+			elevation = null,
+			shapes = ButtonDefaults.shapes(
+				shape = ContinuousRoundedRectangle(12.dp),
+				pressedShape = ContinuousRoundedRectangle(7.dp)
+			),
+			colors = ButtonDefaults.buttonColors(
+				containerColor = MaterialTheme.colorScheme.surfaceContainer,
+				contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+			),
+			onClick = {
+				ctx.clickSound()
+				if (backStack.lastOrNull() !is SortedAlbums) {
+					backStack.add(destination)
+				}
+			}
+		) {
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				Icon(
+					vectorResource(icon),
+					contentDescription = null
+				)
+				Spacer(Modifier.width(10.dp))
+				Text(stringResource(label))
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun LazyGridScope.horizontalAlbums(
+	state: UiState<List<Album>>,
+	viewModel: AlbumsViewModel,
+	onSetShareId: (String) -> Unit
+) {
+	if (state !is UiState.Success || state.data.isNotEmpty()) {
+		header(Res.string.title_recently_played, destination = SortedAlbums(ListType.RECENT))
+	}
+	when (state) {
+		is UiState.Error -> artGridError(state)
+		else -> item(
+			span = { GridItemSpan(maxLineSpan) }
+		) {
+			LazyRow(
+				modifier = Modifier.animateContentSize(
+					animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
+				),
+				horizontalArrangement = Arrangement.spacedBy(12.dp)
+			) {
+				if (state is UiState.Loading) {
+					items(8) {
+						ArtGridPlaceholder(
+							Modifier.width(150.dp)
+						)
+					}
+				} else if (state is UiState.Success) {
+					items(state.data, { it.id }) { album ->
+						AlbumsScreenItem(
+							modifier = Modifier.animateItem().width(150.dp),
+							album = album,
+							viewModel = viewModel,
+							onSetShareId = onSetShareId
+						)
+					}
+				}
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun LazyGridScope.horizontalPlaylists(
+	state: UiState<List<Playlist>>,
+	viewModel: PlaylistsViewModel,
+	onSetShareId: (String) -> Unit,
+	onSetDeletionId: (String) -> Unit
+) {
+	if (state !is UiState.Success || state.data.isNotEmpty()) {
+		header(Res.string.title_playlists, destination = Playlists)
+	}
+	when (state) {
+		is UiState.Error -> artGridError(state)
+		else -> item(
+			span = { GridItemSpan(maxLineSpan) }
+		) {
+			LazyRow(
+				modifier = Modifier.animateContentSize(
+					animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
+				),
+				horizontalArrangement = Arrangement.spacedBy(12.dp)
+			) {
+				if (state is UiState.Loading) {
+					items(8) {
+						ArtGridPlaceholder(
+							Modifier.width(150.dp)
+						)
+					}
+				} else if (state is UiState.Success) {
+					items(state.data, { it.id }) { playlist ->
+						PlaylistsScreenItem(
+							modifier = Modifier.animateItem().width(150.dp),
+							playlist = playlist,
+							viewModel = viewModel,
+							onSetShareId = onSetShareId,
+							onSetDeletionId = onSetDeletionId
+						)
+					}
+				}
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun LazyGridScope.horizontalArtists(
+	state: UiState<List<paige.subsonic.api.model.Artists.Index>>,
+	viewModel: ArtistsViewModel
+) {
+	if (state !is UiState.Success || state.data.isNotEmpty()) {
+		header(Res.string.title_artists, destination = paige.navic.Artists)
+	}
+	when (state) {
+		is UiState.Error -> artGridError(state)
+		else -> item(
+			span = { GridItemSpan(maxLineSpan) }
+		) {
+			LazyRow(
+				modifier = Modifier.animateContentSize(
+					animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()
+				),
+				horizontalArrangement = Arrangement.spacedBy(12.dp)
+			) {
+				if (state is UiState.Loading) {
+					items(8) {
+						ArtGridPlaceholder(
+							Modifier.width(150.dp)
+						)
+					}
+				} else if (state is UiState.Success) {
+					items(state.data.flatMap { it.artist }, { it.id }) { artist ->
+						ArtistsScreenItem(
+							Modifier.animateItem().width(150.dp),
+							artist,
+							viewModel
+						)
+					}
+				}
+			}
+		}
+	}
 }

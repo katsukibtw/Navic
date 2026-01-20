@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
@@ -31,28 +32,29 @@ import paige.navic.ui.component.common.Dropdown
 import paige.navic.ui.component.common.DropdownItem
 import paige.navic.ui.component.common.ErrorBox
 import paige.navic.ui.component.common.RefreshBox
+import paige.navic.ui.component.layout.ArtGrid
 import paige.navic.ui.component.layout.ArtGridItem
-import paige.navic.ui.component.layout.ArtGridPlaceholder
+import paige.navic.ui.component.layout.artGridPlaceholder
 import paige.navic.ui.viewmodel.ArtistsViewModel
 import paige.navic.util.UiState
+import paige.subsonic.api.model.Artist
 
 @Composable
 fun ArtistsScreen(
 	viewModel: ArtistsViewModel = viewModel { ArtistsViewModel() }
 ) {
 	val artistsState by viewModel.artistsState.collectAsState()
-	val selection by viewModel.selectedArtist.collectAsState()
-
-	val starredState by viewModel.starredState.collectAsState()
 
 	RefreshBox(
 		modifier = Modifier.background(MaterialTheme.colorScheme.surface),
 		isRefreshing = artistsState is UiState.Loading,
 		onRefresh = { viewModel.refreshArtists() }
-	) {
-		AnimatedContent(artistsState) {
+	) { topPadding ->
+		AnimatedContent(artistsState, Modifier.padding(top = topPadding)) {
 			when (it) {
-				is UiState.Loading -> ArtGridPlaceholder()
+				is UiState.Loading -> ArtGrid {
+					artGridPlaceholder()
+				}
 				is UiState.Success -> {
 					val grouped = it.data.flatMap { section ->
 						section.artist.groupBy { it.name.firstOrNull()?.uppercaseChar() ?: '#' }
@@ -102,42 +104,7 @@ fun ArtistsScreen(
 									)
 								}
 							}
-							items(artists) { artist ->
-								Box {
-									ArtGridItem(
-										imageModifier = Modifier.combinedClickable(
-											onClick = {},
-											onLongClick = { viewModel.selectArtist(artist) }
-										),
-										imageUrl = artist.coverArt,
-										title = artist.name,
-										subtitle = pluralStringResource(
-											Res.plurals.count_albums,
-											artist.albumCount ?: 0,
-											artist.albumCount ?: 0
-										) + "\n"
-									)
-									Dropdown(
-										expanded = selection == artist,
-										onDismissRequest = { viewModel.clearSelection() })
-									{
-										val starred = (starredState as? UiState.Success)?.data
-										DropdownItem(
-											text = if (starred == true)
-												Res.string.action_remove_star
-											else Res.string.action_star,
-											leadingIcon = Res.drawable.unstar,
-											onClick = {
-												if (starred == true)
-													viewModel.unstarSelectedArtist()
-												else viewModel.starSelectedArtist()
-												viewModel.clearSelection()
-											},
-											enabled = starred != null
-										)
-									}
-								}
-							}
+							artistsScreenItems(artists, viewModel)
 						}
 					}
 				}
@@ -145,5 +112,58 @@ fun ArtistsScreen(
 				is UiState.Error -> ErrorBox(it)
 			}
 		}
+	}
+}
+
+@Composable
+fun ArtistsScreenItem(
+	modifier: Modifier = Modifier,
+	artist: Artist,
+	viewModel: ArtistsViewModel
+) {
+	val selection by viewModel.selectedArtist.collectAsState()
+	val starredState by viewModel.starredState.collectAsState()
+	Box(modifier) {
+		ArtGridItem(
+			imageModifier = Modifier.combinedClickable(
+				onClick = {},
+				onLongClick = { viewModel.selectArtist(artist) }
+			),
+			imageUrl = artist.coverArt,
+			title = artist.name,
+			subtitle = pluralStringResource(
+				Res.plurals.count_albums,
+				artist.albumCount ?: 0,
+				artist.albumCount ?: 0
+			) + "\n"
+		)
+		Dropdown(
+			expanded = selection == artist,
+			onDismissRequest = { viewModel.clearSelection() })
+		{
+			val starred = (starredState as? UiState.Success)?.data
+			DropdownItem(
+				text = if (starred == true)
+					Res.string.action_remove_star
+				else Res.string.action_star,
+				leadingIcon = Res.drawable.unstar,
+				onClick = {
+					if (starred == true)
+						viewModel.unstarSelectedArtist()
+					else viewModel.starSelectedArtist()
+					viewModel.clearSelection()
+				},
+				enabled = starred != null
+			)
+		}
+	}
+}
+
+fun LazyGridScope.artistsScreenItems(
+	data: List<Artist>,
+	viewModel: ArtistsViewModel
+) {
+	items(data, { it.id }) { album ->
+		ArtistsScreenItem(Modifier.animateItem(), album, viewModel)
 	}
 }
