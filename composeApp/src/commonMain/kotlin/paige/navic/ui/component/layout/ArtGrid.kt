@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import com.kyant.capsule.ContinuousCapsule
 import com.kyant.capsule.ContinuousRoundedRectangle
 import paige.navic.LocalContentPadding
@@ -82,6 +83,8 @@ fun ArtGridItem(
 				.data(imageUrl)
 				.memoryCacheKey(imageUrl)
 				.diskCacheKey(imageUrl)
+				.diskCachePolicy(CachePolicy.ENABLED)
+				.memoryCachePolicy(CachePolicy.ENABLED)
 				.build(),
 			contentDescription = title,
 			contentScale = ContentScale.Crop,

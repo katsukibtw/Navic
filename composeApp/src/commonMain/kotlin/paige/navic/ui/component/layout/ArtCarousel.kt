@@ -22,10 +22,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import com.kyant.capsule.ContinuousRoundedRectangle
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalCtx
+import paige.navic.LocalImageBuilder
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -70,8 +72,15 @@ fun CarouselItemScope.ArtCarouselItem(
 ) {
 	val ctx = LocalCtx.current
 	val focusManager = LocalFocusManager.current
+	val imageBuilder = LocalImageBuilder.current
 	AsyncImage(
-		model = image,
+		model = imageBuilder
+			.data(image)
+			.memoryCacheKey(image.toString())
+			.diskCacheKey(image.toString())
+			.diskCachePolicy(CachePolicy.ENABLED)
+			.memoryCachePolicy(CachePolicy.ENABLED)
+			.build(),
 		contentDescription = contentDescription,
 		modifier = Modifier
 			.fillMaxWidth()

@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import navic.composeapp.generated.resources.Res
@@ -297,6 +298,10 @@ fun ArtistHeader(
 		AsyncImage(
 			model = ImageRequest.Builder(LocalPlatformContext.current)
 				.data(imageUrl)
+				.memoryCacheKey(imageUrl)
+				.diskCacheKey(imageUrl)
+				.diskCachePolicy(CachePolicy.ENABLED)
+				.memoryCachePolicy(CachePolicy.ENABLED)
 				.crossfade(true)
 				.crossfade(500)
 				.build(),

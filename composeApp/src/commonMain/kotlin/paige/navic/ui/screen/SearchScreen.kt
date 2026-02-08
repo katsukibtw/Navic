@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
 import com.kyant.capsule.ContinuousCapsule
 import com.kyant.capsule.ContinuousRoundedRectangle
 import navic.composeapp.generated.resources.Res
@@ -64,6 +65,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalContentPadding
 import paige.navic.LocalCtx
+import paige.navic.LocalImageBuilder
 import paige.navic.LocalMediaPlayer
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
@@ -87,6 +89,7 @@ fun SearchScreen(
 	val state by viewModel.searchState.collectAsState()
 	val backStack = LocalNavStack.current
 	val ctx = LocalCtx.current
+	val imageBuilder = LocalImageBuilder.current
 
 	Column(
 		modifier = Modifier.padding(top = 32.dp, bottom = LocalContentPadding.current.calculateBottomPadding())
@@ -152,7 +155,13 @@ fun SearchScreen(
 										},
 										leadingContent = {
 											AsyncImage(
-												model = track.coverArt,
+												model = imageBuilder
+													.data(track.coverArt)
+													.memoryCacheKey(track.coverArt.toString())
+													.diskCacheKey(track.coverArt.toString())
+													.diskCachePolicy(CachePolicy.ENABLED)
+													.memoryCachePolicy(CachePolicy.ENABLED)
+													.build(),
 												contentDescription = null,
 												modifier = Modifier
 													.padding(start = 6.5.dp)

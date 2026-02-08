@@ -66,9 +66,11 @@ import navic.composeapp.generated.resources.notice_loading_lyrics
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalMediaPlayer
 import paige.navic.data.model.Settings
+import paige.navic.ui.component.common.BlendBackground
 import paige.navic.ui.component.common.ErrorBox
 import paige.navic.ui.viewmodel.LyricsViewModel
 import paige.navic.util.UiState
+import paige.navic.util.rememberTrackPainter
 import paige.subsonic.api.model.Track
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -115,122 +117,137 @@ fun LyricsScreen(
 	val spatialSpec = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
 	val effectSpec = MaterialTheme.motionScheme.slowEffectsSpec<Float>()
 
-	AnimatedContent(
-		state,
-		modifier = Modifier.fillMaxSize(),
-		transitionSpec = {
-			(fadeIn(
-				animationSpec = effectSpec
-			) + scaleIn(
-				initialScale = 0.8f,
-				animationSpec = spatialSpec
-			)) togetherWith (fadeOut(
-				animationSpec = effectSpec
-			) + scaleOut(
-				animationSpec = spatialSpec
-			))
-		}
-	) { uiState ->
-		when (uiState) {
-			is UiState.Error -> ErrorBox(
-				error = uiState,
-				modifier = Modifier.wrapContentSize()
+	val sharedPainter = rememberTrackPainter(track.id, track.coverArt)
+
+	Box(modifier = Modifier.fillMaxSize()) {
+		if (!Settings.shared.staticPlayerBackground) {
+			BlendBackground(
+				painter = sharedPainter,
+				isPaused = playerState.isPaused
 			)
-			is UiState.Loading -> LoadingScreen()
-			is UiState.Success -> {
-				val lyrics = uiState.data
-				if (!lyrics.isNullOrEmpty()) {
-					val activeIndex = lyrics.indexOfLast { (time, _) ->
-						currentDuration >= time
-					}
+		}
+		AnimatedContent(
+			state,
+			modifier = Modifier.fillMaxSize(),
+			transitionSpec = {
+				(fadeIn(
+					animationSpec = effectSpec
+				) + scaleIn(
+					initialScale = 0.8f,
+					animationSpec = spatialSpec
+				)) togetherWith (fadeOut(
+					animationSpec = effectSpec
+				) + scaleOut(
+					animationSpec = spatialSpec
+				))
+			},
+		) { uiState ->
+			when (uiState) {
+				is UiState.Error -> ErrorBox(
+					error = uiState,
+					modifier = Modifier.wrapContentSize()
+				)
 
-					LaunchedEffect(activeIndex) {
-						if (!lyricsAutoscroll) return@LaunchedEffect
+				is UiState.Loading -> LoadingScreen()
+				is UiState.Success -> {
+					val lyrics = uiState.data
+					if (!lyrics.isNullOrEmpty()) {
+						val activeIndex = lyrics.indexOfLast { (time, _) ->
+							currentDuration >= time
+						}
 
-						val layoutInfo = listState.layoutInfo
-						val activeItem = layoutInfo.visibleItemsInfo
-							.firstOrNull { it.index == activeIndex }
+						LaunchedEffect(activeIndex) {
+							if (!lyricsAutoscroll) return@LaunchedEffect
 
-						if (activeItem != null) {
-							val itemCenter = activeItem.offset + activeItem.size / 2
-							val viewportCenter =
-								(layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-							val distance = itemCenter - viewportCenter
-							val thresholdPx = with(density) { 24.dp.toPx() }
+							val layoutInfo = listState.layoutInfo
+							val activeItem = layoutInfo.visibleItemsInfo
+								.firstOrNull { it.index == activeIndex }
 
-							if (kotlin.math.abs(distance) > thresholdPx) {
-								listState.animateScrollBy(
-									value = distance.toFloat(),
-									animationSpec = tween(
-										durationMillis = 450,
-										easing = FastOutSlowInEasing
+							if (activeItem != null) {
+								val itemCenter = activeItem.offset + activeItem.size / 2
+								val viewportCenter =
+									(layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+								val distance = itemCenter - viewportCenter
+								val thresholdPx = with(density) { 24.dp.toPx() }
+
+								if (kotlin.math.abs(distance) > thresholdPx) {
+									listState.animateScrollBy(
+										value = distance.toFloat(),
+										animationSpec = tween(
+											durationMillis = 450,
+											easing = FastOutSlowInEasing
+										)
+									)
+								}
+							} else if (activeIndex >= 0) {
+								launch {
+									delay(500)
+									val viewportCenter =
+										(layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+									val scrollOffset = -(viewportCenter / 2)
+
+									listState.animateScrollToItem(
+										index = activeIndex,
+										scrollOffset = scrollOffset
+									)
+								}
+							}
+						}
+
+						LazyColumn(
+							Modifier.fillMaxSize(),
+							state = listState,
+							contentPadding = WindowInsets.statusBars.asPaddingValues()
+								+ WindowInsets.systemBars.asPaddingValues()
+						) {
+							itemsIndexed(lyrics) { index, (startTime, text) ->
+								val isActive = index == activeIndex
+
+								val lineProgress = when {
+									index < activeIndex -> 1f
+									index > activeIndex -> 0f
+									else -> {
+										val nextTime =
+											lyrics.getOrNull(index + 1)?.first ?: duration
+										val lineDuration = nextTime - startTime
+										if (lineDuration > Duration.ZERO) {
+											((currentDuration - startTime) / lineDuration).toFloat()
+												.coerceIn(0f, 1f)
+										} else 1f
+									}
+								}
+
+								val padding by animateDpAsState(
+									if (isActive) 20.dp else 12.dp, label = "padding",
+									animationSpec = MaterialTheme.motionScheme.slowSpatialSpec()
+								)
+
+								KaraokeText(
+									text = text,
+									progress = lineProgress,
+									isActive = isActive,
+									onClick = {
+										player.seek((startTime / duration).toFloat())
+										if (playerState.isPaused) {
+											player.resume()
+										}
+									},
+									modifier = Modifier.padding(
+										horizontal = 32.dp,
+										vertical = padding
+									).then(
+										if (index == 0) {
+											Modifier.padding(top = 16.dp)
+										} else {
+											Modifier
+										}
 									)
 								)
 							}
-						} else if (activeIndex >= 0) {
-							launch {
-								delay(500)
-								val viewportCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-								val scrollOffset = -(viewportCenter / 2)
-
-								listState.animateScrollToItem(
-									index = activeIndex,
-									scrollOffset = scrollOffset
-								)
-							}
 						}
+					} else {
+						placeholder()
 					}
-
-					LazyColumn(
-						Modifier.fillMaxSize(),
-						state = listState,
-						contentPadding = WindowInsets.statusBars.asPaddingValues()
-							+ WindowInsets.systemBars.asPaddingValues()
-					) {
-						itemsIndexed(lyrics) { index, (startTime, text) ->
-							val isActive = index == activeIndex
-
-							val lineProgress = when {
-								index < activeIndex -> 1f
-								index > activeIndex -> 0f
-								else -> {
-									val nextTime = lyrics.getOrNull(index + 1)?.first ?: duration
-									val lineDuration = nextTime - startTime
-									if (lineDuration > Duration.ZERO) {
-										((currentDuration - startTime) / lineDuration).toFloat()
-											.coerceIn(0f, 1f)
-									} else 1f
-								}
-							}
-
-							val padding by animateDpAsState(
-								if (isActive) 20.dp else 12.dp, label = "padding",
-								animationSpec = MaterialTheme.motionScheme.slowSpatialSpec()
-							)
-
-							KaraokeText(
-								text = text,
-								progress = lineProgress,
-								isActive = isActive,
-								onClick = {
-									player.seek((startTime / duration).toFloat())
-									if (playerState.isPaused) {
-										player.resume()
-									}
-								},
-								modifier = Modifier.padding(
-									horizontal = 32.dp,
-									vertical = padding
-								).then(
-									if (index == 0) {
-										Modifier.padding(top = 16.dp)
-									} else { Modifier }
-								)
-							)
-						}
-					}
-				} else {
-					placeholder()
 				}
 			}
 		}

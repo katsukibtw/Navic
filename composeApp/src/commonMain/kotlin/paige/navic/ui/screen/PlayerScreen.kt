@@ -53,10 +53,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil3.compose.LocalPlatformContext
-import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.kyant.capsule.ContinuousCapsule
 import com.kyant.capsule.ContinuousRoundedRectangle
 import ir.mahozad.multiplatform.wavyslider.material3.WaveAnimationSpecs
@@ -106,6 +102,7 @@ import paige.navic.ui.component.common.MarqueeText
 import paige.navic.ui.component.common.playPauseIconPainter
 import paige.navic.ui.component.layout.Swiper
 import paige.navic.ui.viewmodel.PlayerViewModel
+import paige.navic.util.rememberTrackPainter
 import paige.navic.util.toHHMMSS
 import paige.subsonic.api.model.Playlist
 import kotlin.time.Duration.Companion.seconds
@@ -118,7 +115,6 @@ fun PlayerScreen(
 	val ctx = LocalCtx.current
 	val player = LocalMediaPlayer.current
 	val backStack = LocalNavStack.current
-	val context = LocalPlatformContext.current
 
 	val playerState by player.uiState.collectAsState()
 	val track = playerState.currentTrack
@@ -129,14 +125,7 @@ fun PlayerScreen(
 			auth = true
 		)
 	}
-	val imageRequest = remember(coverUri) {
-		ImageRequest.Builder(context)
-			.data(coverUri)
-			.crossfade(true)
-			.crossfade(500)
-			.build()
-	}
-	val sharedPainter = rememberAsyncImagePainter(imageRequest)
+	val sharedPainter = rememberTrackPainter(track?.id, track?.coverArt)
 
 	val enabled = playerState.currentTrack != null
 
