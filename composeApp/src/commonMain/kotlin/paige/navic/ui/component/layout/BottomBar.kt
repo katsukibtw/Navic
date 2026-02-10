@@ -1,7 +1,6 @@
 package paige.navic.ui.component.layout
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -17,62 +16,62 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.json.Json
 import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.album
-import navic.composeapp.generated.resources.album_unselected
-import navic.composeapp.generated.resources.artist
-import navic.composeapp.generated.resources.artist_unselected
-import navic.composeapp.generated.resources.library_music
-import navic.composeapp.generated.resources.library_music_unselected
-import navic.composeapp.generated.resources.playlist_play
 import navic.composeapp.generated.resources.title_albums
 import navic.composeapp.generated.resources.title_artists
 import navic.composeapp.generated.resources.title_library
 import navic.composeapp.generated.resources.title_playlists
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.NavbarConfig
 import paige.navic.data.model.NavbarTab
 import paige.navic.data.model.Screen
 import paige.navic.data.model.Settings
+import paige.navic.icons.Icons
+import paige.navic.icons.filled.Album
+import paige.navic.icons.filled.Artist
+import paige.navic.icons.filled.LibraryMusic
+import paige.navic.icons.outlined.Album
+import paige.navic.icons.outlined.Artist
+import paige.navic.icons.outlined.LibraryMusic
+import paige.navic.icons.outlined.PlaylistPlay
 import paige.navic.ui.component.common.animatedTabIconPainter
 import paige.navic.ui.component.dialog.NavtabsViewModel
 import paige.navic.util.UiState
 
 private enum class NavItem(
 	val destination: NavKey,
-	val icon: DrawableResource,
-	val iconUnselected: DrawableResource = icon,
+	val icon: ImageVector,
+	val iconUnselected: ImageVector = icon,
 	val label: StringResource
 ) {
 	LIBRARY(
 		destination = Screen.Library(),
-		icon = Res.drawable.library_music,
-		iconUnselected = Res.drawable.library_music_unselected,
+		icon = Icons.Filled.LibraryMusic,
+		iconUnselected = Icons.Outlined.LibraryMusic,
 		label = Res.string.title_library
 	),
 	ALBUMS(
 		destination = Screen.Albums(),
-		icon = Res.drawable.album,
-		iconUnselected = Res.drawable.album_unselected,
+		icon = Icons.Filled.Album,
+		iconUnselected = Icons.Outlined.Album,
 		label = Res.string.title_albums
 	),
 	PLAYLISTS(
 		destination = Screen.Playlists(),
-		icon = Res.drawable.playlist_play,
+		icon = Icons.Outlined.PlaylistPlay,
 		label = Res.string.title_playlists
 	),
 	ARTISTS(
 		destination = Screen.Artists(),
-		icon = Res.drawable.artist,
-		iconUnselected = Res.drawable.artist_unselected,
+		icon = Icons.Filled.Artist,
+		iconUnselected = Icons.Outlined.Artist,
 		label = Res.string.title_artists
 	)
 }
@@ -121,10 +120,10 @@ fun BottomBar(
 									if (painter != null) {
 										Icon(painter = painter, null)
 									} else {
-										Icon(vectorResource(item.icon), null)
+										Icon(item.icon, null)
 									}
 								} else {
-									Icon(vectorResource(item.iconUnselected), null)
+									Icon(item.iconUnselected, null)
 								}
 						},
 						label = {
@@ -163,10 +162,10 @@ fun BottomBar(
 									if (painter != null) {
 										Icon(painter = painter, null)
 									} else {
-										Icon(vectorResource(item.icon), null)
+										Icon(item.icon, null)
 									}
 								} else {
-									Icon(vectorResource(item.iconUnselected), null)
+									Icon(item.iconUnselected, null)
 								}
 						},
 						label = {

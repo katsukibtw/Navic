@@ -69,32 +69,32 @@ import navic.composeapp.generated.resources.action_track_info
 import navic.composeapp.generated.resources.action_view_album
 import navic.composeapp.generated.resources.action_view_artist
 import navic.composeapp.generated.resources.action_view_playlist
-import navic.composeapp.generated.resources.album_unselected
-import navic.composeapp.generated.resources.artist_unselected
-import navic.composeapp.generated.resources.info
 import navic.composeapp.generated.resources.info_not_playing
-import navic.composeapp.generated.resources.lyrics
-import navic.composeapp.generated.resources.more_horiz
-import navic.composeapp.generated.resources.note
-import navic.composeapp.generated.resources.pause
-import navic.composeapp.generated.resources.play_arrow
-import navic.composeapp.generated.resources.playlist_add
-import navic.composeapp.generated.resources.repeat
-import navic.composeapp.generated.resources.repeat_on
-import navic.composeapp.generated.resources.shuffle
-import navic.composeapp.generated.resources.shuffle_on
-import navic.composeapp.generated.resources.skip_next
-import navic.composeapp.generated.resources.skip_previous
-import navic.composeapp.generated.resources.star
-import navic.composeapp.generated.resources.unstar
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalMediaPlayer
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
 import paige.navic.data.model.Settings
 import paige.navic.data.session.SessionManager
+import paige.navic.icons.Icons
+import paige.navic.icons.filled.Note
+import paige.navic.icons.filled.Pause
+import paige.navic.icons.filled.Play
+import paige.navic.icons.filled.RepeatOn
+import paige.navic.icons.filled.ShuffleOn
+import paige.navic.icons.filled.SkipNext
+import paige.navic.icons.filled.SkipPrevious
+import paige.navic.icons.filled.Star
+import paige.navic.icons.outlined.Album
+import paige.navic.icons.outlined.Artist
+import paige.navic.icons.outlined.Info
+import paige.navic.icons.outlined.Lyrics
+import paige.navic.icons.outlined.MoreHoriz
+import paige.navic.icons.outlined.PlaylistAdd
+import paige.navic.icons.outlined.Repeat
+import paige.navic.icons.outlined.Shuffle
+import paige.navic.icons.outlined.Star
 import paige.navic.ui.component.common.BlendBackground
 import paige.navic.ui.component.common.Dropdown
 import paige.navic.ui.component.common.DropdownItem
@@ -166,7 +166,7 @@ fun PlayerScreen(
 			enabled = enabled
 		) {
 			Icon(
-				vectorResource(if (isStarred) Res.drawable.star else Res.drawable.unstar),
+				if (isStarred) Icons.Filled.Star else Icons.Outlined.Star,
 				contentDescription = stringResource(Res.string.action_star)
 			)
 		}
@@ -184,7 +184,7 @@ fun PlayerScreen(
 				enabled = enabled
 			) {
 				Icon(
-					imageVector = vectorResource(Res.drawable.more_horiz),
+					imageVector = Icons.Outlined.MoreHoriz,
 					contentDescription = stringResource(Res.string.action_more)
 				)
 			}
@@ -200,11 +200,17 @@ fun PlayerScreen(
 							backStack.add(Screen.Tracks(tracks))
 						}
 					},
-					text = when (playerState.tracks) {
-						is Playlist -> Res.string.action_view_playlist
-						else -> Res.string.action_view_album
+					text = {
+						Text(
+							stringResource(
+								when (playerState.tracks) {
+									is Playlist -> Res.string.action_view_playlist
+									else -> Res.string.action_view_album
+								}
+							)
+						)
 					},
-					leadingIcon = Res.drawable.album_unselected
+					leadingIcon = { Icon(Icons.Outlined.Album, null) }
 				)
 				DropdownItem(
 					onClick = {
@@ -214,8 +220,8 @@ fun PlayerScreen(
 							backStack.add(Screen.Artist(artistId))
 						}
 					},
-					text = Res.string.action_view_artist,
-					leadingIcon = Res.drawable.artist_unselected
+					text = { Text(stringResource(Res.string.action_view_artist)) },
+					leadingIcon = { Icon(Icons.Outlined.Artist, null) }
 				)
 				DropdownItem(
 					onClick = {
@@ -225,8 +231,8 @@ fun PlayerScreen(
 							backStack.add(Screen.AddToPlaylist(listOf(track)))
 						}
 					},
-					text = Res.string.action_add_to_playlist,
-					leadingIcon = Res.drawable.playlist_add
+					text = { Text(stringResource(Res.string.action_add_to_playlist)) },
+					leadingIcon = { Icon(Icons.Outlined.PlaylistAdd, null) }
 				)
 				DropdownItem(
 					onClick = {
@@ -236,8 +242,8 @@ fun PlayerScreen(
 							backStack.add(Screen.TrackInfo(track))
 						}
 					},
-					text = Res.string.action_track_info,
-					leadingIcon = Res.drawable.info
+					text = { Text(stringResource(Res.string.action_track_info)) },
+					leadingIcon = { Icon(Icons.Outlined.Info, null) }
 				)
 			}
 		}
@@ -263,7 +269,11 @@ fun PlayerScreen(
 								}
 
 								if (!isSameAlbum)
-									backStack.add(Screen.Tracks(playerState.tracks ?: return@clickable))
+									backStack.add(
+										Screen.Tracks(
+											playerState.tracks ?: return@clickable
+										)
+									)
 							}
 						},
 						style = LocalTextStyle.current
@@ -297,11 +307,13 @@ fun PlayerScreen(
 	val durationsRow = @Composable {
 		val duration = playerState.currentTrack?.duration
 		val style = MaterialTheme.typography.bodyMedium
-			.copy(shadow = Shadow(
-				color = MaterialTheme.colorScheme.inverseOnSurface,
-				offset = Offset(0f, 4f),
-				blurRadius = 10f
-			))
+			.copy(
+				shadow = Shadow(
+					color = MaterialTheme.colorScheme.inverseOnSurface,
+					offset = Offset(0f, 4f),
+					blurRadius = 10f
+				)
+			)
 		val color = MaterialTheme.colorScheme.onSurfaceVariant
 		ListItem(
 			colors = ListItemDefaults.colors(Color.Transparent),
@@ -348,7 +360,7 @@ fun PlayerScreen(
 				colors = colors
 			) {
 				Icon(
-					imageVector = vectorResource(Res.drawable.skip_previous),
+					imageVector = Icons.Filled.SkipPrevious,
 					contentDescription = null,
 					modifier = Modifier.size(40.dp)
 				)
@@ -370,11 +382,9 @@ fun PlayerScreen(
 					)
 				} else {
 					Icon(
-						imageVector = vectorResource(
-							if (playerState.isPaused)
-								Res.drawable.play_arrow
-							else Res.drawable.pause
-						),
+						imageVector = if (playerState.isPaused)
+							Icons.Filled.Play
+						else Icons.Filled.Pause,
 						contentDescription = null,
 						modifier = Modifier.size(40.dp)
 					)
@@ -389,7 +399,7 @@ fun PlayerScreen(
 				colors = colors
 			) {
 				Icon(
-					imageVector = vectorResource(Res.drawable.skip_next),
+					imageVector = Icons.Filled.SkipNext,
 					contentDescription = null,
 					modifier = Modifier.size(40.dp)
 				)
@@ -446,9 +456,8 @@ fun PlayerScreen(
 			) {
 				Icon(
 					imageVector = when (playerState.repeatMode) {
-						0 -> vectorResource(Res.drawable.repeat)
-						1 -> vectorResource(Res.drawable.repeat_on)
-						else -> vectorResource(Res.drawable.repeat)
+						1 -> Icons.Filled.RepeatOn
+						else -> Icons.Outlined.Repeat
 					},
 					contentDescription = stringResource(Res.string.action_repeat)
 				)
@@ -462,7 +471,9 @@ fun PlayerScreen(
 				enabled = enabled
 			) {
 				Icon(
-					imageVector = vectorResource(if (playerState.isShuffleEnabled) Res.drawable.shuffle_on else Res.drawable.shuffle),
+					imageVector = if (playerState.isShuffleEnabled)
+						Icons.Filled.ShuffleOn
+					else Icons.Outlined.Shuffle,
 					contentDescription = stringResource(Res.string.action_shuffle)
 				)
 			}
@@ -479,7 +490,7 @@ fun PlayerScreen(
 				enabled = enabled
 			) {
 				Icon(
-					imageVector = vectorResource(Res.drawable.lyrics),
+					imageVector = Icons.Outlined.Lyrics,
 					contentDescription = stringResource(Res.string.action_lyrics)
 				)
 			}
@@ -529,7 +540,7 @@ fun PlayerScreen(
 				)
 				if (coverUri.isNullOrEmpty()) {
 					Icon(
-						imageVector = vectorResource(Res.drawable.note),
+						imageVector = Icons.Filled.Note,
 						contentDescription = null,
 						tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .38f),
 						modifier = Modifier.size(if (playerState.isPaused) 96.dp else 128.dp)

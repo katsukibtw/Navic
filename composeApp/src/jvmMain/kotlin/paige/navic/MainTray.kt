@@ -9,17 +9,17 @@ import com.kdroid.composetray.tray.api.Tray
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.app_name
 import navic.composeapp.generated.resources.exit
+import navic.composeapp.generated.resources.ic_navic
 import navic.composeapp.generated.resources.play_arrow
 import navic.composeapp.generated.resources.skip_next
 import navic.composeapp.generated.resources.skip_previous
-import navic.composeapp.generated.resources.tray_icon
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun ApplicationScope.MainTray(window: ComposeWindow?) {
 	Tray(
-		icon = vectorResource(Res.drawable.tray_icon),
+		icon = vectorResource(Res.drawable.ic_navic),
 		tooltip = stringResource(Res.string.app_name),
 		tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
 	) {

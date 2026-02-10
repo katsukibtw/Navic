@@ -19,16 +19,16 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.forward
 import navic.composeapp.generated.resources.info_app_version
 import navic.composeapp.generated.resources.title_about
 import navic.composeapp.generated.resources.title_acknowledgements
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalContentPadding
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.ChevronForward
 import paige.navic.ui.component.common.Form
 import paige.navic.ui.component.common.FormRow
 import paige.navic.ui.component.layout.NestedTopBar
@@ -71,7 +71,7 @@ fun SettingsAboutScreen() {
 					backStack.add(Screen.Settings.Acknowledgements)
 				}) {
 					Text(stringResource(Res.string.title_acknowledgements))
-					Icon(vectorResource(Res.drawable.forward), null)
+					Icon(Icons.Outlined.ChevronForward, null)
 				}
 			}
 			Spacer(Modifier.height(LocalContentPadding.current.calculateBottomPadding()))

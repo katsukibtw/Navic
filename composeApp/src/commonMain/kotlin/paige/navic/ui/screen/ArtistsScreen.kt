@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,12 +29,13 @@ import navic.composeapp.generated.resources.action_star
 import navic.composeapp.generated.resources.count_albums
 import navic.composeapp.generated.resources.count_artists
 import navic.composeapp.generated.resources.title_artists
-import navic.composeapp.generated.resources.unstar
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.filled.Star
 import paige.navic.ui.component.common.Dropdown
 import paige.navic.ui.component.common.DropdownItem
 import paige.navic.ui.component.common.ErrorBox
@@ -173,10 +175,16 @@ fun ArtistsScreenItem(
 		{
 			val starred = (starredState as? UiState.Success)?.data
 			DropdownItem(
-				text = if (starred == true)
-					Res.string.action_remove_star
-				else Res.string.action_star,
-				leadingIcon = Res.drawable.unstar,
+				text = {
+					Text(
+						stringResource(
+							if (starred == true)
+								Res.string.action_remove_star
+							else Res.string.action_star
+						)
+					)
+				},
+				leadingIcon = { Icon(Icons.Filled.Star, null) },
 				onClick = {
 					if (starred == true)
 						viewModel.unstarSelectedArtist()

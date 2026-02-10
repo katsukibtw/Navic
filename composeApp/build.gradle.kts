@@ -1,12 +1,12 @@
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.io.File
+import org.w3c.dom.Element
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
-import org.w3c.dom.Element
 
 plugins {
 	alias(libs.plugins.kotlinMultiplatform)
@@ -15,7 +15,39 @@ plugins {
 	alias(libs.plugins.composeMultiplatform)
 	alias(libs.plugins.composeCompiler)
 	alias(libs.plugins.aboutLibraries)
+	alias(libs.plugins.valkyrie)
 }
+
+valkyrie {
+	packageName = "paige.navic.icons"
+	generateAtSync = true
+
+	iconPack {
+		name = "Icons"
+		targetSourceSet = "commonMain"
+
+		nested {
+			name = "Brand"
+			sourceFolder = "brand"
+		}
+
+		nested {
+			name = "Desktop"
+			sourceFolder = "desktop"
+		}
+
+		nested {
+			name = "Outlined"
+			sourceFolder = "outlined"
+		}
+
+		nested {
+			name = "Filled"
+			sourceFolder = "filled"
+		}
+	}
+}
+
 aboutLibraries {
 	collect {
 		configPath = file("acknowledgements")

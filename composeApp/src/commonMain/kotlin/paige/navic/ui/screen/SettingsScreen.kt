@@ -22,17 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.discord
-import navic.composeapp.generated.resources.github
-import navic.composeapp.generated.resources.info
-import navic.composeapp.generated.resources.palette
-import navic.composeapp.generated.resources.settings_normal
 import navic.composeapp.generated.resources.subtitle_about
 import navic.composeapp.generated.resources.subtitle_appearance
 import navic.composeapp.generated.resources.subtitle_behaviour
@@ -44,13 +40,17 @@ import navic.composeapp.generated.resources.title_behaviour
 import navic.composeapp.generated.resources.title_chat
 import navic.composeapp.generated.resources.title_settings
 import navic.composeapp.generated.resources.title_source
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalContentPadding
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.brand.Discord
+import paige.navic.icons.brand.Github
+import paige.navic.icons.filled.Palette
+import paige.navic.icons.filled.Settings
+import paige.navic.icons.outlined.Info
 import paige.navic.ui.component.common.Form
 import paige.navic.ui.component.common.FormRow
 import paige.navic.ui.component.layout.NestedTopBar
@@ -71,7 +71,7 @@ fun SettingsScreen() {
 			Form {
 				PageRow(
 					destination = Screen.Settings.Appearance,
-					icon = Res.drawable.palette,
+					icon = Icons.Filled.Palette,
 					iconSize = 24.dp,
 					title = Res.string.title_appearance,
 					subtitle = Res.string.subtitle_appearance,
@@ -80,7 +80,7 @@ fun SettingsScreen() {
 				)
 				PageRow(
 					destination = Screen.Settings.Behaviour,
-					icon = Res.drawable.settings_normal,
+					icon = Icons.Filled.Settings,
 					iconSize = 24.dp,
 					title = Res.string.title_behaviour,
 					subtitle = Res.string.subtitle_behaviour,
@@ -91,7 +91,7 @@ fun SettingsScreen() {
 			Form {
 				PageRow(
 					destination = Screen.Settings.About,
-					icon = Res.drawable.info,
+					icon = Icons.Outlined.Info,
 					title = Res.string.title_about,
 					subtitle = Res.string.subtitle_about,
 					foregroundColor = Color(0xFF2C2C2C),
@@ -99,7 +99,7 @@ fun SettingsScreen() {
 				)
 				PageRow(
 					link = "https://github.com/paigely/Navic",
-					icon = Res.drawable.github,
+					icon = Icons.Brand.Github,
 					title = Res.string.title_source,
 					subtitle = Res.string.subtitle_source,
 					foregroundColor = Color(0xFF2C2C2C),
@@ -107,7 +107,7 @@ fun SettingsScreen() {
 				)
 				PageRow(
 					link = "https://discord.gg/TBcnNX66PH",
-					icon = Res.drawable.discord,
+					icon = Icons.Brand.Discord,
 					title = Res.string.title_chat,
 					subtitle = Res.string.subtitle_chat,
 					foregroundColor = Color(0xFF2C2C2C),
@@ -124,7 +124,7 @@ fun SettingsScreen() {
 private fun PageRow(
 	link: String? = null,
 	destination: NavKey? = null,
-	icon: DrawableResource,
+	icon: ImageVector,
 	iconSize: Dp = 22.dp,
 	title: StringResource,
 	subtitle: StringResource,
@@ -160,7 +160,7 @@ private fun PageRow(
 			verticalArrangement = Arrangement.Center
 		) {
 			Icon(
-				vectorResource(icon),
+				icon,
 				contentDescription = null,
 				modifier = Modifier.size(iconSize),
 				tint = foregroundColor

@@ -48,15 +48,15 @@ import navic.composeapp.generated.resources.option_sort_newest
 import navic.composeapp.generated.resources.option_sort_random
 import navic.composeapp.generated.resources.option_sort_recent
 import navic.composeapp.generated.resources.option_sort_starred
-import navic.composeapp.generated.resources.share
-import navic.composeapp.generated.resources.sort
 import navic.composeapp.generated.resources.title_albums
-import navic.composeapp.generated.resources.unstar
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Share
+import paige.navic.icons.outlined.Sort
+import paige.navic.icons.outlined.Star
 import paige.navic.ui.component.common.Dropdown
 import paige.navic.ui.component.common.DropdownItem
 import paige.navic.ui.component.common.RefreshBox
@@ -189,7 +189,7 @@ fun SortButton(
 				expanded = true
 			}) {
 				Icon(
-					vectorResource(Res.drawable.sort),
+					Icons.Outlined.Sort,
 					contentDescription = null
 				)
 			}
@@ -198,7 +198,7 @@ fun SortButton(
 				expanded = true
 			}) {
 				Icon(
-					vectorResource(Res.drawable.sort),
+					Icons.Outlined.Sort,
 					contentDescription = null
 				)
 			}
@@ -271,8 +271,8 @@ fun AlbumsScreenItem(
 			}
 		) {
 			DropdownItem(
-				text = Res.string.action_share,
-				leadingIcon = Res.drawable.share,
+				text = { Text(stringResource(Res.string.action_share)) },
+				leadingIcon = { Icon(Icons.Outlined.Share, null) },
 				onClick = {
 					viewModel.selectAlbum(null)
 					onSetShareId(album.id)
@@ -281,10 +281,16 @@ fun AlbumsScreenItem(
 			val starred =
 				(starredState as? UiState.Success)?.data
 			DropdownItem(
-				text = if (starred == true)
-					Res.string.action_remove_star
-				else Res.string.action_star,
-				leadingIcon = Res.drawable.unstar,
+				text = {
+					Text(
+						stringResource(
+							if (starred == true)
+								Res.string.action_remove_star
+							else Res.string.action_star
+						)
+					)
+				},
+				leadingIcon = { Icon(Icons.Outlined.Star, null) },
 				onClick = {
 					viewModel.starAlbum(starred != true)
 					viewModel.selectAlbum(null)

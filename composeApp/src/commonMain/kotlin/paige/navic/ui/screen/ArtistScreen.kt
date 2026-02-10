@@ -64,18 +64,18 @@ import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_more
 import navic.composeapp.generated.resources.action_view_on_lastfm
 import navic.composeapp.generated.resources.action_view_on_musicbrainz
-import navic.composeapp.generated.resources.lastfm
-import navic.composeapp.generated.resources.more_vert
-import navic.composeapp.generated.resources.musicbrainz
 import navic.composeapp.generated.resources.option_sort_frequent
 import navic.composeapp.generated.resources.title_albums
 import navic.composeapp.generated.resources.title_similar_artists
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalContentPadding
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.brand.Lastfm
+import paige.navic.icons.brand.Musicbrainz
+import paige.navic.icons.outlined.MoreVert
 import paige.navic.ui.component.common.Dropdown
 import paige.navic.ui.component.common.DropdownItem
 import paige.navic.ui.component.common.ErrorBox
@@ -118,7 +118,7 @@ fun ArtistScreen(
 								expanded = true
 							}) {
 								Icon(
-									vectorResource(Res.drawable.more_vert),
+									Icons.Outlined.MoreVert,
 									stringResource(Res.string.action_more)
 								)
 							}
@@ -127,8 +127,8 @@ fun ArtistScreen(
 								onDismissRequest = { expanded = false }
 							) {
 								DropdownItem(
-									text = Res.string.action_view_on_lastfm,
-									leadingIcon = Res.drawable.lastfm,
+									text = { Text(stringResource(Res.string.action_view_on_lastfm)) },
+									leadingIcon = { Icon(Icons.Brand.Lastfm, null) },
 									enabled = state.info.lastFmUrl != null,
 									onClick = {
 										expanded = false
@@ -138,8 +138,8 @@ fun ArtistScreen(
 									}
 								)
 								DropdownItem(
-									text = Res.string.action_view_on_musicbrainz,
-									leadingIcon = Res.drawable.musicbrainz,
+									text = { Text(stringResource(Res.string.action_view_on_musicbrainz)) },
+									leadingIcon = { Icon(Icons.Brand.Musicbrainz, null) },
 									enabled = state.info.musicBrainzId != null,
 									onClick = {
 										expanded = false

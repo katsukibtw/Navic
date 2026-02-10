@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,28 +50,27 @@ import androidx.navigation3.runtime.NavKey
 import com.kyant.capsule.ContinuousRoundedRectangle
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_see_all
-import navic.composeapp.generated.resources.history
 import navic.composeapp.generated.resources.info_needs_log_in
-import navic.composeapp.generated.resources.library_add
 import navic.composeapp.generated.resources.option_sort_frequent
 import navic.composeapp.generated.resources.option_sort_newest
 import navic.composeapp.generated.resources.option_sort_random
 import navic.composeapp.generated.resources.option_sort_recent
 import navic.composeapp.generated.resources.option_sort_starred
-import navic.composeapp.generated.resources.shuffle
 import navic.composeapp.generated.resources.title_artists
 import navic.composeapp.generated.resources.title_library
 import navic.composeapp.generated.resources.title_playlists
-import navic.composeapp.generated.resources.unstar
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalContentPadding
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
 import paige.navic.data.session.SessionManager
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.History
+import paige.navic.icons.outlined.LibraryAdd
+import paige.navic.icons.outlined.Shuffle
+import paige.navic.icons.outlined.Star
 import paige.navic.shared.systemGesturesExclusion
 import paige.navic.ui.component.common.RefreshBox
 import paige.navic.ui.component.dialog.DeletionDialog
@@ -133,25 +133,25 @@ fun LibraryScreen(
 				horizontalArrangement = Arrangement.spacedBy(6.dp),
 			) {
 				overviewButton(
-					icon = Res.drawable.library_add,
+					icon = Icons.Outlined.LibraryAdd,
 					label = Res.string.option_sort_newest,
 					destination = Screen.Albums(true, ListType.NEWEST),
 					start = true
 				)
 				overviewButton(
-					icon = Res.drawable.shuffle,
+					icon = Icons.Outlined.Shuffle,
 					label = Res.string.option_sort_random,
 					destination = Screen.Albums(true, ListType.RANDOM),
 					start = false
 				)
 				overviewButton(
-					icon = Res.drawable.unstar,
+					icon = Icons.Outlined.Star,
 					label = Res.string.option_sort_starred,
 					destination = Screen.Albums(true, ListType.STARRED),
 					start = true
 				)
 				overviewButton(
-					icon = Res.drawable.history,
+					icon = Icons.Outlined.History,
 					label = Res.string.option_sort_frequent,
 					destination = Screen.Albums(true, ListType.FREQUENT),
 					start = false
@@ -227,7 +227,7 @@ private fun LazyGridScope.header(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterialApi::class)
 private fun LazyGridScope.overviewButton(
-	icon: DrawableResource,
+	icon: ImageVector,
 	label: StringResource,
 	destination: NavKey,
 	start: Boolean
@@ -265,7 +265,7 @@ private fun LazyGridScope.overviewButton(
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				Icon(
-					vectorResource(icon),
+					icon,
 					contentDescription = null
 				)
 				Spacer(Modifier.width(10.dp))

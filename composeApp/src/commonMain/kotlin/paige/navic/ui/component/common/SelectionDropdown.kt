@@ -30,9 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.kyant.capsule.ContinuousRoundedRectangle
-import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.check
-import org.jetbrains.compose.resources.vectorResource
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Check
 import paige.navic.ui.theme.defaultFont
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -120,7 +119,7 @@ private fun SelectionDropdownItem(
 		) {
 			Text(label, fontFamily = defaultFont(100, round = 100f))
 			Icon(
-				vectorResource(Res.drawable.check),
+				Icons.Outlined.Check,
 				null,
 				modifier = Modifier.padding(start = 6.dp).size(20.dp).alpha(alpha)
 			)

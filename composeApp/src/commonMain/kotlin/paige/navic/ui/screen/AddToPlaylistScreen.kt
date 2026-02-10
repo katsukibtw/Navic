@@ -38,13 +38,13 @@ import navic.composeapp.generated.resources.action_ok
 import navic.composeapp.generated.resources.action_refresh
 import navic.composeapp.generated.resources.info_no_other_playlists
 import navic.composeapp.generated.resources.info_no_playlists
-import navic.composeapp.generated.resources.playlist_add
-import navic.composeapp.generated.resources.refresh
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.PlaylistAdd
+import paige.navic.icons.outlined.Refresh
 import paige.navic.ui.component.common.ErrorBox
 import paige.navic.ui.component.layout.CustomDialog
 import paige.navic.ui.viewmodel.AddToPlaylistViewModel
@@ -139,7 +139,7 @@ fun AddToPlaylistScreen(
 						},
 						colors = colors
 					) {
-						Icon(vectorResource(Res.drawable.playlist_add), null)
+						Icon(Icons.Outlined.PlaylistAdd, null)
 						Spacer(Modifier.width(8.dp))
 						Text(stringResource(Res.string.action_new))
 					}
@@ -154,7 +154,7 @@ fun AddToPlaylistScreen(
 					colors = colors
 				) {
 					Icon(
-						imageVector = vectorResource(Res.drawable.refresh),
+						imageVector = Icons.Outlined.Refresh,
 						contentDescription = stringResource(Res.string.action_refresh)
 					)
 				}

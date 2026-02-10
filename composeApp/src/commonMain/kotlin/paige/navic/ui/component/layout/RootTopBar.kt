@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumFlexibleTopAppBar
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -39,18 +40,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.account_circle
 import navic.composeapp.generated.resources.action_log_in
 import navic.composeapp.generated.resources.action_log_out
-import navic.composeapp.generated.resources.logout
-import navic.composeapp.generated.resources.search
-import navic.composeapp.generated.resources.settings
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
 import paige.navic.data.model.User
+import paige.navic.icons.Icons
+import paige.navic.icons.filled.Settings
+import paige.navic.icons.outlined.AccountCircle
+import paige.navic.icons.outlined.Logout
+import paige.navic.icons.outlined.Search
 import paige.navic.ui.component.common.Dropdown
 import paige.navic.ui.component.common.DropdownItem
 import paige.navic.ui.component.dialog.LoginDialog
@@ -116,7 +117,7 @@ private fun Actions(
 		enabled = user != null
 	) {
 		Icon(
-			vectorResource(Res.drawable.search),
+			Icons.Outlined.Search,
 			contentDescription = null
 		)
 	}
@@ -126,7 +127,7 @@ private fun Actions(
 		backStack.add(Screen.Settings.Root)
 	}) {
 		Icon(
-			vectorResource(Res.drawable.settings),
+			Icons.Filled.Settings,
 			contentDescription = null
 		)
 	}
@@ -163,13 +164,13 @@ private fun Actions(
 					onDismissRequest = { expanded = false }
 				) {
 					DropdownItem(
-						text = Res.string.action_log_out,
+						text = { Text(stringResource(Res.string.action_log_out)) },
 						onClick = {
 							ctx.clickSound()
 							onLogOut()
 							onSetShowLogin(false)
 						},
-						leadingIcon = Res.drawable.logout
+						leadingIcon = { Icon(Icons.Outlined.Logout, null) }
 					)
 				}
 			}
@@ -214,7 +215,7 @@ private fun Actions(
 					onSetShowLogin(true)
 				}) {
 					Icon(
-						vectorResource(Res.drawable.account_circle),
+						Icons.Outlined.AccountCircle,
 						contentDescription = stringResource(Res.string.action_log_in)
 					)
 				}

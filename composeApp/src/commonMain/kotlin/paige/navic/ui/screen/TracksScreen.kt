@@ -60,29 +60,29 @@ import navic.composeapp.generated.resources.action_star
 import navic.composeapp.generated.resources.action_track_info
 import navic.composeapp.generated.resources.action_view_on_lastfm
 import navic.composeapp.generated.resources.action_view_on_musicbrainz
-import navic.composeapp.generated.resources.info
 import navic.composeapp.generated.resources.info_unknown_album
 import navic.composeapp.generated.resources.info_unknown_artist
 import navic.composeapp.generated.resources.info_unknown_genre
 import navic.composeapp.generated.resources.info_unknown_year
-import navic.composeapp.generated.resources.lastfm
-import navic.composeapp.generated.resources.more_vert
-import navic.composeapp.generated.resources.musicbrainz
-import navic.composeapp.generated.resources.play_arrow
-import navic.composeapp.generated.resources.playlist_add
-import navic.composeapp.generated.resources.playlist_remove
-import navic.composeapp.generated.resources.share
-import navic.composeapp.generated.resources.shuffle
-import navic.composeapp.generated.resources.star
 import navic.composeapp.generated.resources.subtitle_playlist
-import navic.composeapp.generated.resources.unstar
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalContentPadding
 import paige.navic.LocalMediaPlayer
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
 import paige.navic.data.model.Settings
+import paige.navic.icons.Icons
+import paige.navic.icons.brand.Lastfm
+import paige.navic.icons.brand.Musicbrainz
+import paige.navic.icons.filled.Play
+import paige.navic.icons.filled.Star
+import paige.navic.icons.outlined.Info
+import paige.navic.icons.outlined.MoreVert
+import paige.navic.icons.outlined.PlaylistAdd
+import paige.navic.icons.outlined.PlaylistRemove
+import paige.navic.icons.outlined.Share
+import paige.navic.icons.outlined.Shuffle
+import paige.navic.icons.outlined.Star
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.component.common.Dropdown
 import paige.navic.ui.component.common.DropdownItem
@@ -143,7 +143,7 @@ fun TracksScreen(
 						expanded = true
 					}) {
 						Icon(
-							vectorResource(Res.drawable.more_vert),
+							Icons.Outlined.MoreVert,
 							stringResource(Res.string.action_more)
 						)
 					}
@@ -153,8 +153,8 @@ fun TracksScreen(
 					) {
 						val info = (albumInfoState as? UiState.Success)?.data
 						DropdownItem(
-							text = Res.string.action_view_on_lastfm,
-							leadingIcon = Res.drawable.lastfm,
+							text = { Text(stringResource(Res.string.action_view_on_lastfm)) },
+							leadingIcon = { Icon(Icons.Brand.Lastfm, null) },
 							enabled = albumInfoState is UiState.Success
 								&& info?.lastFmUrl != null,
 							onClick = {
@@ -165,8 +165,8 @@ fun TracksScreen(
 							}
 						)
 						DropdownItem(
-							text = Res.string.action_view_on_musicbrainz,
-							leadingIcon = Res.drawable.musicbrainz,
+							text = { Text(stringResource(Res.string.action_view_on_musicbrainz)) },
+							leadingIcon = { Icon(Icons.Brand.Musicbrainz, null) },
 							enabled = albumInfoState is UiState.Success
 								&& info?.musicBrainzId != null,
 							onClick = {
@@ -179,9 +179,9 @@ fun TracksScreen(
 							}
 						)
 						DropdownItem(
+							text = { Text(stringResource(Res.string.action_share)) },
+							leadingIcon = { Icon(Icons.Outlined.Share, null) },
 							containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-							text = Res.string.action_share,
-							leadingIcon = Res.drawable.share,
 							enabled = tracks is UiState.Success,
 							onClick = {
 								expanded = false
@@ -189,9 +189,9 @@ fun TracksScreen(
 							},
 						)
 						DropdownItem(
+							text = { Text(stringResource(Res.string.action_add_all_to_playlist)) },
+							leadingIcon = { Icon(Icons.Outlined.PlaylistAdd, null) },
 							containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-							text = Res.string.action_add_all_to_playlist,
-							leadingIcon = Res.drawable.playlist_add,
 							enabled = tracks is UiState.Success,
 							onClick = {
 								expanded = false
@@ -260,8 +260,8 @@ fun TracksScreen(
 											) {
 												DropdownItem(
 													containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-													text = Res.string.action_share,
-													leadingIcon = Res.drawable.share,
+													text = { Text(stringResource(Res.string.action_share)) },
+													leadingIcon = { Icon(Icons.Outlined.Share, null) },
 													onClick = {
 														shareId = track.id
 														viewModel.clearSelection()
@@ -271,12 +271,23 @@ fun TracksScreen(
 													(starredState as? UiState.Success)?.data
 												DropdownItem(
 													containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-													text = if (starred == true)
-														Res.string.action_remove_star
-													else Res.string.action_star,
-													leadingIcon = if (starred == true)
-														Res.drawable.star
-													else Res.drawable.unstar,
+													text = {
+														Text(
+															stringResource(
+																if (starred == true)
+																	Res.string.action_remove_star
+																else Res.string.action_star
+															)
+														)
+													},
+													leadingIcon = {
+														Icon(
+															if (starred == true)
+																Icons.Filled.Star
+															else Icons.Outlined.Star,
+															null
+														)
+													},
 													onClick = {
 														if (starred == true)
 															viewModel.unstarSelectedTrack()
@@ -287,8 +298,8 @@ fun TracksScreen(
 												)
 												DropdownItem(
 													containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-													text = Res.string.action_track_info,
-													leadingIcon = Res.drawable.info,
+													text = { Text(stringResource(Res.string.action_track_info)) },
+													leadingIcon = { Icon(Icons.Outlined.Info, null) },
 													onClick = {
 														backStack.add(Screen.TrackInfo(track))
 														viewModel.clearSelection()
@@ -296,10 +307,16 @@ fun TracksScreen(
 												)
 												DropdownItem(
 													containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-													text = if (tracks is Playlist)
-														Res.string.action_add_to_another_playlist
-													else Res.string.action_add_to_playlist,
-													leadingIcon = Res.drawable.playlist_add,
+													text = {
+														Text(
+															stringResource(
+																if (tracks is Playlist)
+																	Res.string.action_add_to_another_playlist
+																else Res.string.action_add_to_playlist
+															)
+														)
+													},
+													leadingIcon = { Icon(Icons.Outlined.PlaylistAdd, null) },
 													onClick = {
 														viewModel.clearSelection()
 														if (backStack.lastOrNull() !is Screen.AddToPlaylist) {
@@ -315,8 +332,8 @@ fun TracksScreen(
 												if (tracks is Playlist) {
 													DropdownItem(
 														containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-														text = Res.string.action_remove_from_playlist,
-														leadingIcon = Res.drawable.playlist_remove,
+														text = { Text(stringResource(Res.string.action_remove_from_playlist)) },
+														leadingIcon = { Icon(Icons.Outlined.PlaylistRemove, null) },
 														onClick = {
 															viewModel.removeFromPlaylist()
 														},
@@ -419,7 +436,7 @@ private fun TracksScreenScope.Metadata() {
 			onClick = { player.play(tracks, 0) },
 			shape = shape
 		) {
-			Icon(vectorResource(Res.drawable.play_arrow), null)
+			Icon(Icons.Filled.Play, null)
 			Text(
 				stringResource(Res.string.action_play)
 			)
@@ -431,7 +448,7 @@ private fun TracksScreenScope.Metadata() {
 			},
 			shape = shape
 		) {
-			Icon(vectorResource(Res.drawable.shuffle), null)
+			Icon(Icons.Outlined.Shuffle, null)
 			Text(
 				stringResource(Res.string.action_shuffle)
 			)

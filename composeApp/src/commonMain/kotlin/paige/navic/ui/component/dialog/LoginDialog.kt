@@ -48,17 +48,17 @@ import com.kyant.capsule.ContinuousRoundedRectangle
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_cancel
 import navic.composeapp.generated.resources.action_log_in
-import navic.composeapp.generated.resources.badge
-import navic.composeapp.generated.resources.link
-import navic.composeapp.generated.resources.login
 import navic.composeapp.generated.resources.option_account_navidrome_instance
 import navic.composeapp.generated.resources.option_account_password
 import navic.composeapp.generated.resources.option_account_username
-import navic.composeapp.generated.resources.password
 import navic.composeapp.generated.resources.title_login_dialog
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Badge
+import paige.navic.icons.outlined.Link
+import paige.navic.icons.outlined.Login
+import paige.navic.icons.outlined.Password
 import paige.navic.ui.component.common.ErrorBox
 import paige.navic.ui.theme.defaultFont
 import paige.navic.ui.viewmodel.LoginViewModel
@@ -133,7 +133,7 @@ fun LoginDialog(
 				Spacer(Modifier.height(2.dp))
 				OutlinedTextField(
 					state = viewModel.instanceState,
-					leadingIcon = { Icon(vectorResource(Res.drawable.link), null) },
+					leadingIcon = { Icon(Icons.Outlined.Link, null) },
 					label = { Text(stringResource(Res.string.option_account_navidrome_instance)) },
 					placeholder = { Text("demo.navidrome.org") },
 					lineLimits = TextFieldLineLimits.SingleLine,
@@ -146,7 +146,7 @@ fun LoginDialog(
 				Spacer(Modifier.height(8.dp))
 				OutlinedTextField(
 					state = viewModel.usernameState,
-					leadingIcon = { Icon(vectorResource(Res.drawable.badge), null) },
+					leadingIcon = { Icon(Icons.Outlined.Badge, null) },
 					label = { Text(stringResource(Res.string.option_account_username)) },
 					lineLimits = TextFieldLineLimits.SingleLine,
 					modifier = Modifier.fillMaxWidth().semantics {
@@ -158,7 +158,7 @@ fun LoginDialog(
 				)
 				OutlinedSecureTextField(
 					state = viewModel.passwordState,
-					leadingIcon = { Icon(vectorResource(Res.drawable.password), null) },
+					leadingIcon = { Icon(Icons.Outlined.Password, null) },
 					label = { Text(stringResource(Res.string.option_account_password)) },
 					modifier = Modifier.fillMaxWidth()
 				)
@@ -173,7 +173,7 @@ fun LoginDialog(
 				enabled = loginState !is LoginState.Loading,
 				content = {
 					if (loginState !is LoginState.Loading) {
-						Icon(vectorResource(Res.drawable.login), null)
+						Icon(Icons.Outlined.Login, null)
 						Spacer(Modifier.width(8.dp))
 						Text(stringResource(Res.string.action_log_in), fontFamily = defaultFont(100))
 					} else {

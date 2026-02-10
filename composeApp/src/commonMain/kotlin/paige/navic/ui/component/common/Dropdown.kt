@@ -1,28 +1,26 @@
 package paige.navic.ui.component.common
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.ui.theme.defaultFont
 
@@ -56,9 +54,9 @@ fun Dropdown(
 fun DropdownItem(
 	modifier: Modifier = Modifier,
 	containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-	text: StringResource,
 	onClick: () -> Unit = {},
-	leadingIcon: DrawableResource? = null,
+	text: @Composable () -> Unit = {},
+	leadingIcon: @Composable () -> Unit = {},
 	enabled: Boolean = true,
 	rounding: Dp = 4.dp
 ) {
@@ -78,15 +76,17 @@ fun DropdownItem(
 	) {
 		DropdownMenuItem(
 			text = {
-				Text(
-					stringResource(text),
-					fontFamily = defaultFont(
-						grade = 100,
-						width = 104f
-					),
-					modifier = Modifier.padding(start = 2.dp),
-					color = color
-				)
+				CompositionLocalProvider(
+					LocalTextStyle provides TextStyle(
+						fontFamily = defaultFont(
+							grade = 100,
+							width = 104f
+						),
+						color = color
+					)
+				) {
+					text()
+				}
 			},
 			onClick = {
 				ctx.clickSound()
@@ -94,13 +94,12 @@ fun DropdownItem(
 			},
 			modifier = modifier,
 			leadingIcon = {
-				leadingIcon?.let {
-					Icon(
-						vectorResource(it),
-						contentDescription = null,
-						tint = color,
-						modifier = Modifier.size(20.dp)
-					)
+				CompositionLocalProvider(
+					LocalContentColor provides color
+				) {
+					Box(Modifier.size(20.dp)) {
+						leadingIcon()
+					}
 				}
 			},
 			contentPadding = PaddingValues(horizontal = 16.dp, vertical = 2.dp),

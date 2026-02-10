@@ -31,19 +31,19 @@ import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_delete
 import navic.composeapp.generated.resources.action_new
 import navic.composeapp.generated.resources.action_share
-import navic.composeapp.generated.resources.add
 import navic.composeapp.generated.resources.count_songs
-import navic.composeapp.generated.resources.playlist_remove
-import navic.composeapp.generated.resources.share
 import navic.composeapp.generated.resources.title_create_playlist
 import navic.composeapp.generated.resources.title_playlists
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalContentPadding
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Add
+import paige.navic.icons.outlined.PlaylistRemove
+import paige.navic.icons.outlined.Share
 import paige.navic.ui.component.common.Dropdown
 import paige.navic.ui.component.common.DropdownItem
 import paige.navic.ui.component.common.RefreshBox
@@ -100,7 +100,7 @@ fun PlaylistsScreen(
 				},
 				icon = {
 					Icon(
-						imageVector = vectorResource(Res.drawable.add),
+						imageVector = Icons.Outlined.Add,
 						contentDescription = stringResource(Res.string.title_create_playlist)
 					)
 				}
@@ -204,16 +204,16 @@ fun PlaylistsScreenItem(
 			}
 		) {
 			DropdownItem(
-				text = Res.string.action_share,
-				leadingIcon = Res.drawable.share,
+				text = { Text(stringResource(Res.string.action_share)) },
+				leadingIcon = { Icon(Icons.Outlined.Share, null) },
 				onClick = {
 					onSetShareId(playlist.id)
 					viewModel.clearSelection()
 				},
 			)
 			DropdownItem(
-				text = Res.string.action_delete,
-				leadingIcon = Res.drawable.playlist_remove,
+				text = { Text(stringResource(Res.string.action_delete)) },
+				leadingIcon = { Icon(Icons.Outlined.PlaylistRemove, null) },
 				onClick = {
 					onSetDeletionId(playlist.id)
 					viewModel.clearSelection()

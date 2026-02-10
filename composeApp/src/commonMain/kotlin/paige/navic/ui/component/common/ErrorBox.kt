@@ -32,13 +32,13 @@ import com.kyant.capsule.ContinuousRoundedRectangle
 import com.materialkolor.ktx.darken
 import kotlinx.coroutines.delay
 import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.check
-import navic.composeapp.generated.resources.copy
 import navic.composeapp.generated.resources.info_error
-import navic.composeapp.generated.resources.keyboard_arrow_down
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Check
+import paige.navic.icons.outlined.Copy
+import paige.navic.icons.outlined.KeyboardArrowDown
 import paige.navic.ui.theme.mapleMono
 import paige.navic.util.UiState
 
@@ -80,7 +80,7 @@ fun ErrorBox(
 				},
 				content = {
 					Icon(
-						vectorResource(Res.drawable.keyboard_arrow_down),
+						Icons.Outlined.KeyboardArrowDown,
 						null,
 						modifier = Modifier.scale(scaleX = 1f, scaleY = iconScale)
 					)
@@ -117,7 +117,7 @@ fun ErrorBox(
 					},
 					content = {
 						Icon(
-							vectorResource(if (copied) Res.drawable.check else Res.drawable.copy),
+							if (copied) Icons.Outlined.Check else Icons.Outlined.Copy,
 							null
 						)
 					},

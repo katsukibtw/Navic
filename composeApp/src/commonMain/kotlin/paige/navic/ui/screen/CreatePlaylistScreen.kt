@@ -17,14 +17,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_cancel
 import navic.composeapp.generated.resources.action_ok
-import navic.composeapp.generated.resources.badge
 import navic.composeapp.generated.resources.option_playlist_name
 import navic.composeapp.generated.resources.title_create_playlist
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Badge
 import paige.navic.ui.component.layout.CustomDialog
 import paige.navic.ui.viewmodel.CreatePlaylistViewModel
 import paige.navic.util.UiState
@@ -84,7 +84,7 @@ fun CreatePlaylistScreen(
 	) {
 		OutlinedTextField(
 			state = viewModel.name,
-			leadingIcon = { Icon(vectorResource(Res.drawable.badge), null) },
+			leadingIcon = { Icon(Icons.Outlined.Badge, null) },
 			label = { Text(stringResource(Res.string.option_playlist_name)) }
 		)
 		// TODO: list of songs and adding songs

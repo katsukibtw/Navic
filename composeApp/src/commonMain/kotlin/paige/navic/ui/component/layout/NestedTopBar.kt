@@ -18,11 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_navigate_back
-import navic.composeapp.generated.resources.arrow_back
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +56,7 @@ fun NestedTopBar(
 					}
 				) {
 					Icon(
-						vectorResource(Res.drawable.arrow_back),
+						Icons.Outlined.ArrowBack,
 						stringResource(Res.string.action_navigate_back)
 					)
 				}

@@ -36,12 +36,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_ok
-import navic.composeapp.generated.resources.drag_handle
 import navic.composeapp.generated.resources.option_navbar_tab_positions
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.data.model.NavbarConfig
 import paige.navic.data.model.NavbarTab
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.DragHandle
 import paige.navic.ui.component.common.ErrorBox
 import paige.navic.util.UiState
 import sh.calvin.reorderable.ReorderableCollectionItemScope
@@ -215,7 +215,7 @@ private fun ReorderableCollectionItemScope.NavtabRow(
 				onClick = {}
 			) {
 				Icon(
-					vectorResource(Res.drawable.drag_handle),
+					Icons.Outlined.DragHandle,
 					contentDescription = null
 				)
 			}

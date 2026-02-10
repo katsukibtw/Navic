@@ -33,11 +33,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.skip_next
-import navic.composeapp.generated.resources.skip_previous
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.data.model.Settings
+import paige.navic.icons.Icons
+import paige.navic.icons.filled.SkipNext
+import paige.navic.icons.filled.SkipPrevious
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -99,12 +98,12 @@ fun Swiper(
 			horizontalArrangement = Arrangement.SpaceBetween
 		) {
 			SwipeIndicatorIcon(
-				icon = vectorResource(Res.drawable.skip_previous),
+				icon = Icons.Filled.SkipPrevious,
 				isVisible = offsetX.value > 0,
 				progress = progress
 			)
 			SwipeIndicatorIcon(
-				icon = vectorResource(Res.drawable.skip_next),
+				icon = Icons.Filled.SkipNext,
 				isVisible = offsetX.value < 0,
 				progress = progress
 			)

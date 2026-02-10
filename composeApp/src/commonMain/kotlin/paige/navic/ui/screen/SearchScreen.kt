@@ -53,8 +53,6 @@ import com.kyant.capsule.ContinuousRoundedRectangle
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_clear_search
 import navic.composeapp.generated.resources.action_navigate_back
-import navic.composeapp.generated.resources.arrow_back
-import navic.composeapp.generated.resources.close
 import navic.composeapp.generated.resources.info_unknown_album
 import navic.composeapp.generated.resources.info_unknown_artist
 import navic.composeapp.generated.resources.info_unknown_year
@@ -63,13 +61,15 @@ import navic.composeapp.generated.resources.title_artists
 import navic.composeapp.generated.resources.title_search
 import navic.composeapp.generated.resources.title_songs
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalContentPadding
 import paige.navic.LocalCtx
 import paige.navic.LocalImageBuilder
 import paige.navic.LocalMediaPlayer
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.ArrowBack
+import paige.navic.icons.outlined.Close
 import paige.navic.ui.component.common.ErrorBox
 import paige.navic.ui.component.layout.ArtCarousel
 import paige.navic.ui.component.layout.ArtCarouselItem
@@ -224,7 +224,7 @@ private fun SearchTopBar(
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Icon(
-				vectorResource(Res.drawable.arrow_back),
+				Icons.Outlined.ArrowBack,
 				contentDescription = stringResource(Res.string.action_navigate_back),
 				tint = MaterialTheme.colorScheme.onSurfaceVariant
 			)
@@ -252,7 +252,7 @@ private fun SearchTopBar(
 						}
 					) {
 						Icon(
-							vectorResource(Res.drawable.close),
+							Icons.Outlined.Close,
 							contentDescription = stringResource(Res.string.action_clear_search)
 						)
 					}

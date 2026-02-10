@@ -39,18 +39,18 @@ import coil3.compose.AsyncImage
 import com.kyant.capsule.ContinuousRoundedRectangle
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.info_not_playing
-import navic.composeapp.generated.resources.note
-import navic.composeapp.generated.resources.pause
-import navic.composeapp.generated.resources.play_arrow
-import navic.composeapp.generated.resources.skip_next
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import paige.navic.LocalCtx
 import paige.navic.LocalMediaPlayer
 import paige.navic.LocalNavStack
 import paige.navic.data.model.Screen
 import paige.navic.data.model.Settings
 import paige.navic.data.session.SessionManager
+import paige.navic.icons.Icons
+import paige.navic.icons.filled.Note
+import paige.navic.icons.filled.Pause
+import paige.navic.icons.filled.Play
+import paige.navic.icons.filled.SkipNext
 import paige.navic.ui.component.common.MarqueeText
 import paige.navic.ui.component.common.playPauseIconPainter
 
@@ -181,7 +181,7 @@ fun PlayerBar(
 						)
 						if (coverUri.isNullOrEmpty()) {
 							Icon(
-								imageVector = vectorResource(Res.drawable.note),
+								imageVector = Icons.Filled.Note,
 								contentDescription = null,
 								tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .38f)
 							)
@@ -212,11 +212,9 @@ fun PlayerBar(
 								)
 							} else {
 								Icon(
-									imageVector = vectorResource(
-										if (playerState.isPaused)
-											Res.drawable.play_arrow
-										else Res.drawable.pause
-									),
+									imageVector = if (playerState.isPaused)
+										Icons.Filled.Play
+									else Icons.Filled.Pause,
 									contentDescription = null,
 									modifier = Modifier.size(iconSize)
 								)
@@ -230,7 +228,7 @@ fun PlayerBar(
 							enabled = playerState.currentTrack != null
 						) {
 							Icon(
-								imageVector = vectorResource(Res.drawable.skip_next),
+								imageVector = Icons.Filled.SkipNext,
 								contentDescription = null,
 								modifier = Modifier.size(iconSize)
 							)
@@ -266,14 +264,19 @@ fun PlayerBar(
 						.height(10.dp)
 						.pointerInput(Unit) {
 							if (track != null) {
-							detectDragGestures(
-								onDragStart = { dragging = true },
-								onDragEnd = { dragging = false }
-							) { change, _ ->
-								player.seek((change.position.x / size.width.toFloat()).coerceIn(0f, 1f))
-								change.consume()
-							}
+								detectDragGestures(
+									onDragStart = { dragging = true },
+									onDragEnd = { dragging = false }
+								) { change, _ ->
+									player.seek(
+										(change.position.x / size.width.toFloat()).coerceIn(
+											0f,
+											1f
+										)
+									)
+									change.consume()
 								}
+							}
 						}
 						.align(Alignment.BottomStart),
 					contentAlignment = Alignment.BottomStart
