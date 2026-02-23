@@ -234,9 +234,10 @@ fun PlayerScreen(
 			modifier = Modifier
 				.padding(horizontal = 16.dp)
 				.padding(bottom = 6.dp),
-			verticalAlignment = Alignment.CenterVertically
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.spacedBy(8.dp)
 		) {
-			Column {
+			Column(Modifier.weight(1f)) {
 				track?.title?.let { title ->
 					MarqueeText(
 						title,
@@ -281,7 +282,6 @@ fun PlayerScreen(
 					text = track?.artist ?: stringResource(Res.string.info_not_playing)
 				)
 			}
-			Spacer(Modifier.weight(1f))
 			Row(
 				horizontalArrangement = Arrangement.spacedBy(10.dp)
 			) {
