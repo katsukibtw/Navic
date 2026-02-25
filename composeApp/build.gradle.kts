@@ -243,7 +243,6 @@ compose.desktop {
 		nativeDistributions {
 			targetFormats(TargetFormat.Msi, TargetFormat.Dmg, TargetFormat.AppImage)
 			packageName = "paige.Navic"
-			linux.iconFile = project.file("../.github/icon.png")
 		}
 	}
 }
