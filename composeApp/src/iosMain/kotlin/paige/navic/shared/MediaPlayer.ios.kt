@@ -151,11 +151,19 @@ class IOSMediaPlayerViewModel(
 	}
 
 	override fun addToQueueSingle(track: Track) {
-		_uiState.update { it.copy(queue = it.queue + track) }
+		_uiState.update { it.copy(
+			queue = it.queue + track,
+			currentIndex = it.queue.indexOf(it.currentTrack),
+			currentTrack = if (it.queue.indexOf(it.currentTrack) == -1) null else it.currentTrack
+		) }
 	}
 
 	override fun addToQueue(tracks: TrackCollection) {
-		_uiState.update { it.copy(queue = it.queue + tracks.tracks) }
+		_uiState.update { it.copy(
+			queue = it.queue + tracks.tracks,
+			currentIndex = it.queue.indexOf(it.currentTrack),
+			currentTrack = if (it.queue.indexOf(it.currentTrack) == -1) null else it.currentTrack
+		) }
 	}
 
 	override fun removeFromQueue(index: Int) {
@@ -163,7 +171,11 @@ class IOSMediaPlayerViewModel(
 			val newQueue = state.queue.toMutableList().apply {
 				if (index in indices) removeAt(index)
 			}
-			state.copy(queue = newQueue)
+			state.copy(
+				queue = newQueue,
+				currentIndex = newQueue.indexOf(state.currentTrack),
+				currentTrack = if (newQueue.indexOf(state.currentTrack) == -1) null else state.currentTrack
+			)
 		}
 	}
 
@@ -175,7 +187,11 @@ class IOSMediaPlayerViewModel(
 					add(toIndex, item)
 				}
 			}
-			state.copy(queue = newQueue)
+			state.copy(
+				queue = newQueue,
+				currentIndex = newQueue.indexOf(state.currentTrack),
+				currentTrack = if (newQueue.indexOf(state.currentTrack) == -1) null else state.currentTrack
+			)
 		}
 	}
 
@@ -231,7 +247,9 @@ class IOSMediaPlayerViewModel(
 		_uiState.update {
 			it.copy(
 				queue = shuffledTracks,
-				isShuffleEnabled = true
+				isShuffleEnabled = true,
+				currentIndex = it.queue.indexOf(it.currentTrack),
+				currentTrack = if (it.queue.indexOf(it.currentTrack) == -1) null else it.currentTrack
 			)
 		}
 		playAt(0)
