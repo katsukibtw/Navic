@@ -131,6 +131,7 @@ fun AlbumsScreen(
 									modifier = Modifier.animateItem(),
 									album = album,
 									viewModel = viewModel,
+									tab = "albums",
 									onSetShareId = { newShareId ->
 										shareId = newShareId
 									}
@@ -235,6 +236,7 @@ private fun ListType.label() =
 fun AlbumsScreenItem(
 	modifier: Modifier = Modifier,
 	album: Album,
+	tab: String,
 	viewModel: AlbumsViewModel,
 	onSetShareId: (String) -> Unit
 ) {
@@ -246,12 +248,14 @@ fun AlbumsScreenItem(
 		ArtGridItem(
 			onClick = {
 				ctx.clickSound()
-				backStack.add(Screen.Tracks(album))
+				backStack.add(Screen.Tracks(album, tab))
 			},
 			onLongClick = { viewModel.selectAlbum(album) },
 			coverArt = album.coverArt,
 			title = album.name,
 			subtitle = album.artist ?: stringResource(Res.string.info_unknown_artist),
+			id = album.id,
+			tab = tab
 		)
 		Dropdown(
 			expanded = selection == album,

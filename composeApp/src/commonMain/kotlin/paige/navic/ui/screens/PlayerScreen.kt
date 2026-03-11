@@ -179,7 +179,7 @@ fun PlayerScreen() {
 						playerState.currentCollection?.let { tracks ->
 							expanded = false
 							backStack.remove(Screen.Player)
-							backStack.add(Screen.Tracks(tracks))
+							backStack.add(Screen.Tracks(tracks, ""))
 						}
 					},
 					text = {
@@ -258,7 +258,8 @@ fun PlayerScreen() {
 								if (!isSameAlbum)
 									backStack.add(
 										Screen.Tracks(
-											playerState.currentCollection ?: return@clickable
+											playerState.currentCollection ?: return@clickable,
+											""
 										)
 									)
 							}

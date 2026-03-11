@@ -122,6 +122,7 @@ fun PlaylistsScreen(
 								PlaylistsScreenItem(
 									modifier = Modifier.animateItem(),
 									playlist = playlist,
+									tab = "playlists",
 									viewModel = viewModel,
 									onSetShareId = { newShareId ->
 										shareId = newShareId
@@ -158,6 +159,7 @@ fun PlaylistsScreen(
 fun PlaylistsScreenItem(
 	modifier: Modifier = Modifier,
 	playlist: Playlist,
+	tab: String,
 	viewModel: PlaylistsViewModel,
 	onSetShareId: (String) -> Unit,
 	onSetDeletionId: (String) -> Unit
@@ -169,7 +171,7 @@ fun PlaylistsScreenItem(
 		ArtGridItem(
 			onClick = {
 				ctx.clickSound()
-				backStack.add(Screen.Tracks(playlist))
+				backStack.add(Screen.Tracks(playlist, "playlists"))
 			},
 			onLongClick = { viewModel.selectPlaylist(playlist) },
 			coverArt = playlist.coverArt,
@@ -185,7 +187,9 @@ fun PlaylistsScreenItem(
 				playlist.comment?.let {
 					append("\n${playlist.comment}\n")
 				}
-			}
+			},
+			id = playlist.id,
+			tab = tab
 		)
 		Dropdown(
 			expanded = selection == playlist,

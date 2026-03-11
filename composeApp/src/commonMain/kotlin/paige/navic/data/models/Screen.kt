@@ -32,7 +32,7 @@ sealed interface Screen : NavKey {
 	@Serializable data object Player : Screen
 	@Serializable data object Lyrics : Screen
 	@Serializable data object Queue : Screen
-	@Serializable data class Tracks(val partialCollection: TrackCollection) : Screen
+	@Serializable data class Tracks(val partialCollection: TrackCollection, val tab: String) : Screen
 	@Serializable data class TrackInfo(val track: Track) : Screen
 	@Serializable data class Search(
 		val nested: Boolean = false

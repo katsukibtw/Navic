@@ -136,7 +136,7 @@ fun ArtistsScreen(
 											)
 										}
 									}
-									artistsScreenItems(artists, viewModel)
+									artistsScreenItems(artists, viewModel, "artists")
 								}
 							}
 							AlphabeticalScroller(
@@ -157,6 +157,7 @@ fun ArtistsScreen(
 fun ArtistsScreenItem(
 	modifier: Modifier = Modifier,
 	artist: Artist,
+	tab: String,
 	viewModel: ArtistsViewModel
 ) {
 	val ctx = LocalCtx.current
@@ -176,7 +177,9 @@ fun ArtistsScreenItem(
 				Res.plurals.count_albums,
 				artist.albumCount ?: 0,
 				artist.albumCount ?: 0
-			)
+			),
+			id = artist.id,
+			tab = tab
 		)
 		Dropdown(
 			expanded = selection == artist,
@@ -210,9 +213,10 @@ fun ArtistsScreenItem(
 
 fun LazyGridScope.artistsScreenItems(
 	data: List<Artist>,
-	viewModel: ArtistsViewModel
+	viewModel: ArtistsViewModel,
+	tab: String
 ) {
 	items(data, { it.id }) { album ->
-		ArtistsScreenItem(Modifier.animateItem(), album, viewModel)
+		ArtistsScreenItem(Modifier.animateItem(), album, tab, viewModel)
 	}
 }
