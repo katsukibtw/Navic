@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.zt64.subsonic.api.model.Song
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_remove_from_queue
 import navic.composeapp.generated.resources.action_reorder
@@ -67,7 +68,6 @@ import paige.navic.utils.dragHandle
 import paige.navic.utils.draggableItems
 import paige.navic.utils.fadeFromTop
 import paige.navic.utils.rememberDraggableListState
-import paige.subsonic.api.models.Track
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -128,7 +128,7 @@ fun QueueScreen() {
 private fun QueueScreenItem(
 	index: Int,
 	count: Int,
-	track: Track,
+	track: Song,
 	isPlaying: Boolean,
 	isSelected: Boolean,
 	isDragging: Boolean,
@@ -214,7 +214,7 @@ private fun QueueScreenItem(
 					shapes = itemShape,
 					verticalAlignment = Alignment.CenterVertically,
 					content = { MarqueeText(track.title) },
-					supportingContent = { MarqueeText(track.artist ?: stringResource(Res.string.info_unknown_artist)) },
+					supportingContent = { MarqueeText(track.artistName) },
 					leadingContent = {
 						Text(
 							text = "${index + 1}",

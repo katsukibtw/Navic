@@ -1,5 +1,6 @@
 package paige.navic.data.repositories
 
+import dev.zt64.subsonic.api.model.Song
 import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -10,14 +11,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import paige.navic.data.session.SessionManager
-import paige.subsonic.api.models.Track
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -110,9 +107,6 @@ object LyricsContentParser {
 		val jsonObject = jsonParser.parseToJsonElement(jsonString).jsonObject
 
 		return when {
-			jsonObject.containsKey("subsonic-response") -> {
-				parseSubsonicJson(jsonObject)
-			}
 			jsonObject.containsKey("syncedLyrics") -> {
 				val syncedStr = jsonObject["syncedLyrics"]?.jsonPrimitive?.contentOrNull
 				if (!syncedStr.isNullOrEmpty()) parseLrc(syncedStr) else null
@@ -123,25 +117,6 @@ object LyricsContentParser {
 			}
 			else -> null
 		}
-	}
-
-	private fun parseSubsonicJson(root: JsonObject): List<LyricLine>? {
-		val response = root["subsonic-response"]?.jsonObject ?: return null
-
-		if (response["status"]?.jsonPrimitive?.contentOrNull == "failed") return null
-
-		val structuredLyrics = response["lyricsList"]?.jsonObject?.get("structuredLyrics")?.jsonArray
-		val syncedLyrics = structuredLyrics?.firstOrNull {
-			it.jsonObject["synced"]?.jsonPrimitive?.booleanOrNull == true
-		} ?: structuredLyrics?.firstOrNull()
-
-		return syncedLyrics?.jsonObject?.get("line")?.jsonArray?.mapNotNull { line ->
-			val startMs = line.jsonObject["start"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
-			val value = line.jsonObject["value"]?.jsonPrimitive?.contentOrNull
-			if (startMs != null && value != null) {
-				LyricLine(time = startMs.milliseconds, text = value)
-			} else null
-		}?.sortedBy { it.time }
 	}
 
 	private fun parseYoulyResponse(response: YoulyResponse): List<LyricLine>? {
@@ -202,16 +177,22 @@ class LyricsRepository(
 		}
 	}
 
-	suspend fun fetchLyrics(track: Track): LyricsResult? {
+	suspend fun fetchLyrics(track: Song): LyricsResult? {
 		val currentConfig = getConfig()
 		for (provider in currentConfig.priority) {
 			try {
 				val rawContent = when (provider) {
 					LyricsProvider.LYRICS_PLUS -> fetchRawLyricsPlus(track, currentConfig)
-					LyricsProvider.SUBSONIC -> fetchRawSubsonic(track)
 					LyricsProvider.LRCLIB -> fetchRawLrcLib(track, currentConfig)
+					else -> null
 				}
 				val parsedLyrics = rawContent?.let { LyricsContentParser.parse(it) }
+					?: SessionManager.api.getLyrics(track).firstOrNull()?.lines?.map { line ->
+						LyricLine(
+							time = line.start.milliseconds,
+							text = line.value
+						)
+					}
 				if (!parsedLyrics.isNullOrEmpty()) {
 					return LyricsResult(
 						lines = parsedLyrics,
@@ -226,23 +207,13 @@ class LyricsRepository(
 		return null
 	}
 
-	private suspend fun fetchRawSubsonic(track: Track): String? {
-		return runCatching {
-			SessionManager.api.getLyricsBySongId(track.id)
-		}.getOrNull()
-	}
-
-	private suspend fun fetchRawLrcLib(track: Track, config: LyricsConfig): String? {
-		val artist = track.artist ?: return null
-		val album = track.album ?: return null
-		val duration = track.duration ?: return null
-
+	private suspend fun fetchRawLrcLib(track: Song, config: LyricsConfig): String? {
 		return try {
 			val response = client.get(config.lrcLibBaseUrl) {
 				parameter("track_name", track.title)
-				parameter("artist_name", artist)
-				parameter("album_name", album)
-				parameter("duration", duration)
+				parameter("artist_name", track.artistName)
+				parameter("album_name", track.albumTitle)
+				parameter("duration", track.duration)
 				accept(ContentType.Application.Json)
 			}
 			if (response.status.isSuccess()) response.bodyAsText() else null
@@ -251,15 +222,13 @@ class LyricsRepository(
 		}
 	}
 
-	private suspend fun fetchRawLyricsPlus(track: Track, config: LyricsConfig): String? {
-		val artist = track.artist ?: return null
-
+	private suspend fun fetchRawLyricsPlus(track: Song, config: LyricsConfig): String? {
 		for (baseUrl in config.lyricsPlusMirrors) {
 			try {
 				val response = client.get("$baseUrl/v2/lyrics/get") {
 					parameter("title", track.title)
-					parameter("artist", artist)
-					parameter("album", track.album)
+					parameter("artist", track.artistName)
+					parameter("album", track.albumTitle)
 					parameter("duration", track.duration)
 					accept(ContentType.Application.Json)
 				}

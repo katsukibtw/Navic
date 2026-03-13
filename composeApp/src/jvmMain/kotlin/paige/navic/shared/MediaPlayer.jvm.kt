@@ -2,18 +2,18 @@ package paige.navic.shared
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import paige.subsonic.api.models.Track
-import paige.subsonic.api.models.TrackCollection
+import dev.zt64.subsonic.api.model.Song
+import dev.zt64.subsonic.api.model.SongCollection
 import java.io.File
 
 // TODO: implement this class
 class JvmMediaPlayerViewModel(
 	storage: PlayerStateStorage
 ) : MediaPlayerViewModel(storage) {
-	override fun addToQueueSingle(track: Track) {
+	override fun addToQueueSingle(track: Song) {
 	}
 
-	override fun addToQueue(tracks: TrackCollection) {
+	override fun addToQueue(tracks: SongCollection) {
 	}
 
 	override fun removeFromQueue(index: Int) {
@@ -49,7 +49,7 @@ class JvmMediaPlayerViewModel(
 	override fun toggleRepeat() {
 	}
 
-	override fun shufflePlay(tracks: TrackCollection) {
+	override fun shufflePlay(tracks: SongCollection) {
 	}
 
 	override fun syncPlayerWithState(state: PlayerUiState) {

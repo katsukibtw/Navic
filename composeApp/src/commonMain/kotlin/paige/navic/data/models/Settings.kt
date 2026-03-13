@@ -40,7 +40,6 @@ import org.jetbrains.compose.resources.StringResource
 import paige.navic.LocalCtx
 import paige.navic.utils.darkIosColorScheme
 import paige.navic.utils.lightIosColorScheme
-import paige.subsonic.api.models.ListType
 import kotlin.enums.enumEntries
 import kotlin.reflect.KProperty
 
@@ -222,7 +221,6 @@ class Settings(
 	var windowPositionY by preference(100f)
 	var windowSizeX by preference(800f)
 	var windowSizeY by preference(600f)
-	var listType by preference(ListType.ALPHABETICAL_BY_ARTIST)
 	var nowPlayingToolbarPosition by preference(ToolbarPosition.Bottom)
 
 	/**

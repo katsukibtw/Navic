@@ -5,11 +5,11 @@ package paige.navic.shared
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.zt64.subsonic.api.model.Song
+import dev.zt64.subsonic.api.model.SongCollection
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.update
 import paige.navic.data.session.SessionManager
-import paige.subsonic.api.models.Track
-import paige.subsonic.api.models.TrackCollection
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
 import platform.AVFAudio.setActive
@@ -131,7 +131,7 @@ class IOSMediaPlayerViewModel(
 
 		player.replaceCurrentItemWithPlayerItem(
 			AVPlayerItem(
-				NSURL.URLWithString(SessionManager.api.streamUrl(trackToPlay.id))!!
+				NSURL.URLWithString(SessionManager.api.getStreamUrl(trackToPlay.id))!!
 			)
 		)
 		player.play()
@@ -150,7 +150,7 @@ class IOSMediaPlayerViewModel(
 		updateNowPlayingInfo(trackToPlay)
 	}
 
-	override fun addToQueueSingle(track: Track) {
+	override fun addToQueueSingle(track: Song) {
 		_uiState.update { it.copy(
 			queue = it.queue + track,
 			currentIndex = it.queue.indexOf(it.currentTrack),
@@ -158,9 +158,9 @@ class IOSMediaPlayerViewModel(
 		) }
 	}
 
-	override fun addToQueue(tracks: TrackCollection) {
+	override fun addToQueue(tracks: SongCollection) {
 		_uiState.update { it.copy(
-			queue = it.queue + tracks.tracks,
+			queue = it.queue + tracks.songs,
 			currentIndex = it.queue.indexOf(it.currentTrack),
 			currentTrack = if (it.queue.indexOf(it.currentTrack) == -1) null else it.currentTrack
 		) }
@@ -242,8 +242,8 @@ class IOSMediaPlayerViewModel(
 		}
 	}
 
-	override fun shufflePlay(tracks: TrackCollection) {
-		val shuffledTracks = tracks.tracks.shuffled()
+	override fun shufflePlay(tracks: SongCollection) {
+		val shuffledTracks = tracks.songs.shuffled()
 		_uiState.update {
 			it.copy(
 				queue = shuffledTracks,
@@ -283,7 +283,7 @@ class IOSMediaPlayerViewModel(
 		}
 	}
 
-	private fun updateNowPlayingInfo(track: Track?) {
+	private fun updateNowPlayingInfo(track: Song?) {
 		if (track == null) {
 			MPNowPlayingInfoCenter.defaultCenter().nowPlayingInfo = null
 			return
@@ -291,8 +291,8 @@ class IOSMediaPlayerViewModel(
 
 		val info = mutableMapOf<Any?, Any?>()
 		info[MPMediaItemPropertyTitle] = track.title
-		info[MPMediaItemPropertyArtist] = track.artist ?: ""
-		info[MPMediaItemPropertyAlbumTitle] = track.album ?: ""
+		info[MPMediaItemPropertyArtist] = track.artistName
+		info[MPMediaItemPropertyAlbumTitle] = track.albumTitle
 
 		val duration = player.currentItem?.duration
 		if (duration != null) {
@@ -308,7 +308,7 @@ class IOSMediaPlayerViewModel(
 		info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(
 			boundsSize = CGSizeMake(512.0, 512.0),
 			requestHandler = {
-				return@MPMediaItemArtwork track.coverArt
+				return@MPMediaItemArtwork track.coverArtId
 					?.let { SessionManager.api.getCoverArtUrl(it, auth = true) }
 					?.let { NSURL.URLWithString(it) }
 					?.let { NSData.dataWithContentsOfURL(it) }
@@ -327,7 +327,7 @@ class IOSMediaPlayerViewModel(
 
 	override fun syncPlayerWithState(state: PlayerUiState) {
 		val track = state.queue.getOrNull(state.currentIndex) ?: return
-		val url = NSURL.URLWithString(SessionManager.api.streamUrl(track.id)) ?: return
+		val url = NSURL.URLWithString(SessionManager.api.getStreamUrl(track.id)) ?: return
 		player.replaceCurrentItemWithPlayerItem(AVPlayerItem(url))
 		updateNowPlayingInfo(track)
 	}

@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.zt64.subsonic.api.model.Song
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import navic.composeapp.generated.resources.Res
@@ -88,7 +89,6 @@ import paige.navic.ui.viewmodels.LyricsViewModel
 import paige.navic.utils.UiState
 import paige.navic.utils.fadeFromTop
 import paige.navic.utils.rememberTrackPainter
-import paige.subsonic.api.models.Track
 import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -98,7 +98,7 @@ import kotlin.time.toDuration
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LyricsScreen(
-	track: Track?,
+	track: Song?,
 	viewModel: LyricsViewModel = viewModel(key = track?.id) {
 		LyricsViewModel(track)
 	}
@@ -128,7 +128,7 @@ fun LyricsScreen(
 	}
 
 	val track = track ?: return placeholder()
-	val duration = track.duration?.toDuration(DurationUnit.SECONDS) ?: return placeholder()
+	val duration = track.duration ?: return placeholder()
 
 	val progressState = playerState.progress
 	val currentDuration = duration * progressState.toDouble()
@@ -141,7 +141,7 @@ fun LyricsScreen(
 	val spatialSpec = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
 	val effectSpec = MaterialTheme.motionScheme.slowEffectsSpec<Float>()
 
-	val sharedPainter = rememberTrackPainter(track.id, track.coverArt)
+	val sharedPainter = rememberTrackPainter(track.id, track.coverArtId)
 
 	Box(modifier = Modifier.fillMaxSize()) {
 		AnimatedContent(

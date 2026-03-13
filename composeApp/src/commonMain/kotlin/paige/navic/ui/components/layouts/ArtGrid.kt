@@ -42,6 +42,7 @@ import paige.navic.LocalImageBuilder
 import paige.navic.LocalSharedTransitionScope
 import paige.navic.data.models.Settings
 import paige.navic.data.session.SessionManager
+import paige.navic.data.session.SessionManager.getCoverArtUrl
 import paige.navic.ui.components.common.ErrorBox
 import paige.navic.utils.UiState
 import paige.navic.utils.onRightClick
@@ -93,7 +94,7 @@ fun ArtGridItem(
 	val artGridRounding = Settings.shared.artGridRounding
 	val model = remember(coverArt) {
 		imageBuilder
-			.data(SessionManager.api.getCoverArtUrl(coverArt, auth = true))
+			.data(SessionManager.api.getCoverArtUrl(coverArt))
 			.memoryCacheKey(coverArt)
 			.diskCacheKey(coverArt)
 			.diskCachePolicy(CachePolicy.ENABLED)

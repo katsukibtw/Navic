@@ -67,10 +67,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import dev.zt64.subsonic.api.model.Playlist
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import dev.zt64.subsonic.api.model.Song
 import ir.mahozad.multiplatform.wavyslider.material3.WaveAnimationSpecs
 import ir.mahozad.multiplatform.wavyslider.material3.WavySlider
 import kotlinx.coroutines.delay
@@ -91,6 +93,7 @@ import paige.navic.LocalNavStack
 import paige.navic.data.models.Screen
 import paige.navic.data.models.Settings
 import paige.navic.data.session.SessionManager
+import paige.navic.data.session.SessionManager.getCoverArtUrl
 import paige.navic.icons.Icons
 import paige.navic.icons.filled.Note
 import paige.navic.icons.filled.Pause
@@ -116,8 +119,6 @@ import paige.navic.ui.components.common.playPauseIconPainter
 import paige.navic.utils.fadeFromTop
 import paige.navic.utils.rememberTrackPainter
 import paige.navic.utils.toHoursMinutesSeconds
-import paige.subsonic.api.models.Playlist
-import paige.subsonic.api.models.Track
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -133,13 +134,13 @@ fun PlayerScreen() {
 	val playerState by player.uiState.collectAsState()
 	val track = playerState.currentTrack
 
-	val sharedPainter = rememberTrackPainter(track?.id, track?.coverArt)
+	val sharedPainter = rememberTrackPainter(track?.id, track?.coverArtId)
 
 	val isBuffering = playerState.isLoading
 	val enabled = playerState.currentTrack != null
 
 	var isStarred by remember(playerState.currentTrack) {
-		mutableStateOf(playerState.currentTrack?.starred != null)
+		mutableStateOf(playerState.currentTrack?.starredAt != null)
 	}
 
 	val scope = rememberCoroutineScope()
@@ -292,7 +293,7 @@ fun PlayerScreen() {
 							color = MaterialTheme.colorScheme.onSurfaceVariant,
 							fontSize = MaterialTheme.typography.bodyMedium.fontSize * 1.1
 						),
-					text = track?.artist ?: stringResource(Res.string.info_not_playing)
+					text = track?.artistName ?: stringResource(Res.string.info_not_playing)
 				)
 			}
 			Row(
@@ -318,7 +319,7 @@ fun PlayerScreen() {
 		Row(Modifier.padding(horizontal = 16.dp)) {
 			if (duration != null) {
 				Text(
-					((duration * playerState.progress).toDouble().seconds).toHoursMinutesSeconds(),
+					text = ((duration.inWholeSeconds * playerState.progress).toDouble().seconds).toHoursMinutesSeconds(),
 					color = color, style = style
 				)
 			} else {
@@ -326,7 +327,7 @@ fun PlayerScreen() {
 			}
 			Spacer(Modifier.weight(1f))
 			if (duration != null) {
-				Text(duration.seconds.toHoursMinutesSeconds(), color = color, style = style)
+				Text(duration.toHoursMinutesSeconds(), color = color, style = style)
 			} else {
 				Text("--:--", color = color, style = style)
 			}
@@ -556,16 +557,16 @@ fun PlayerScreen() {
 private fun PlayerArtwork(
 	modifier: Modifier = Modifier,
 	isLandscape: Boolean,
-	track: Track
+	track: Song
 ) {
 	val player = LocalMediaPlayer.current
 	val playerState by player.uiState.collectAsState()
 	val platformContext = LocalPlatformContext.current
-	val model = remember(track.coverArt) {
+	val model = remember(track.coverArtId) {
 		ImageRequest.Builder(platformContext)
-			.data(SessionManager.api.getCoverArtUrl(track.coverArt, auth = true))
-			.memoryCacheKey(track.coverArt)
-			.diskCacheKey(track.coverArt)
+			.data(SessionManager.api.getCoverArtUrl(track.coverArtId))
+			.memoryCacheKey(track.coverArtId)
+			.diskCacheKey(track.coverArtId)
 			.diskCachePolicy(CachePolicy.ENABLED)
 			.memoryCachePolicy(CachePolicy.ENABLED)
 			.build()
@@ -591,7 +592,7 @@ private fun PlayerArtwork(
 				.clip(MaterialTheme.shapes.large)
 				.background(MaterialTheme.colorScheme.onSurface.copy(alpha = .1f))
 		)
-		if (track.coverArt.isNullOrEmpty()) {
+		if (track.coverArtId.isNullOrEmpty()) {
 			Icon(
 				imageVector = Icons.Filled.Note,
 				contentDescription = null,

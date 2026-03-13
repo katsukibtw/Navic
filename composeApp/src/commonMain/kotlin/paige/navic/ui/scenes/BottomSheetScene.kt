@@ -76,6 +76,7 @@ import paige.navic.LocalNavStack
 import paige.navic.data.models.Screen
 import paige.navic.data.models.Settings
 import paige.navic.data.session.SessionManager
+import paige.navic.data.session.SessionManager.getCoverArtUrl
 import paige.navic.icons.Icons
 import paige.navic.icons.outlined.KeyboardArrowDown
 import paige.navic.icons.outlined.Lyrics
@@ -336,11 +337,8 @@ private fun colorSchemeForTrack(): ColorScheme {
 	val player = LocalMediaPlayer.current
 	val playerState by player.uiState.collectAsState()
 	val track = playerState.currentTrack
-	val coverUri = remember(track?.coverArt) {
-		SessionManager.api.getCoverArtUrl(
-			track?.coverArt,
-			auth = true
-		)
+	val coverUri = remember(track?.coverArtId) {
+		SessionManager.api.getCoverArtUrl(track?.coverArtId)
 	}
 	val networkLoader = rememberNetworkLoader(HttpClient().config {
 		install(HttpTimeout) {
