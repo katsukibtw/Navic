@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -39,6 +40,8 @@ import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -70,6 +73,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_more
+import navic.composeapp.generated.resources.action_play
 import navic.composeapp.generated.resources.action_view_on_lastfm
 import navic.composeapp.generated.resources.action_view_on_musicbrainz
 import navic.composeapp.generated.resources.count_albums
@@ -79,6 +83,7 @@ import navic.composeapp.generated.resources.title_similar_artists
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalCtx
+import paige.navic.LocalMediaPlayer
 import paige.navic.LocalNavStack
 import paige.navic.data.models.Screen
 import paige.navic.data.session.SessionManager
@@ -86,6 +91,7 @@ import paige.navic.data.session.SessionManager.getCoverArtUrl
 import paige.navic.icons.Icons
 import paige.navic.icons.brand.Lastfm
 import paige.navic.icons.brand.Musicbrainz
+import paige.navic.icons.filled.Play
 import paige.navic.icons.outlined.MoreVert
 import paige.navic.ui.components.common.Dropdown
 import paige.navic.ui.components.common.DropdownItem
@@ -108,6 +114,7 @@ fun ArtistScreen(
 	viewModel: ArtistViewModel = viewModel(key = artistId) { ArtistViewModel(artistId) }
 ) {
 	val ctx = LocalCtx.current
+	val player = LocalMediaPlayer.current
 	val backStack = LocalNavStack.current
 	val layoutDirection = LocalLayoutDirection.current
 	val artistState by viewModel.artistState.collectAsState()
@@ -166,7 +173,9 @@ fun ArtistScreen(
 								lastfm = (artistState as? UiState.Success)?.data?.info?.lastFmUrl,
 								innerPadding = contentPadding,
 								scrollState = viewModel.scrollState,
-								sharedTransitionScope = this@SharedTransitionLayout
+								sharedTransitionScope = this@SharedTransitionLayout,
+								onPlay = { viewModel.playArtistAlbums(player) },
+								playEnabled = state.albums.isNotEmpty()
 							)
 							Column(
 								modifier = Modifier
@@ -282,8 +291,11 @@ private fun ArtistScreenHeader(
 	lastfm: String?,
 	innerPadding: PaddingValues,
 	scrollState: ScrollState,
-	sharedTransitionScope: SharedTransitionScope
+	sharedTransitionScope: SharedTransitionScope,
+	onPlay: () -> Unit,
+	playEnabled: Boolean
 ) {
+	val ctx = LocalCtx.current
 	val layoutDirection = LocalLayoutDirection.current
 	val platformContext = LocalPlatformContext.current
 	val model = remember(coverArt) {
@@ -355,17 +367,36 @@ private fun ArtistScreenHeader(
 							modifier = Modifier.widthIn(max = 500.dp)
 						)
 					}
-					AnimatedVisibility(!scrollState.canScrollBackward) {
-						Text(
-							text = artistName,
-							style = MaterialTheme.typography.displaySmall,
-							fontWeight = FontWeight.Bold,
-							color = Color.White,
-							modifier = Modifier.sharedBounds(
-								sharedContentState = rememberSharedContentState("name"),
-								animatedVisibilityScope = this@AnimatedVisibility
+					Row(
+						verticalAlignment = Alignment.CenterVertically
+					) {
+						AnimatedVisibility(!scrollState.canScrollBackward) {
+							Text(
+								text = artistName,
+								style = MaterialTheme.typography.displaySmall,
+								fontWeight = FontWeight.Bold,
+								color = Color.White,
+								modifier = Modifier.sharedBounds(
+									sharedContentState = rememberSharedContentState("name"),
+									animatedVisibilityScope = this@AnimatedVisibility
+								)
 							)
-						)
+						}
+						Spacer(Modifier.weight(1f))
+						IconButton(
+							onClick = {
+								ctx.clickSound()
+								onPlay()
+							},
+							colors = IconButtonDefaults.filledIconButtonColors(),
+							enabled = playEnabled,
+							modifier = Modifier.size(60.dp)
+						) {
+							Icon(
+								Icons.Filled.Play,
+								contentDescription = stringResource(Res.string.action_play)
+							)
+						}
 					}
 				}
 			}
