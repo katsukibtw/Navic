@@ -71,7 +71,8 @@ import paige.navic.utils.rememberTrackPainter
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerBar(
-	modifier: Modifier = Modifier
+	modifier: Modifier = Modifier,
+	clicksEnabled: Boolean = true
 ) {
 	val ctx = LocalCtx.current
 	val player = LocalMediaPlayer.current
@@ -154,7 +155,8 @@ fun PlayerBar(
 		},
 		onSwipeRight = {
 			player.previous()
-		}
+		},
+		enabled = clicksEnabled
 	) {
 		Box(
 			modifier = modifier
@@ -305,7 +307,8 @@ fun PlayerBar(
 					} else {
 						MarqueeText(stringResource(Res.string.info_not_playing))
 					}
-				}
+				},
+				enabled = clicksEnabled
 			)
 			if (Settings.shared.playerBarProgressStyle == PlayerBarProgressStyle.Visible
 				|| Settings.shared.playerBarProgressStyle == PlayerBarProgressStyle.Seekable) {
@@ -341,7 +344,9 @@ fun PlayerBar(
 							.fillMaxWidth()
 							.height(14.dp)
 							.then(
-								if (track != null && Settings.shared.playerBarProgressStyle == PlayerBarProgressStyle.Seekable)
+								if (track != null
+									&& Settings.shared.playerBarProgressStyle == PlayerBarProgressStyle.Seekable
+									&& clicksEnabled)
 									Modifier.pointerInput(Unit) {
 										detectDragGestures(
 											onDragStart = {

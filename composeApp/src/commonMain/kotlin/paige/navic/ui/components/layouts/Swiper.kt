@@ -46,6 +46,7 @@ fun Swiper(
 	onSwipeRight: () -> Unit,
 	modifier: Modifier = Modifier,
 	swipeThreshold: Float = 200f,
+	enabled: Boolean = true,
 	enableHaptics: Boolean = true,
 	background: @Composable (BoxScope.() -> Unit)? = null,
 	content: @Composable BoxScope.() -> Unit
@@ -113,7 +114,7 @@ fun Swiper(
 			modifier = Modifier
 				.offset { IntOffset(offsetX.value.roundToInt(), 0) }
 				.draggable(
-					enabled = Settings.shared.swipeToSkip,
+					enabled = enabled && Settings.shared.swipeToSkip,
 					orientation = Orientation.Horizontal,
 					state = rememberDraggableState { delta ->
 						coroutineScope.launch {
