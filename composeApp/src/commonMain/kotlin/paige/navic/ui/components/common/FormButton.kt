@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 fun FormButton(
 	onClick: () -> Unit,
 	color: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+	disabledColor: Color = color.copy(alpha = .5f),
 	enabled: Boolean = true,
 	content: @Composable () -> Unit
 ) {
@@ -22,7 +23,7 @@ fun FormButton(
 		horizontalArrangement = Arrangement.Center,
 		contentPadding = PaddingValues(14.dp),
 		rounding = 5.dp,
-		color = color
+		color = if (enabled) color else disabledColor
 	) {
 		CompositionLocalProvider(
 			LocalContentColor provides MaterialTheme.colorScheme

@@ -1,12 +1,13 @@
 package paige.navic.ui.screens
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,8 +26,9 @@ import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.models.Screen
 import paige.navic.icons.Icons
-import paige.navic.icons.outlined.Badge
-import paige.navic.ui.components.layouts.CustomDialog
+import paige.navic.icons.outlined.PlaylistAdd
+import paige.navic.ui.components.common.FormButton
+import paige.navic.ui.components.dialogs.FormDialog
 import paige.navic.ui.viewmodels.CreatePlaylistViewModel
 import paige.navic.utils.UiState
 
@@ -52,25 +54,18 @@ fun CreatePlaylistScreen(
 		}
 	}
 
-	CustomDialog(
+	FormDialog(
+		onDismissRequest = {},
+		icon = { Icon(Icons.Outlined.PlaylistAdd, null) },
 		title = { Text(stringResource(Res.string.title_create_playlist)) },
 		buttons = {
-			TextButton(
-				onClick = {
-					ctx.clickSound()
-					if (backStack.lastOrNull() is Screen.CreatePlaylist) {
-						backStack.removeLastOrNull()
-					}
-				},
-				enabled = state !is UiState.Loading,
-				content = { Text(stringResource(Res.string.action_cancel)) }
-			)
-			Button(
+			FormButton(
 				onClick = {
 					ctx.clickSound()
 					viewModel.create()
 				},
-				enabled = state !is UiState.Loading,
+				enabled = state !is UiState.Loading && viewModel.name.text.isNotBlank(),
+				color = MaterialTheme.colorScheme.primary
 			) {
 				if (state !is UiState.Loading) {
 					Text(stringResource(Res.string.action_ok))
@@ -80,13 +75,28 @@ fun CreatePlaylistScreen(
 					)
 				}
 			}
+			FormButton(
+				onClick = {
+					ctx.clickSound()
+					if (backStack.lastOrNull() is Screen.CreatePlaylist) {
+						backStack.removeLastOrNull()
+					}
+				},
+				enabled = state !is UiState.Loading,
+				content = { Text(stringResource(Res.string.action_cancel)) }
+			)
+		},
+		content = {
+			(state as? UiState.Error)?.error?.let {
+				SelectionContainer {
+					Text("$it")
+				}
+			}
+			TextField(
+				state = viewModel.name,
+				label = { Text(stringResource(Res.string.option_playlist_name)) },
+				lineLimits = TextFieldLineLimits.SingleLine
+			)
 		}
-	) {
-		OutlinedTextField(
-			state = viewModel.name,
-			leadingIcon = { Icon(Icons.Outlined.Badge, null) },
-			label = { Text(stringResource(Res.string.option_playlist_name)) }
-		)
-		// TODO: list of songs and adding songs
-	}
+	)
 }
