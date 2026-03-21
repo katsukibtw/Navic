@@ -85,7 +85,7 @@ fun PlaylistsScreen(
 	var shareExpiry by remember { mutableStateOf<Duration?>(null) }
 	var deletionId by remember { mutableStateOf<String?>(null) }
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-	val isLoggedIn = SessionManager.isLoggedIn.collectAsState()
+	val isLoggedIn by SessionManager.isLoggedIn.collectAsState()
 
 	Scaffold(
 		topBar = {
@@ -103,6 +103,7 @@ fun PlaylistsScreen(
 			}
 		},
 		floatingActionButton = {
+			if (!isLoggedIn) return@Scaffold
 			MediumFloatingActionButton(
 				shape = MaterialTheme.shapes.large,
 				containerColor = MaterialTheme.colorScheme.primary,
@@ -133,7 +134,7 @@ fun PlaylistsScreen(
 			isRefreshing = isRefreshing || playlistsState is UiState.Loading,
 			onRefresh = { viewModel.refreshPlaylists() }
 		) {
-			if (!isLoggedIn.value) {
+			if (!isLoggedIn) {
 				Text(
 					stringResource(Res.string.info_needs_log_in),
 					color = MaterialTheme.colorScheme.onSurfaceVariant,
