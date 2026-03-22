@@ -1,30 +1,14 @@
-package paige.navic.ui.screens
+package paige.navic.ui.screens.queue.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.plus
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,104 +28,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.zt64.subsonic.api.model.Song
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_remove_from_queue
 import navic.composeapp.generated.resources.action_reorder
-import navic.composeapp.generated.resources.info_no_queue
 import org.jetbrains.compose.resources.stringResource
-import paige.navic.LocalCtx
-import paige.navic.LocalMediaPlayer
 import paige.navic.icons.Icons
 import paige.navic.icons.outlined.Delete
 import paige.navic.icons.outlined.DragHandle
-import paige.navic.icons.outlined.PlaylistRemove
-import paige.navic.ui.components.common.ContentUnavailable
 import paige.navic.ui.components.common.MarqueeText
-import paige.navic.ui.viewmodels.QueueViewModel
 import paige.navic.utils.DraggableListState
 import paige.navic.utils.dragHandle
-import paige.navic.utils.draggableItems
-import paige.navic.utils.fadeFromTop
-import paige.navic.utils.rememberDraggableListState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun QueueScreen(
-	viewModel: QueueViewModel = viewModel { QueueViewModel() }
-) {
-	val ctx = LocalCtx.current
-	val player = LocalMediaPlayer.current
-	val playerState by player.uiState.collectAsStateWithLifecycle()
-	val currentTrack = playerState.currentTrack
-	val queue = playerState.queue
-
-	val haptic = LocalHapticFeedback.current
-	val draggableState = rememberDraggableListState(viewModel.listState) { from, to ->
-		player.moveQueueItem(from, to)
-		haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-	}
-
-	LazyColumn(
-		modifier = Modifier.fillMaxSize().fadeFromTop(),
-		state = draggableState.listState,
-		contentPadding = WindowInsets.statusBars.asPaddingValues()
-			+ WindowInsets.systemBars.asPaddingValues()
-			+ PaddingValues(vertical = 70.dp, horizontal = 16.dp),
-		verticalArrangement = if (queue.isNotEmpty())
-			Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
-		else Arrangement.Center
-	) {
-		draggableItems(
-			state = draggableState,
-			items = queue,
-			key = { track -> track.id }
-		) { track, isDragging ->
-			val index = queue.indexOf(track)
-
-			QueueScreenItem(
-				index = index,
-				count = queue.count(),
-				track = track,
-				isPlaying = currentTrack?.id == track.id
-					&& !playerState.isPaused,
-				isSelected = currentTrack?.id == track.id,
-				isDragging = isDragging,
-				draggableState = draggableState,
-				onClick = {
-					ctx.clickSound()
-					if (currentTrack?.id != track.id) {
-						player.playAt(index)
-					}
-				},
-				onRemove = {
-					haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-					player.removeFromQueue(index)
-				}
-			)
-		}
-		if (queue.isEmpty()) {
-			item {
-				ContentUnavailable(
-					icon = Icons.Outlined.PlaylistRemove,
-					label = stringResource(Res.string.info_no_queue)
-				)
-			}
-		}
-	}
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun QueueScreenItem(
+fun QueueScreenItem(
 	index: Int,
 	count: Int,
 	track: Song,
@@ -269,36 +174,4 @@ private fun QueueScreenItem(
 			}
 		}
 	)
-}
-
-@Composable
-private fun Waveform(
-	isPlaying: Boolean
-) {
-	val transition = rememberInfiniteTransition()
-	Row(
-		modifier = Modifier.height(18.dp),
-		horizontalArrangement = Arrangement.spacedBy(2.dp),
-		verticalAlignment = Alignment.CenterVertically
-	) {
-		repeat(5) { index ->
-			val fraction by transition.animateFloat(
-				initialValue = 0.2f,
-				targetValue = 1f,
-				animationSpec = infiniteRepeatable(
-					animation = tween(
-						durationMillis = 400 + (index * 150),
-						easing = FastOutSlowInEasing
-					),
-					repeatMode = RepeatMode.Reverse
-				)
-			)
-			Box(
-				modifier = Modifier
-					.width(3.dp)
-					.fillMaxHeight(if (isPlaying) fraction else .2f)
-					.background(MaterialTheme.colorScheme.onSurface, shape = CircleShape)
-			)
-		}
-	}
 }

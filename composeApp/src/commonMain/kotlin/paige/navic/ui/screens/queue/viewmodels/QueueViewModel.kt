@@ -1,4 +1,4 @@
-package paige.navic.ui.viewmodels
+package paige.navic.ui.screens.queue.viewmodels
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
