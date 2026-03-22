@@ -31,7 +31,7 @@ import paige.navic.data.models.settings.enums.NowPlayingBackgroundStyle
 import paige.navic.data.models.settings.enums.ToolbarPosition
 import paige.navic.ui.components.common.Form
 import paige.navic.ui.components.common.FormRow
-import paige.navic.ui.components.dialogs.NowPlayingSliderStyleDialog
+import paige.navic.ui.screens.settings.dialogs.NowPlayingSliderStyleDialog
 import paige.navic.ui.components.layouts.NestedTopBar
 import paige.navic.ui.screens.settings.components.SettingSelectionRow
 import paige.navic.ui.screens.settings.components.SettingSwitchRow

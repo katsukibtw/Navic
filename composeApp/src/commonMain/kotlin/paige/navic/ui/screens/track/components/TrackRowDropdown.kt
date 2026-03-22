@@ -139,7 +139,7 @@ fun TrackRowDropdown(
 		}
 	}
 
-	if (playlistDialogShown && track != null) {
+	if (playlistDialogShown) {
 		@Suppress("AssignedValueIsNeverRead")
 		PlaylistUpdateDialog(
 			tracks = listOf(track),

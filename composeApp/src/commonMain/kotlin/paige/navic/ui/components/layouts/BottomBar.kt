@@ -51,7 +51,7 @@ import paige.navic.icons.outlined.LibraryMusic
 import paige.navic.icons.outlined.PlaylistPlay
 import paige.navic.icons.outlined.Search
 import paige.navic.ui.components.common.animatedTabIconPainter
-import paige.navic.ui.components.dialogs.NavtabsViewModel
+import paige.navic.ui.screens.settings.viewmodels.NavtabsViewModel
 import paige.navic.utils.UiState
 
 private enum class NavItem(

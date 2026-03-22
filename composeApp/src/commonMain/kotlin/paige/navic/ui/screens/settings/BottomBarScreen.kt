@@ -58,7 +58,7 @@ import paige.navic.icons.outlined.ChevronForward
 import paige.navic.ui.components.common.Form
 import paige.navic.ui.components.common.FormRow
 import paige.navic.ui.components.common.FormTitle
-import paige.navic.ui.components.dialogs.NavtabsDialog
+import paige.navic.ui.screens.settings.dialogs.NavtabsDialog
 import paige.navic.ui.components.layouts.NestedTopBar
 import paige.navic.ui.components.layouts.RootBottomBar
 import paige.navic.ui.screens.settings.components.SettingSelectionRow

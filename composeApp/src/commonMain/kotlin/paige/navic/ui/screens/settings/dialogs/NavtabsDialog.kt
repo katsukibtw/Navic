@@ -1,4 +1,4 @@
-package paige.navic.ui.components.dialogs
+package paige.navic.ui.screens.settings.dialogs
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,17 +25,19 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.russhwolf.settings.Settings
+import kotlinx.serialization.json.Json
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_ok
 import navic.composeapp.generated.resources.action_reorder
-import navic.composeapp.generated.resources.option_lyrics_priority
+import navic.composeapp.generated.resources.option_navigation_bar_tabs
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalCtx
-import paige.navic.data.repositories.LyricsProvider
+import paige.navic.data.models.NavbarTab
 import paige.navic.icons.Icons
 import paige.navic.icons.outlined.DragHandle
 import paige.navic.ui.components.common.ErrorBox
-import paige.navic.ui.viewmodels.LyricsPriorityViewModel
+import paige.navic.ui.screens.settings.viewmodels.NavtabsViewModel
 import paige.navic.utils.DraggableListState
 import paige.navic.utils.UiState
 import paige.navic.utils.dragHandle
@@ -43,14 +46,13 @@ import paige.navic.utils.rememberDraggableListState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LyricsPriorityDialog(
+fun NavtabsDialog(
 	presented: Boolean,
 	onDismissRequest: () -> Unit,
-	viewModel: LyricsPriorityViewModel = viewModel { LyricsPriorityViewModel() }
+	viewModel: NavtabsViewModel = viewModel { NavtabsViewModel(Settings(), Json) }
 ) {
 	if (!presented) return
 
-	val ctx = LocalCtx.current
 	val haptic = LocalHapticFeedback.current
 	val state by viewModel.state.collectAsState()
 
@@ -66,7 +68,7 @@ fun LyricsPriorityDialog(
 			val config = (state as UiState.Success).data
 			AlertDialog(
 				title = {
-					Text(stringResource(Res.string.option_lyrics_priority))
+					Text(stringResource(Res.string.option_navigation_bar_tabs))
 				},
 				text = {
 					LazyColumn(
@@ -78,23 +80,23 @@ fun LyricsPriorityDialog(
 					) {
 						draggableItems(
 							state = draggableState,
-							items = config.priority,
-							key = { provider -> provider.name }
-						) { provider, isDragging ->
-							ProviderRow(
-								provider = provider,
+							items = config.tabs,
+							key = { tab -> tab.id }
+						) { tab, isDragging ->
+							NavtabRow(
+								tab = tab,
+								state = draggableState,
 								isDragging = isDragging,
-								state = draggableState
+								onToggleVisibility = {
+									viewModel.toggleVisibility(tab.id)
+								}
 							)
 						}
 					}
 				},
 				onDismissRequest = onDismissRequest,
 				confirmButton = {
-					Button(onClick = {
-						ctx.clickSound()
-						onDismissRequest()
-					}) {
+					Button(onClick = onDismissRequest) {
 						Text(stringResource(Res.string.action_ok))
 					}
 				}
@@ -105,15 +107,18 @@ fun LyricsPriorityDialog(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ProviderRow(
+private fun NavtabRow(
+	tab: NavbarTab,
 	state: DraggableListState,
-	provider: LyricsProvider,
-	isDragging: Boolean
+	isDragging: Boolean,
+	onToggleVisibility: () -> Unit
 ) {
+	val ctx = LocalCtx.current
 	val elevation by animateDpAsState(
 		if (isDragging) 4.dp else 0.dp,
 		animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
 	)
+
 	Surface(
 		shadowElevation = elevation,
 		modifier = Modifier.fillMaxWidth(),
@@ -122,15 +127,23 @@ private fun ProviderRow(
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 16.dp, vertical = 8.dp),
+				.padding(8.dp),
 			horizontalArrangement = Arrangement.SpaceBetween,
 			verticalAlignment = Alignment.CenterVertically
 		) {
-			Text(provider.displayName)
+			Checkbox(
+				enabled = tab.id != NavbarTab.Id.LIBRARY,
+				checked = tab.visible,
+				onCheckedChange = { _ ->
+					ctx.clickSound()
+					onToggleVisibility()
+				}
+			)
+			Text(tab.id.name.lowercase().replaceFirstChar { it.uppercase() })
 			IconButton(
 				modifier = Modifier.dragHandle(
 					state = state,
-					key = provider.name
+					key = tab.id
 				),
 				onClick = {}
 			) {

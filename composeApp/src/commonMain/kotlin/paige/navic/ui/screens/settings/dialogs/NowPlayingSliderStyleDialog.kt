@@ -1,4 +1,4 @@
-package paige.navic.ui.components.dialogs
+package paige.navic.ui.screens.settings.dialogs
 
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.BorderStroke

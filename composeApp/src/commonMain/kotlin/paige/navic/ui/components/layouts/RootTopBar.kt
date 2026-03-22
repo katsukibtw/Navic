@@ -61,7 +61,7 @@ import paige.navic.icons.outlined.Share
 import paige.navic.ui.components.common.Dropdown
 import paige.navic.ui.components.common.DropdownItem
 import paige.navic.ui.components.dialogs.LoginDialog
-import paige.navic.ui.components.dialogs.NavtabsViewModel
+import paige.navic.ui.screens.settings.viewmodels.NavtabsViewModel
 import paige.navic.ui.viewmodels.LoginViewModel
 import paige.navic.utils.LoginState
 import paige.navic.utils.UiState

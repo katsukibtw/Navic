@@ -46,7 +46,7 @@ import paige.navic.data.models.settings.Settings
 import paige.navic.ui.components.common.Form
 import paige.navic.ui.components.common.FormRow
 import paige.navic.ui.components.common.FormTitle
-import paige.navic.ui.components.dialogs.LyricsPriorityDialog
+import paige.navic.ui.screens.settings.dialogs.LyricsPriorityDialog
 import paige.navic.ui.components.layouts.NestedTopBar
 import paige.navic.ui.screens.settings.components.SettingSwitchRow
 import paige.navic.utils.fadeFromTop

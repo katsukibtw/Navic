@@ -1,4 +1,4 @@
-package paige.navic.ui.components.dialogs
+package paige.navic.ui.screens.settings.dialogs
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,89 +23,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.russhwolf.settings.Settings
-import com.russhwolf.settings.set
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.serialization.json.Json
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_ok
 import navic.composeapp.generated.resources.action_reorder
-import navic.composeapp.generated.resources.option_navigation_bar_tabs
+import navic.composeapp.generated.resources.option_lyrics_priority
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalCtx
-import paige.navic.data.models.NavbarConfig
-import paige.navic.data.models.NavbarTab
+import paige.navic.data.repositories.LyricsProvider
 import paige.navic.icons.Icons
 import paige.navic.icons.outlined.DragHandle
 import paige.navic.ui.components.common.ErrorBox
+import paige.navic.ui.viewmodels.LyricsPriorityViewModel
 import paige.navic.utils.DraggableListState
 import paige.navic.utils.UiState
 import paige.navic.utils.dragHandle
 import paige.navic.utils.draggableItems
 import paige.navic.utils.rememberDraggableListState
 
-class NavtabsViewModel(
-	private val settings: Settings,
-	private val json: Json
-) : ViewModel() {
-	private val _state = MutableStateFlow<UiState<NavbarConfig>>(UiState.Loading)
-	val state = _state.asStateFlow()
-
-	init {
-		try {
-			_state.value = UiState.Success(loadConfig())
-		} catch (e: Exception) {
-			_state.value = UiState.Error(e)
-		}
-	}
-
-	private fun loadConfig(): NavbarConfig {
-		val raw = settings.getStringOrNull(NavbarConfig.KEY)
-			?: return NavbarConfig.default
-		val config: NavbarConfig = json.decodeFromString(raw)
-		return config.takeIf { it.version == NavbarConfig.VERSION }
-			?: NavbarConfig.default
-	}
-
-	private fun setConfig(newConfig: NavbarConfig) {
-		_state.value = UiState.Success(newConfig)
-		settings[NavbarConfig.KEY] = json.encodeToString(newConfig)
-	}
-
-	fun move(from: Int, to: Int) {
-		val config = (_state.value as UiState.Success).data
-		setConfig(config.copy(
-			tabs = config.tabs.toMutableList().apply {
-				add(to, removeAt(from))
-			}
-		))
-	}
-
-	fun toggleVisibility(id: NavbarTab.Id) {
-		val config = (_state.value as UiState.Success).data
-		setConfig(
-			config.copy(
-				tabs = config.tabs.map {
-					if (it.id == id) it.copy(visible = !it.visible) else it
-				}
-			)
-		)
-	}
-}
-
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NavtabsDialog(
+fun LyricsPriorityDialog(
 	presented: Boolean,
 	onDismissRequest: () -> Unit,
-	viewModel: NavtabsViewModel = viewModel { NavtabsViewModel(Settings(), Json) }
+	viewModel: LyricsPriorityViewModel = viewModel { LyricsPriorityViewModel() }
 ) {
 	if (!presented) return
 
+	val ctx = LocalCtx.current
 	val haptic = LocalHapticFeedback.current
 	val state by viewModel.state.collectAsState()
 
@@ -122,7 +66,7 @@ fun NavtabsDialog(
 			val config = (state as UiState.Success).data
 			AlertDialog(
 				title = {
-					Text(stringResource(Res.string.option_navigation_bar_tabs))
+					Text(stringResource(Res.string.option_lyrics_priority))
 				},
 				text = {
 					LazyColumn(
@@ -134,23 +78,23 @@ fun NavtabsDialog(
 					) {
 						draggableItems(
 							state = draggableState,
-							items = config.tabs,
-							key = { tab -> tab.id }
-						) { tab, isDragging ->
-							NavtabRow(
-								tab = tab,
-								state = draggableState,
+							items = config.priority,
+							key = { provider -> provider.name }
+						) { provider, isDragging ->
+							ProviderRow(
+								provider = provider,
 								isDragging = isDragging,
-								onToggleVisibility = {
-									viewModel.toggleVisibility(tab.id)
-								}
+								state = draggableState
 							)
 						}
 					}
 				},
 				onDismissRequest = onDismissRequest,
 				confirmButton = {
-					Button(onClick = onDismissRequest) {
+					Button(onClick = {
+						ctx.clickSound()
+						onDismissRequest()
+					}) {
 						Text(stringResource(Res.string.action_ok))
 					}
 				}
@@ -161,18 +105,15 @@ fun NavtabsDialog(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun NavtabRow(
-	tab: NavbarTab,
+private fun ProviderRow(
 	state: DraggableListState,
-	isDragging: Boolean,
-	onToggleVisibility: () -> Unit
+	provider: LyricsProvider,
+	isDragging: Boolean
 ) {
-	val ctx = LocalCtx.current
 	val elevation by animateDpAsState(
 		if (isDragging) 4.dp else 0.dp,
 		animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
 	)
-
 	Surface(
 		shadowElevation = elevation,
 		modifier = Modifier.fillMaxWidth(),
@@ -181,23 +122,15 @@ private fun NavtabRow(
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(8.dp),
+				.padding(horizontal = 16.dp, vertical = 8.dp),
 			horizontalArrangement = Arrangement.SpaceBetween,
 			verticalAlignment = Alignment.CenterVertically
 		) {
-			Checkbox(
-				enabled = tab.id != NavbarTab.Id.LIBRARY,
-				checked = tab.visible,
-				onCheckedChange = { _ ->
-					ctx.clickSound()
-					onToggleVisibility()
-				}
-			)
-			Text(tab.id.name.lowercase().replaceFirstChar { it.uppercase() })
+			Text(provider.displayName)
 			IconButton(
 				modifier = Modifier.dragHandle(
 					state = state,
-					key = tab.id
+					key = provider.name
 				),
 				onClick = {}
 			) {
