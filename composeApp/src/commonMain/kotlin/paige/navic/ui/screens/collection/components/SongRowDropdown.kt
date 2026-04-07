@@ -57,6 +57,7 @@ fun CollectionDetailScreenSongRowDropdown(
     onRemoveFromPlaylist: () -> Unit,
     starredState: UiState<Boolean>,
     downloadStatus: DownloadStatus?,
+	isOnline: Boolean,
     onDownload: () -> Unit,
     onCancelDownload: () -> Unit,
     onDeleteDownload: () -> Unit,
@@ -148,7 +149,8 @@ fun CollectionDetailScreenSongRowDropdown(
 					onClick = {
 						onDownload()
 						onDismissRequest()
-					}
+					},
+					enabled = isOnline
 				)
 			}
 		}

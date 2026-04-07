@@ -41,7 +41,8 @@ import paige.navic.ui.theme.defaultFont
 
 @Composable
 fun CollectionDetailScreenHeadingRowButtons(
-	collection: DomainSongCollection
+	collection: DomainSongCollection,
+	isOnline: Boolean
 ) {
 	val player = koinViewModel<MediaPlayerViewModel>()
 	val downloadManager = koinInject<DownloadManager>()
@@ -117,7 +118,8 @@ fun CollectionDetailScreenHeadingRowButtons(
 			},
 			shape = shape,
 			enabled = downloadStatus == DownloadStatus.NOT_DOWNLOADED
-				&& collection.songs.isNotEmpty(),
+				&& collection.songs.isNotEmpty()
+				&& isOnline,
 			contentPadding = PaddingValues(0.dp)
 		) {
 			when (downloadStatus) {

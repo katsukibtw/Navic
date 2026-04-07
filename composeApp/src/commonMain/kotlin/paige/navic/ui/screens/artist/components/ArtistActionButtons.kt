@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +37,7 @@ fun ArtistActionButtons(
 	onDownload: () -> Unit,
 	downloadStatus: DownloadStatus,
 	playEnabled: Boolean,
+	isOnline: Boolean,
 	modifier: Modifier = Modifier
 ) {
 	val ctx = LocalCtx.current
@@ -85,7 +85,8 @@ fun ArtistActionButtons(
 			},
 			shape = ContinuousCapsule,
 			enabled = downloadStatus == DownloadStatus.NOT_DOWNLOADED
-				&& playEnabled,
+				&& playEnabled
+				&& isOnline,
 			contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
 		) {
 			when (downloadStatus) {
