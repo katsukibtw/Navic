@@ -1,4 +1,4 @@
-package paige.navic.ui.screens.track.viewmodels
+package paige.navic.ui.screens.collection.viewmodels
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
@@ -14,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 import paige.navic.data.database.entities.DownloadStatus
 import paige.navic.data.database.mappers.toDomainModel
 import paige.navic.domain.models.DomainSongCollection
-import paige.navic.domain.repositories.TrackRepository
+import paige.navic.domain.repositories.CollectionRepository
 import paige.navic.data.session.SessionManager
 import paige.navic.managers.DownloadManager
 import paige.navic.managers.ConnectivityManager
@@ -24,13 +24,9 @@ import paige.navic.domain.models.DomainSong
 import paige.navic.shared.Logger
 import paige.navic.utils.UiState
 
-/**
- * Viewmodel for the screen that shows an album/playlist and its songs.
- * Not to be confused with SongListViewModel, this just has a dumb name
- */
-class TrackListViewModel(
+class CollectionDetailViewModel(
 	private val collectionId: String,
-	private val repository: TrackRepository,
+	private val repository: CollectionRepository,
 	private val downloadManager: DownloadManager,
 	connectivityManager: ConnectivityManager
 ) : ViewModel() {

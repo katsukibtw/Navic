@@ -5,7 +5,7 @@ package paige.navic.shared
 import androidx.lifecycle.viewModelScope
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.update
-import paige.navic.domain.repositories.TrackRepository
+import paige.navic.domain.repositories.CollectionRepository
 import paige.navic.domain.models.DomainSongCollection
 import paige.navic.data.session.SessionManager
 import paige.navic.domain.models.DomainSong
@@ -53,13 +53,13 @@ import platform.MediaPlayer.MPRemoteCommandHandlerStatusSuccess
 import platform.UIKit.UIImage
 
 class IOSMediaPlayerViewModel(
-	stateRepository: PlayerStateRepository,
-	trackRepository: TrackRepository,
-	downloadManager: DownloadManager,
-	connectivityManager: ConnectivityManager
+    stateRepository: PlayerStateRepository,
+	collectionRepository: CollectionRepository,
+    downloadManager: DownloadManager,
+    connectivityManager: ConnectivityManager
 ) : MediaPlayerViewModel(
 	stateRepository = stateRepository,
-	trackRepository = trackRepository,
+	collectionRepository = collectionRepository,
 	downloadManager = downloadManager,
 	connectivityManager = connectivityManager
 ) {

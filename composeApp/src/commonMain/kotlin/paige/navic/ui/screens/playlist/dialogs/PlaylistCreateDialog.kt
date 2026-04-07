@@ -60,7 +60,7 @@ fun PlaylistCreateDialog(
 						if (backStack.contains(Screen.NowPlaying)) {
 							backStack.remove(Screen.NowPlaying)
 						}
-						backStack.add(Screen.TrackList(event.playlist.id, "playlists"))
+						backStack.add(Screen.CollectionDetail(event.playlist.id, "playlists"))
 					}
 				}
 			}

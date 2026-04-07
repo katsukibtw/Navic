@@ -22,11 +22,7 @@ import paige.navic.domain.models.DomainSong
 import paige.navic.utils.UiState
 import kotlin.time.Clock
 
-/**
- * Repository for the screen that shows an album/playlist and its songs.
- * Not to be confused with SongRepository, this just has a dumb name
- */
-class TrackRepository(
+class CollectionRepository(
 	private val albumDao: AlbumDao,
 	private val playlistDao: PlaylistDao,
 	private val songDao: SongDao,

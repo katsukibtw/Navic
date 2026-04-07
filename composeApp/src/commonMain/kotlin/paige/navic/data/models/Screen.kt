@@ -48,7 +48,7 @@ sealed interface Screen : NavKey {
 	@Immutable @Serializable data object NowPlaying : Screen
 	@Immutable @Serializable data object Lyrics : Screen
 	@Immutable @Serializable data object Queue : Screen
-	@Immutable @Serializable data class TrackList(
+	@Immutable @Serializable data class CollectionDetail(
 		val collectionId: String,
 		val tab: String
 	) : Screen

@@ -90,7 +90,7 @@ import paige.navic.ui.screens.settings.SettingsPlaybackScreen
 import paige.navic.ui.screens.settings.SettingsScreen
 import paige.navic.ui.screens.song.SongListScreen
 import paige.navic.ui.screens.song.SongDetailScreen
-import paige.navic.ui.screens.track.TrackListScreen
+import paige.navic.ui.screens.collection.CollectionDetailScreen
 import paige.navic.ui.theme.NavicTheme
 import paige.navic.utils.BottomBarScrollManager
 import paige.navic.utils.LocalBottomBarScrollManager
@@ -259,8 +259,8 @@ private fun entryProvider(
 		entry<Screen.Queue>(metadata = BottomSheetSceneStrategy.bottomSheet(isTransparent = true)) {
 			QueueScreen()
 		}
-		entry<Screen.TrackList>(metadata = detailPane("root")) { key ->
-			TrackListScreen(key.collectionId, key.tab)
+		entry<Screen.CollectionDetail>(metadata = detailPane("root")) { key ->
+			CollectionDetailScreen(key.collectionId, key.tab)
 		}
 		entry<Screen.SongDetail>(metadata = detailPane("root")) { key ->
 			SongDetailScreen(key.songId)

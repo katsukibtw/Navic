@@ -6,12 +6,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import paige.navic.domain.models.DomainSong
-import paige.navic.domain.repositories.TrackRepository
+import paige.navic.domain.repositories.CollectionRepository
 import paige.navic.utils.UiState
 
 class SongDetailViewModel(
 	songId: String,
-	private val repository: TrackRepository
+	private val repository: CollectionRepository
 ) : ViewModel() {
 	private val _songState = MutableStateFlow<UiState<DomainSong>>(UiState.Loading())
 	val songState = _songState.asStateFlow()

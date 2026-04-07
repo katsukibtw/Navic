@@ -18,7 +18,7 @@ import paige.navic.domain.models.DomainSongCollection
 import kotlinx.serialization.json.decodeFromJsonElement
 import paige.navic.data.models.settings.Settings
 import paige.navic.domain.repositories.PlayerStateRepository
-import paige.navic.domain.repositories.TrackRepository
+import paige.navic.domain.repositories.CollectionRepository
 import paige.navic.managers.ConnectivityManager
 import paige.navic.managers.DownloadManager
 import kotlin.time.Clock
@@ -38,7 +38,7 @@ data class PlayerUiState(
 
 abstract class MediaPlayerViewModel(
 	private val stateRepository: PlayerStateRepository,
-	private val trackRepository: TrackRepository,
+	private val collectionRepository: CollectionRepository,
 	protected val connectivityManager: ConnectivityManager,
 	protected val downloadManager: DownloadManager
 ) : ViewModel() {
@@ -109,7 +109,7 @@ abstract class MediaPlayerViewModel(
 				currentTrack = track.copy(starredAt = Clock.System.now())
 			)
 
-			trackRepository.starTrack(track)
+			collectionRepository.starTrack(track)
 		}
 	}
 
@@ -121,7 +121,7 @@ abstract class MediaPlayerViewModel(
 				currentTrack = track.copy(starredAt = null)
 			)
 
-			trackRepository.unstarTrack(track)
+			collectionRepository.unstarTrack(track)
 		}
 	}
 
