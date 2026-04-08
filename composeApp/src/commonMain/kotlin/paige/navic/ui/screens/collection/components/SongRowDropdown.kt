@@ -75,7 +75,6 @@ fun CollectionDetailScreenSongRowDropdown(
 		onDismissRequest = onDismissRequest
 	) {
 		DropdownItem(
-			containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 			text = { Text(stringResource(Res.string.action_add_to_queue)) },
 			leadingIcon = { Icon(Icons.Outlined.Queue, null) },
 			onClick = {
@@ -84,7 +83,6 @@ fun CollectionDetailScreenSongRowDropdown(
 			},
 		)
 		DropdownItem(
-			containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 			text = { Text(stringResource(Res.string.action_share)) },
 			leadingIcon = { Icon(Icons.Outlined.Share, null) },
 			onClick = {
@@ -95,7 +93,6 @@ fun CollectionDetailScreenSongRowDropdown(
 		val starred =
 			(starredState as? UiState.Success)?.data
 		DropdownItem(
-			containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 			text = {
 				Text(
 					stringResource(
@@ -125,7 +122,6 @@ fun CollectionDetailScreenSongRowDropdown(
 		when (downloadStatus) {
 			DownloadStatus.DOWNLOADING -> {
 				DropdownItem(
-					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 					text = { Text(stringResource(Res.string.action_cancel_download)) },
 					leadingIcon = { Icon(Icons.Outlined.Close, null) },
 					onClick = {
@@ -136,7 +132,6 @@ fun CollectionDetailScreenSongRowDropdown(
 			}
 			DownloadStatus.DOWNLOADED -> {
 				DropdownItem(
-					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 					text = { Text(stringResource(Res.string.action_delete_download)) },
 					leadingIcon = { Icon(Icons.Outlined.Delete, null) },
 					onClick = {
@@ -147,7 +142,6 @@ fun CollectionDetailScreenSongRowDropdown(
 			}
 			DownloadStatus.FAILED -> {
 				DropdownItem(
-					containerColor = MaterialTheme.colorScheme.errorContainer,
 					text = {
 						Column {
 							Text(
@@ -170,7 +164,6 @@ fun CollectionDetailScreenSongRowDropdown(
 			}
 			else -> {
 				DropdownItem(
-					containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 					text = { Text(stringResource(Res.string.action_download)) },
 					leadingIcon = { Icon(Icons.Outlined.Download, null) },
 					onClick = {
@@ -183,7 +176,6 @@ fun CollectionDetailScreenSongRowDropdown(
 		}
 
 		DropdownItem(
-			containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 			text = { Text(stringResource(Res.string.action_track_info)) },
 			leadingIcon = { Icon(Icons.Outlined.Info, null) },
 			onClick = {
@@ -192,7 +184,6 @@ fun CollectionDetailScreenSongRowDropdown(
 			},
 		)
 		DropdownItem(
-			containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 			text = {
 				Text(
 					stringResource(
@@ -215,7 +206,6 @@ fun CollectionDetailScreenSongRowDropdown(
 		)
 		if (collection !is DomainAlbum) {
 			DropdownItem(
-				containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
 				text = { Text(stringResource(Res.string.action_remove_from_playlist)) },
 				leadingIcon = {
 					Icon(
