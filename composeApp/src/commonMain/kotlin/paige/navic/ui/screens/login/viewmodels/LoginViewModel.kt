@@ -101,10 +101,10 @@ class LoginViewModel(
 	}
 
 	fun logout() {
+		_loginState.value = LoginState.Idle
+		SessionManager.logout()
 		viewModelScope.launch {
 			repository.removeEverything()
-			SessionManager.logout()
-			_loginState.value = LoginState.Idle
 		}
 	}
 }
