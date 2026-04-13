@@ -1,4 +1,4 @@
-import androidx.room.gradle.RoomExtension
+import androidx.room3.gradle.RoomExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension
 import io.github.composegears.valkyrie.gradle.ValkyrieExtension
@@ -14,7 +14,7 @@ plugins {
 	alias(libs.plugins.aboutLibraries)
 	alias(libs.plugins.valkyrie)
 	alias(libs.plugins.ksp)
-	alias(libs.plugins.androidx.room)
+	alias(libs.plugins.androidx.room3)
 }
 
 // remove material 2
@@ -178,7 +178,7 @@ extensions.configure<RoomExtension> {
 }
 
 dependencies {
-	"kspAndroid"(libs.androidx.room.compiler)
-	"kspIosSimulatorArm64"(libs.androidx.room.compiler)
-	"kspIosArm64"(libs.androidx.room.compiler)
+	"kspAndroid"(libs.androidx.room3.compiler)
+	"kspIosSimulatorArm64"(libs.androidx.room3.compiler)
+	"kspIosArm64"(libs.androidx.room3.compiler)
 }

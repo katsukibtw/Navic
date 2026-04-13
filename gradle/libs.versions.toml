@@ -13,7 +13,7 @@ kotlin = "2.3.20"
 androidx-activity = "1.13.0"
 androidx-lifecycle = "2.10.0"
 androidx-datastore = "1.2.1"
-androidx-room = "2.8.4"
+androidx-room3 = "3.0.0-alpha03"
 androidx-sqlite = "2.6.2"
 androidx-navigation3 = "1.1.0-rc01"
 androidx-media3 = "1.10.0"
@@ -56,8 +56,8 @@ androidx-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecy
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
 androidx-animation-graphics = { group = "androidx.compose.animation", name = "animation-graphics", version = "1.10.6" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "androidx-room" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "androidx-room" }
+androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "androidx-room3" }
+androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "androidx-room3" }
 androidx-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "androidx-navigation3" }
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "androidx-media3" }
 androidx-media3-session = { module = "androidx.media3:media3-session", version.ref = "androidx-media3" }
@@ -108,7 +108,7 @@ ktor-android = ["ktor-client-okhttp"]
 cmpThirdParty = ["capsule", "wavySlider", "kmpalette-core", "kmpalette-network", "materialKolor", "composePipette", "multiplatformSettings", "aboutLibraries-compose", "aboutLibraries-core"]
 androidx-android = ["androidx-activity-compose", "androidx-datastore-preferences", "androidx-animation-graphics"]
 androidx-lifecycle = ["androidx-lifecycle-viewmodel", "androidx-lifecycle-runtime"]
-room = ["androidx-room-runtime", "androidx-sqlite-bundled"]
+room = ["androidx-room3-runtime", "androidx-sqlite-bundled"]
 koin = ["koin-core", "koin-compose", "koin-compose-viewmodel"]
 
 [plugins]
@@ -121,4 +121,4 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 valkyrie = { id = "io.github.composegears.valkyrie", version = "0.4.0" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-androidx-room = { id = "androidx.room", version.ref = "androidx-room" }
+androidx-room3 = { id = "androidx.room3", version.ref = "androidx-room3" }
