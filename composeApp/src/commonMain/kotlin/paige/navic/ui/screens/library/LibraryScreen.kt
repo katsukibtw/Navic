@@ -23,6 +23,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import paige.navic.domain.models.DomainAlbumListType
+import paige.navic.domain.models.DomainSongCollection
+import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.components.common.ErrorSnackbar
 import paige.navic.ui.components.dialogs.DeletionDialog
 import paige.navic.ui.components.dialogs.DeletionEndpoint
@@ -73,6 +75,8 @@ fun LibraryScreen() {
 	var playlistDeletionId by rememberSaveable { mutableStateOf<String?>(null) }
 	var playlistCreateDialogShown by rememberSaveable { mutableStateOf(false) }
 
+	val player = koinViewModel<MediaPlayerViewModel>()
+
 	val isOnline by albumsViewModel.isOnline.collectAsStateWithLifecycle()
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -118,6 +122,7 @@ fun LibraryScreen() {
 				onSelectAlbum = { albumsViewModel.selectAlbum(it) },
 				onClearAlbumSelection = { albumsViewModel.clearSelection() },
 				onStarSelectedAlbum = { albumsViewModel.starAlbum(it) },
+				onAddAlbumToQueue = { player.addToQueue(selectedAlbum as DomainSongCollection)},
 
 				artistsState = artistsState,
 				selectedArtist = selectedArtist,
@@ -131,6 +136,7 @@ fun LibraryScreen() {
 				onSelectPlaylist = { playlistsViewModel.selectPlaylist(it) },
 				onClearPlaylistSelection = { playlistsViewModel.clearSelection() },
 				onDeletePlaylist = { playlistDeletionId = it },
+				onAddPlaylistToQueue = { player.addToQueue(selectedPlaylist as DomainSongCollection)},
 
 				genresState = genresState
 			)
