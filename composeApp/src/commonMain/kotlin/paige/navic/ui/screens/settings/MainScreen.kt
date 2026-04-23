@@ -37,9 +37,12 @@ import navic.composeapp.generated.resources.title_developer
 import navic.composeapp.generated.resources.title_now_playing
 import navic.composeapp.generated.resources.title_playback
 import navic.composeapp.generated.resources.title_settings
+import navic.composeapp.generated.resources.option_auto_offline_without_wifi
+import navic.composeapp.generated.resources.subtitle_automatic_offline
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalNavStack
+import paige.navic.LocalCtx
 import paige.navic.data.models.Screen
 import paige.navic.data.models.settings.Settings
 import paige.navic.icons.Icons
@@ -54,11 +57,14 @@ import paige.navic.icons.outlined.Note
 import paige.navic.ui.components.common.Form
 import paige.navic.ui.components.common.FormRow
 import paige.navic.ui.components.layouts.NestedTopBar
+import paige.navic.ui.screens.settings.components.SettingSwitchRow
 import paige.navic.ui.theme.defaultFont
 import paige.navic.utils.fadeFromTop
 
 @Composable
 fun SettingsScreen() {
+	val ctx = LocalCtx.current
+
 	Scaffold(
 		topBar = { NestedTopBar({ Text(stringResource(Res.string.title_settings)) }) }
 	) { innerPadding ->
@@ -120,6 +126,16 @@ fun SettingsScreen() {
 					title = Res.string.title_about,
 					subtitle = Res.string.subtitle_about
 				)
+			}
+			if (!listOf("ipados", "ios").contains(ctx.name.lowercase())) {
+				Form {
+					SettingSwitchRow(
+						title = { Text(stringResource(Res.string.option_auto_offline_without_wifi)) },
+						subtitle = { Text(stringResource(Res.string.subtitle_automatic_offline)) },
+						value = Settings.shared.autoOfflineWithoutWiFI,
+						onSetValue = { Settings.shared.autoOfflineWithoutWiFI = it }
+					)
+				}
 			}
 		}
 	}

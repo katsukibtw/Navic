@@ -70,6 +70,8 @@ class Settings(
 	// sync related settings
 	var lastFullSyncTime by preference(0L)
 
+	var autoOfflineWithoutWiFI by preference(false)
+
 	companion object {
 		val shared = Settings(KmpSettings())
 	}
