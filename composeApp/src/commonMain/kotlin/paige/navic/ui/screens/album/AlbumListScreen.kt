@@ -116,7 +116,7 @@ fun AlbumListScreen(
 					state = albumsState,
 					starred = starred,
 					selectedAlbum = selectedAlbum,
-					onAddToQueue = { player.addToQueue(selectedAlbum as DomainSongCollection) },
+					onAddToQueue = { if (selectedAlbum != null) player.addToQueue(selectedAlbum as DomainSongCollection) },
 					onUpdateSelection = { viewModel.selectAlbum(it) },
 					onClearSelection = { viewModel.clearSelection() },
 					onSetShareId = { newShareId ->

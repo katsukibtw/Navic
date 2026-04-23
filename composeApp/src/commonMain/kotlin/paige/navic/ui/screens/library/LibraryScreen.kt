@@ -122,7 +122,7 @@ fun LibraryScreen() {
 				onSelectAlbum = { albumsViewModel.selectAlbum(it) },
 				onClearAlbumSelection = { albumsViewModel.clearSelection() },
 				onStarSelectedAlbum = { albumsViewModel.starAlbum(it) },
-				onAddAlbumToQueue = { player.addToQueue(selectedAlbum as DomainSongCollection)},
+				onAddAlbumToQueue = { if (selectedAlbum != null) player.addToQueue(selectedAlbum as DomainSongCollection)},
 
 				artistsState = artistsState,
 				selectedArtist = selectedArtist,
@@ -136,7 +136,7 @@ fun LibraryScreen() {
 				onSelectPlaylist = { playlistsViewModel.selectPlaylist(it) },
 				onClearPlaylistSelection = { playlistsViewModel.clearSelection() },
 				onDeletePlaylist = { playlistDeletionId = it },
-				onAddPlaylistToQueue = { player.addToQueue(selectedPlaylist as DomainSongCollection)},
+				onAddPlaylistToQueue = { if (selectedPlaylist != null) player.addToQueue(selectedPlaylist as DomainSongCollection)},
 
 				genresState = genresState
 			)
