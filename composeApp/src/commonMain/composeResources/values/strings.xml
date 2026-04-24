@@ -11,6 +11,8 @@
 	<string name="title_bottom_app_bar">Bottom Bar</string>
 	<string name="title_playback">Playback</string>
 	<string name="title_data_storage">Data &amp; Storage</string>
+	<string name="title_connection">Connection</string>
+	<string name="title_offline_mode">Offline mode</string>
 	<string name="title_sync_control">Synchronization Control</string>
 	<string name="title_cache_management">Cache &amp; Storage Management</string>
 	<string name="title_danger_zone">Danger Zone</string>
@@ -53,6 +55,7 @@
 	<string name="subtitle_bottom_app_bar">Customise the bottom bar &amp; mini player</string>
 	<string name="subtitle_playback">Audio behaviour, scrobbling, lyrics</string>
 	<string name="subtitle_data_storage">Manage sync, network usage, and cache</string>
+	<string name="subtitle_connection">Offline mode, server connection settings</string>
 	<string name="subtitle_trigger_sync">Forces a full library pull immediately</string>
 	<string name="subtitle_pending_actions">%1$d items waiting for network</string>
 	<string name="subtitle_developer">Debugging, testing</string>

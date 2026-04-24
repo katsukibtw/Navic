@@ -26,6 +26,7 @@ import navic.composeapp.generated.resources.subtitle_about
 import navic.composeapp.generated.resources.subtitle_appearance
 import navic.composeapp.generated.resources.subtitle_bottom_app_bar
 import navic.composeapp.generated.resources.subtitle_data_storage
+import navic.composeapp.generated.resources.subtitle_connection
 import navic.composeapp.generated.resources.subtitle_developer
 import navic.composeapp.generated.resources.subtitle_now_playing
 import navic.composeapp.generated.resources.subtitle_playback
@@ -33,18 +34,14 @@ import navic.composeapp.generated.resources.title_about
 import navic.composeapp.generated.resources.title_appearance
 import navic.composeapp.generated.resources.title_bottom_app_bar
 import navic.composeapp.generated.resources.title_data_storage
+import navic.composeapp.generated.resources.title_connection
 import navic.composeapp.generated.resources.title_developer
 import navic.composeapp.generated.resources.title_now_playing
 import navic.composeapp.generated.resources.title_playback
 import navic.composeapp.generated.resources.title_settings
-import navic.composeapp.generated.resources.option_manual_offline
-import navic.composeapp.generated.resources.subtitle_manual_offline
-import navic.composeapp.generated.resources.option_auto_offline
-import navic.composeapp.generated.resources.subtitle_auto_offline
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalNavStack
-import paige.navic.LocalCtx
 import paige.navic.data.models.Screen
 import paige.navic.data.models.settings.Settings
 import paige.navic.icons.Icons
@@ -56,6 +53,7 @@ import paige.navic.icons.outlined.ChevronForward
 import paige.navic.icons.outlined.Code
 import paige.navic.icons.outlined.DataTable
 import paige.navic.icons.outlined.Note
+import paige.navic.icons.outlined.Offline
 import paige.navic.ui.components.common.Form
 import paige.navic.ui.components.common.FormRow
 import paige.navic.ui.components.layouts.NestedTopBar
@@ -65,8 +63,6 @@ import paige.navic.utils.fadeFromTop
 
 @Composable
 fun SettingsScreen() {
-	val ctx = LocalCtx.current
-
 	Scaffold(
 		topBar = { NestedTopBar({ Text(stringResource(Res.string.title_settings)) }) }
 	) { innerPadding ->
@@ -114,6 +110,13 @@ fun SettingsScreen() {
 					subtitle = Res.string.subtitle_data_storage
 				)
 				PageRow(
+					destination = Screen.Settings.Connection,
+					icon = Icons.Outlined.Offline,
+					iconSize = 24.dp,
+					title = Res.string.title_connection,
+					subtitle = Res.string.subtitle_connection
+				)
+				PageRow(
 					destination = Screen.Settings.Developer,
 					icon = Icons.Outlined.Code,
 					iconSize = 24.dp,
@@ -128,22 +131,6 @@ fun SettingsScreen() {
 					title = Res.string.title_about,
 					subtitle = Res.string.subtitle_about
 				)
-			}
-			Form {
-				SettingSwitchRow(
-					title = { Text(stringResource(Res.string.option_manual_offline)) },
-					subtitle = { Text(stringResource(Res.string.subtitle_manual_offline)) },
-					value = Settings.shared.manualOffline,
-					onSetValue = { Settings.shared.manualOffline = it }
-				)
-				if (!listOf("ipados", "ios").contains(ctx.name.lowercase())) {
-					SettingSwitchRow(
-						title = { Text(stringResource(Res.string.option_auto_offline)) },
-						subtitle = { Text(stringResource(Res.string.subtitle_auto_offline)) },
-						value = Settings.shared.autoOffline,
-						onSetValue = { Settings.shared.autoOffline = it }
-					)
-				}
 			}
 		}
 	}
