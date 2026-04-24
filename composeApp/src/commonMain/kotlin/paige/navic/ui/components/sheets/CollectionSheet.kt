@@ -30,6 +30,7 @@ import navic.composeapp.generated.resources.action_add_all_to_playlist
 import navic.composeapp.generated.resources.action_cancel_download
 import navic.composeapp.generated.resources.action_delete
 import navic.composeapp.generated.resources.action_download
+import navic.composeapp.generated.resources.action_play_next
 import navic.composeapp.generated.resources.action_remove_star
 import navic.composeapp.generated.resources.action_share
 import navic.composeapp.generated.resources.action_star
@@ -52,6 +53,7 @@ import paige.navic.icons.outlined.PlaylistRemove
 import paige.navic.icons.outlined.Share
 import paige.navic.icons.outlined.Star
 import paige.navic.icons.outlined.Queue
+import paige.navic.icons.outlined.QueuePlayNext
 import paige.navic.ui.components.common.CoverArt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -65,6 +67,7 @@ fun CollectionSheet(
 	onCancelDownloadAll: (() -> Unit)? = null,
 	downloadStatus: DownloadStatus? = null,
 	onShare: (() -> Unit)? = null,
+	onPlayNext: (() -> Unit)? = null,
 	onAddToQueue: (() -> Unit)? = null,
 	onAddAllToPlaylist: (() -> Unit)? = null,
 	onViewOnLastFm: ((String) -> Unit)? = null,
@@ -146,6 +149,19 @@ fun CollectionSheet(
 				leadingContent = { Icon(Icons.Outlined.Share, null) },
 				onClick = {
 					onShare()
+					onDismissRequest()
+				},
+				colors = colors,
+				contentPadding = contentPadding
+			)
+		}
+
+		if (onPlayNext != null) {
+			ListItem(
+				content = { Text(stringResource(Res.string.action_play_next)) },
+				leadingContent = { Icon(Icons.Outlined.QueuePlayNext, null) },
+				onClick = {
+					onPlayNext()
 					onDismissRequest()
 				},
 				colors = colors,

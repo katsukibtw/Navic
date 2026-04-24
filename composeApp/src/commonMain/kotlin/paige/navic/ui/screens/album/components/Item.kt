@@ -23,6 +23,7 @@ fun AlbumListScreenItem(
 	onDeselect: () -> Unit,
 	onSetStarred: (starred: Boolean) -> Unit,
 	onSetShareId: (String) -> Unit,
+	onPlayNext: () -> Unit,
 	onAddToQueue: () -> Unit,
 	isOnline: Boolean
 ) {
@@ -50,6 +51,7 @@ fun AlbumListScreenItem(
 				collection = album,
 				isOnline = isOnline,
 				onShare = { onSetShareId(album.id) },
+				onPlayNext = onPlayNext,
 				onAddToQueue = onAddToQueue,
 				starred = starred,
 				onSetStarred = onSetStarred

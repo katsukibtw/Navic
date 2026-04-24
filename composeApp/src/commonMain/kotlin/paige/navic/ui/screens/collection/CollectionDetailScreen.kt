@@ -103,6 +103,7 @@ fun CollectionDetailScreen(
 				isOnline = isOnline,
 				onDownloadAll = { viewModel.downloadAll() },
 				onCancelDownloadAll = { viewModel.cancelDownloadAll() },
+				onPlayNext = { if (collection != null) player.playNext(collection) },
 				onAddToQueue = { if (collection != null) player.addToQueue(collection) },
 				downloadStatus = downloadStatus
 			)
@@ -187,6 +188,7 @@ fun CollectionDetailScreen(
 							onDownload = { viewModel.downloadSong(song) },
 							onCancelDownload = { viewModel.cancelDownload(song.id) },
 							onDeleteDownload = { viewModel.deleteDownload(song.id) },
+							onPlayNext = { player.playNextSingle(song) },
 							onAddToQueue = { player.addToQueueSingle(song) },
 							isOnline = isOnline
 						)
