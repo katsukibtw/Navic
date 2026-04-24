@@ -168,6 +168,9 @@ fun CollectionDetailScreen(
 							onLongClick = {
 								viewModel.selectSong(song)
 							},
+							onPlayNext = { 
+								player.playNextSingle(song) 
+							},
 							onAddToQueue = {
 								player.addToQueueSingle(song)
 							},
