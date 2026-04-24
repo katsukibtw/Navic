@@ -507,7 +507,7 @@ class AndroidMediaPlayerViewModel(
 			controller?.addMediaItem(_uiState.value.currentIndex + 1, song.toMediaItem())
 			_uiState.update { state ->
 				val newQueue = 
-					if (state.queue == null || state.queue.isEmpty()) 
+					if (state.queue.isEmpty()) 
 						state.queue + song
 					else
 						state.queue.slice(0..state.currentIndex) + song + state.queue.slice(state.currentIndex+1..state.queue.size-1)
@@ -526,7 +526,7 @@ class AndroidMediaPlayerViewModel(
 			controller?.addMediaItems(_uiState.value.currentIndex + 1, items)
 			_uiState.update { state ->
 				val newQueue = 
-					if (state.queue == null || state.queue.isEmpty()) 
+					if (state.queue.isEmpty()) 
 						state.queue + collection.songs
 					else
 						state.queue.slice(0..state.currentIndex) + collection.songs + state.queue.slice(state.currentIndex+1..state.queue.size-1)
