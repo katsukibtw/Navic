@@ -47,7 +47,7 @@ actual class ConnectivityManager(
 		connectivityManager.registerNetworkCallback(request, callback)
 
 		val isCurrentlyOnline = connectivityManager.activeNetwork?.let { network ->
-			if (Settings.shared.autoOfflineWithoutWiFI)
+			if (Settings.shared.autoOffline)
 				connectivityManager.getNetworkCapabilities(network)
 					?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
 				else connectivityManager.getNetworkCapabilities(network)

@@ -132,8 +132,8 @@ fun SettingsScreen() {
 					SettingSwitchRow(
 						title = { Text(stringResource(Res.string.option_auto_offline_without_wifi)) },
 						subtitle = { Text(stringResource(Res.string.subtitle_automatic_offline)) },
-						value = Settings.shared.autoOfflineWithoutWiFI,
-						onSetValue = { Settings.shared.autoOfflineWithoutWiFI = it }
+						value = Settings.shared.autoOffline,
+						onSetValue = { Settings.shared.autoOffline = it }
 					)
 				}
 			}

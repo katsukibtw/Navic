@@ -190,7 +190,7 @@
     <string name="option_sort_descending">Нисходящий</string>
     <string name="option_enable_scrobbling">История прослушивания</string>
     <string name="option_choose_theme">Тема приложения</string>
-	<string name="option_auto_offline_without_wifi">Автоматический оффлайн без Wi-Fi</string>
+	<string name="option_auto_offline_without_wifi">Автоматический оффлайн</string>
     <string name="option_replay_gain">Повторное воспроизведение</string>
     <string name="option_gapless_playback">Воспроизведение без пропусков</string>
     <string name="option_audio_offload">Оффлайн аудио</string>
