@@ -46,13 +46,15 @@ actual class ConnectivityManager(
 
 		connectivityManager.registerNetworkCallback(request, callback)
 
-		val isCurrentlyOnline = connectivityManager.activeNetwork?.let { network ->
-			if (Settings.shared.autoOffline)
-				connectivityManager.getNetworkCapabilities(network)
-					?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-				else connectivityManager.getNetworkCapabilities(network)
-					?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-		} ?: false
+		val isCurrentlyOnline = 
+			if (Settings.shared.manualOffline) false
+			else connectivityManager.activeNetwork?.let { network ->
+				if (Settings.shared.autoOffline)
+					connectivityManager.getNetworkCapabilities(network)
+						?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+					else connectivityManager.getNetworkCapabilities(network)
+						?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+			} ?: false
 
 		trySend(isCurrentlyOnline)
 

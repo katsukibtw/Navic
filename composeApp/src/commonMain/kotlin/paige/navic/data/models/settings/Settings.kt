@@ -70,6 +70,7 @@ class Settings(
 	// sync related settings
 	var lastFullSyncTime by preference(0L)
 
+	var manualOffline by preference(false)
 	var autoOffline by preference(false)
 
 	companion object {

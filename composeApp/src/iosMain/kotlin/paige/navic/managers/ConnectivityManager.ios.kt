@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import paige.navic.data.session.SessionManager
+import paige.navic.data.models.settings.Settings
 import platform.Network.nw_path_get_status
 import platform.Network.nw_path_monitor_cancel
 import platform.Network.nw_path_monitor_create
@@ -32,7 +33,12 @@ actual class ConnectivityManager(
 		val monitor = nw_path_monitor_create()
 		nw_path_monitor_set_update_handler(monitor) { path ->
 			val status = nw_path_get_status(path)
-			trySend(status == nw_path_status_satisfied)
+			trySend(
+				if (Settings.shared.manualOffline) 
+					false 
+				else 
+					status == nw_path_status_satisfied
+			)
 		}
 		nw_path_monitor_set_queue(monitor, dispatch_get_main_queue())
 		nw_path_monitor_start(monitor)

@@ -37,8 +37,10 @@ import navic.composeapp.generated.resources.title_developer
 import navic.composeapp.generated.resources.title_now_playing
 import navic.composeapp.generated.resources.title_playback
 import navic.composeapp.generated.resources.title_settings
-import navic.composeapp.generated.resources.option_auto_offline_without_wifi
-import navic.composeapp.generated.resources.subtitle_automatic_offline
+import navic.composeapp.generated.resources.option_manual_offline
+import navic.composeapp.generated.resources.subtitle_manual_offline
+import navic.composeapp.generated.resources.option_auto_offline
+import navic.composeapp.generated.resources.subtitle_auto_offline
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import paige.navic.LocalNavStack
@@ -127,11 +129,17 @@ fun SettingsScreen() {
 					subtitle = Res.string.subtitle_about
 				)
 			}
-			if (!listOf("ipados", "ios").contains(ctx.name.lowercase())) {
-				Form {
+			Form {
+				SettingSwitchRow(
+					title = { Text(stringResource(Res.string.option_manual_offline)) },
+					subtitle = { Text(stringResource(Res.string.subtitle_manual_offline)) },
+					value = Settings.shared.manualOffline,
+					onSetValue = { Settings.shared.manualOffline = it }
+				)
+				if (!listOf("ipados", "ios").contains(ctx.name.lowercase())) {
 					SettingSwitchRow(
-						title = { Text(stringResource(Res.string.option_auto_offline_without_wifi)) },
-						subtitle = { Text(stringResource(Res.string.subtitle_automatic_offline)) },
+						title = { Text(stringResource(Res.string.option_auto_offline)) },
+						subtitle = { Text(stringResource(Res.string.subtitle_auto_offline)) },
 						value = Settings.shared.autoOffline,
 						onSetValue = { Settings.shared.autoOffline = it }
 					)

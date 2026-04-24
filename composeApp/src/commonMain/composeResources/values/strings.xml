@@ -63,7 +63,8 @@
 	<string name="subtitle_audio_offload">Experimental. Requires application restart. May conflict with gapless playback on some devices</string>
 	<string name="subtitle_now_playing_background_style">Choose static if you have performance issues</string>
 	<string name="subtitle_check_for_updates">It is recommended to leave this on, as some updates provide important bug fixes</string>
-	<string name="subtitle_automatic_offline">Automatically switch into offline mode when not connected to any Wi-Fi network</string>
+	<string name="subtitle_manual_offline">Switch into offline mode until this setting is turned off. Requires app restart</string>
+	<string name="subtitle_auto_offline">Automatically switch into offline mode when not connected to any Wi-Fi network</string>
 
 	<string name="option_now_playing_background_style">Background style</string>
 	<string name="option_now_playing_background_style_static">Static</string>
@@ -110,7 +111,8 @@
 	<string name="option_playlist_songs">Songs</string>
 	<string name="option_enable_scrobbling">Enable scrobbling</string>
 	<string name="option_choose_theme">Application theme</string>
-	<string name="option_auto_offline_without_wifi">Auto offline</string>
+	<string name="option_manual_offline">Manual offline</string>
+	<string name="option_auto_offline">Auto offline</string>
 	<string name="option_replay_gain">ReplayGain</string>
 	<string name="option_gapless_playback">Gapless playback</string>
 	<string name="option_audio_offload">Audio offload</string>
