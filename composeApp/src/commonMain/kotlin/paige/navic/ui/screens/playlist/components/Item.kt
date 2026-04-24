@@ -2,8 +2,13 @@ package paige.navic.ui.screens.playlist.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.count_songs
@@ -14,6 +19,7 @@ import paige.navic.data.models.Screen
 import paige.navic.domain.models.DomainPlaylist
 import paige.navic.ui.components.layouts.ArtGridItem
 import paige.navic.ui.components.sheets.CollectionSheet
+import paige.navic.ui.screens.playlist.dialogs.PlaylistUpdateDialog
 
 @Composable
 fun PlaylistListScreenItem(
@@ -31,6 +37,9 @@ fun PlaylistListScreenItem(
 	val ctx = LocalCtx.current
 	val backStack = LocalNavStack.current
 	val scope = rememberCoroutineScope()
+
+	var playlistDialogShown by rememberSaveable { mutableStateOf(false) }
+
 	Box(modifier) {
 		ArtGridItem(
 			onClick = {
@@ -65,7 +74,16 @@ fun PlaylistListScreenItem(
 				onShare = { onSetShareId(playlist.id) },
 				onDelete = { onSetDeletionId(playlist.id) },
 				onPlayNext = onPlayNext,
-				onAddToQueue = onAddToQueue
+				onAddToQueue = onAddToQueue,
+				onAddAllToPlaylist = { playlistDialogShown = true },
+			)
+		}
+
+		if (playlistDialogShown) {
+			@Suppress("AssignedValueIsNeverRead")
+			PlaylistUpdateDialog(
+				songs = playlist.songs.orEmpty().toPersistentList(),
+				onDismissRequest = { playlistDialogShown = false }
 			)
 		}
 	}
