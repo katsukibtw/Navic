@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import paige.navic.data.session.SessionManager
 import android.net.ConnectivityManager as AndroidConnectivityManager
 import paige.navic.data.models.settings.Settings
+import paige.navic.data.models.settings.enums.OfflineMode
 
 @OptIn(ExperimentalCoroutinesApi::class)
 actual class ConnectivityManager(
@@ -47,9 +48,9 @@ actual class ConnectivityManager(
 		connectivityManager.registerNetworkCallback(request, callback)
 
 		val isCurrentlyOnline = 
-			if (Settings.shared.manualOffline) false
+			if (Settings.shared.offlineMode == OfflineMode.Forced) false
 			else connectivityManager.activeNetwork?.let { network ->
-				if (Settings.shared.autoOffline)
+				if (Settings.shared.offlineMode == OfflineMode.NoWiFi)
 					connectivityManager.getNetworkCapabilities(network)
 						?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
 					else connectivityManager.getNetworkCapabilities(network)

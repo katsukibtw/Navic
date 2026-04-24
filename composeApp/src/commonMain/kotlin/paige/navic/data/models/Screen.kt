@@ -123,9 +123,6 @@ sealed interface Screen : NavKey {
 		data object DataStorage : Settings
 		@Immutable
 		@Serializable
-		data object Connection : Settings
-		@Immutable
-		@Serializable
 		data object Fonts : Settings
 		@Immutable
 		@Serializable

@@ -172,8 +172,6 @@
     <string name="subtitle_gapless_playback">Экспериментальная функция. Требуется перезапуск приложения. На некоторых устройствах может возникать конфликт при выносе аудиообработки</string>
     <string name="subtitle_audio_offload">Экспериментальная функция. Требуется перезапуск приложения. Может конфликтовать с режимом воспроизведения без пропусков</string>
     <string name="subtitle_now_playing_background_style">Выберите статический, если у вас есть проблемы с производительностью</string>
-    <string name="subtitle_manual_offline">Перейти в режим оффлайн до отключения этой настройки. Требует перезапуска приложения</string>
-    <string name="subtitle_auto_offline">Автоматически переходить в режим оффлайн без подключения к Wi-Fi</string>
     <string name="option_now_playing_background_style">Стиль фона</string>
     <string name="option_now_playing_background_style_static">Статический</string>
     <string name="option_now_playing_background_style_dynamic">Динамичный</string>
@@ -191,8 +189,6 @@
     <string name="option_sort_descending">Нисходящий</string>
     <string name="option_enable_scrobbling">История прослушивания</string>
     <string name="option_choose_theme">Тема приложения</string>
-	<string name="option_manual_offline">Ручной оффлайн</string>
-	<string name="option_auto_offline">Автоматический оффлайн</string>
     <string name="option_replay_gain">Повторное воспроизведение</string>
     <string name="option_gapless_playback">Воспроизведение без пропусков</string>
     <string name="option_audio_offload">Оффлайн аудио</string>
@@ -267,8 +263,6 @@
     <string name="theme_spotify">В центре внимания</string>
     <string name="info_track_replay_gain_effective">Текущее значение ReplayGain</string>
     <string name="title_data_storage">Данные и хранилище</string>
-	<string name="title_connection">Подключение</string>
-	<string name="title_offline_mode">Режим оффлайн</string>
     <string name="title_sync_control">Управление синхронизацией</string>
     <string name="title_cache_management">Управление кэшем</string>
     <string name="title_danger_zone">Опасная зона</string>
@@ -277,7 +271,6 @@
     <string name="title_bulk_download">Загрузка всех альбомов</string>
     <string name="title_confirm">Подтвердить</string>
     <string name="subtitle_data_storage">Синхронизация, использование сети и кэш</string>
-	<string name="subtitle_connection">Оффлайн, параметры подключения к серверу</string>
     <string name="subtitle_trigger_sync">Принудительная полная синхронизация библиотеки</string>
     <string name="subtitle_pending_actions">%1$d элемент(-ов) ожидают подключения к сети</string>
     <string name="option_lyrics_keep_alive">Не выключать экран при просмотре текстов песен</string>

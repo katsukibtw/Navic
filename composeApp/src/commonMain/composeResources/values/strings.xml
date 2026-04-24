@@ -11,8 +11,6 @@
 	<string name="title_bottom_app_bar">Bottom Bar</string>
 	<string name="title_playback">Playback</string>
 	<string name="title_data_storage">Data &amp; Storage</string>
-	<string name="title_connection">Connection</string>
-	<string name="title_offline_mode">Offline mode</string>
 	<string name="title_sync_control">Synchronization Control</string>
 	<string name="title_cache_management">Cache &amp; Storage Management</string>
 	<string name="title_danger_zone">Danger Zone</string>
@@ -49,13 +47,13 @@
 	<string name="title_confirm">Confirm</string>
 	<string name="title_update">Update available</string>
 	<string name="title_changelog">Release notes</string>
+	<string name="title_network">Network</string>
 
 	<string name="subtitle_appearance">Themes, colours, layout</string>
 	<string name="subtitle_now_playing">Customise the fullscreen now playing view</string>
 	<string name="subtitle_bottom_app_bar">Customise the bottom bar &amp; mini player</string>
 	<string name="subtitle_playback">Audio behaviour, scrobbling, lyrics</string>
 	<string name="subtitle_data_storage">Manage sync, network usage, and cache</string>
-	<string name="subtitle_connection">Offline mode, server connection settings</string>
 	<string name="subtitle_trigger_sync">Forces a full library pull immediately</string>
 	<string name="subtitle_pending_actions">%1$d items waiting for network</string>
 	<string name="subtitle_developer">Debugging, testing</string>
@@ -66,8 +64,7 @@
 	<string name="subtitle_audio_offload">Experimental. Requires application restart. May conflict with gapless playback on some devices</string>
 	<string name="subtitle_now_playing_background_style">Choose static if you have performance issues</string>
 	<string name="subtitle_check_for_updates">It is recommended to leave this on, as some updates provide important bug fixes</string>
-	<string name="subtitle_manual_offline">Switch into offline mode until this setting is turned off. Requires app restart</string>
-	<string name="subtitle_auto_offline">Automatically switch into offline mode when not connected to any Wi-Fi network</string>
+	<string name="subtitle_offline_mode">Dictates when the app should go in an offline mode. Requires application restart</string>
 
 	<string name="option_now_playing_background_style">Background style</string>
 	<string name="option_now_playing_background_style_static">Static</string>
@@ -114,8 +111,6 @@
 	<string name="option_playlist_songs">Songs</string>
 	<string name="option_enable_scrobbling">Enable scrobbling</string>
 	<string name="option_choose_theme">Application theme</string>
-	<string name="option_manual_offline">Manual offline</string>
-	<string name="option_auto_offline">Auto offline</string>
 	<string name="option_replay_gain">ReplayGain</string>
 	<string name="option_gapless_playback">Gapless playback</string>
 	<string name="option_audio_offload">Audio offload</string>
@@ -129,6 +124,10 @@
 	<string name="option_radio_name">Name</string>
 	<string name="option_radio_stream_url">Stream URL</string>
 	<string name="option_radio_homepage_url">Homepage URL</string>
+	<string name="option_offline_mode">Offline mode</string>
+	<string name="option_offline_mode_auto">Auto</string>
+	<string name="option_offline_mode_forced">Forced</string>
+	<string name="option_offline_mode_no_wifi">No Wi-Fi</string>
 
 	<string name="info_status_idle">Idle</string>
 	<string name="info_status_calculating">Calculating...</string>
