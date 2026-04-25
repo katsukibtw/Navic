@@ -160,27 +160,27 @@ fun CollectionDetailScreen(
 							.sortedBy { it.discNumber }
 							.groupBy { it.discNumber }
 					val multipleDiscs = groupedCollection.keys.count() > 1
-					groupedCollection.forEach { key, value -> 
-						if (key != null && multipleDiscs) {
+					groupedCollection.forEach {
+						if (it.key != null && multipleDiscs) {
 							item {
 								Text(
 									text = stringResource(
 										Res.string.title_disc_number,
-										key
+										it.key as Int
 									),
 									style = MaterialTheme.typography.titleMediumEmphasized,
 									fontWeight = FontWeight(600),
-									modifier = Modifier.heightIn(min = 32.dp).padding(top = if (key == 1) 0.dp else 12.dp, bottom = 4.dp)
+									modifier = Modifier.heightIn(min = 32.dp).padding(top = if (it.key == 1) 0.dp else 12.dp, bottom = 4.dp)
 								)
 							}
 						}
-						itemsIndexed(value) { index, song ->
+						itemsIndexed(it.value) { index, song ->
 							val download = allDownloads.find { it.songId == song.id }
 							Box {
 								CollectionDetailScreenSongRow(
 									song = song,
 									index = index,
-									count = value.count(),
+									count = it.value.count(),
 									onClick = {
 										if (playerState.currentSong?.id != song.id) {
 											player.clearQueue()
