@@ -3,6 +3,7 @@ package paige.navic.ui.screens.collection
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -10,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -19,9 +21,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.info_no_songs
+import navic.composeapp.generated.resources.title_disc_number
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -149,52 +154,123 @@ fun CollectionDetailScreen(
 					)
 				}
 
-				itemsIndexed(collection.songs) { index, song ->
-					val download = allDownloads.find { it.songId == song.id }
-					Box {
-						CollectionDetailScreenSongRow(
-							song = song,
-							index = index,
-							count = collection.songs.count(),
-							onClick = {
-								if (playerState.currentSong?.id != song.id) {
-									player.clearQueue()
-									player.addToQueue(collection)
-									player.playAt(index)
-								} else {
-									player.togglePlay()
-								}
-							},
-							onLongClick = {
-								viewModel.selectSong(song)
-							},
-							onPlayNext = { 
-								player.playNextSingle(song) 
-							},
-							onAddToQueue = {
-								player.addToQueueSingle(song)
-							},
-							download = download,
-							isOffline = !isOnline
-						)
-						CollectionDetailScreenSongRowDropdown(
-							expanded = selection == song,
-							onDismissRequest = { viewModel.clearSelection() },
-							onRemoveStar = { viewModel.unstarSelectedSong() },
-							onAddStar = { viewModel.starSelectedSong() },
-							onShare = { shareId = song.id },
-							collection = collection,
-							song = song,
-							onRemoveFromPlaylist = { viewModel.removeFromPlaylist() },
-							starredState = starredState,
-							downloadStatus = download?.status,
-							onDownload = { viewModel.downloadSong(song) },
-							onCancelDownload = { viewModel.cancelDownload(song.id) },
-							onDeleteDownload = { viewModel.deleteDownload(song.id) },
-							onPlayNext = { player.playNextSingle(song) },
-							onAddToQueue = { player.addToQueueSingle(song) },
-							isOnline = isOnline
-						)
+				if (collection is DomainAlbum) {
+					val groupedCollection = 
+						collection.songs
+							.sortedBy { it.discNumber }
+							.groupBy { it.discNumber }
+					val multipleDiscs = groupedCollection.keys.count() > 1
+					groupedCollection.forEach { key, value -> 
+						if (key != null && multipleDiscs) {
+							item {
+								Text(
+									text = stringResource(
+										Res.string.title_disc_number,
+										key
+									),
+									style = MaterialTheme.typography.titleMediumEmphasized,
+									fontWeight = FontWeight(600),
+									modifier = Modifier.heightIn(min = 32.dp).padding(top = 12.dp, bottom = 6.dp)
+								)
+							}
+						}
+						itemsIndexed(value) { index, song ->
+							val download = allDownloads.find { it.songId == song.id }
+							Box {
+								CollectionDetailScreenSongRow(
+									song = song,
+									index = index,
+									count = value.count(),
+									onClick = {
+										if (playerState.currentSong?.id != song.id) {
+											player.clearQueue()
+											player.addToQueue(collection)
+											player.playAt(index)
+										} else {
+											player.togglePlay()
+										}
+									},
+									onLongClick = {
+										viewModel.selectSong(song)
+									},
+									onPlayNext = { 
+										player.playNextSingle(song) 
+									},
+									onAddToQueue = {
+										player.addToQueueSingle(song)
+									},
+									download = download,
+									isOffline = !isOnline
+								)
+								CollectionDetailScreenSongRowDropdown(
+									expanded = selection == song,
+									onDismissRequest = { viewModel.clearSelection() },
+									onRemoveStar = { viewModel.unstarSelectedSong() },
+									onAddStar = { viewModel.starSelectedSong() },
+									onShare = { shareId = song.id },
+									collection = collection,
+									song = song,
+									onRemoveFromPlaylist = { viewModel.removeFromPlaylist() },
+									starredState = starredState,
+									downloadStatus = download?.status,
+									onDownload = { viewModel.downloadSong(song) },
+									onCancelDownload = { viewModel.cancelDownload(song.id) },
+									onDeleteDownload = { viewModel.deleteDownload(song.id) },
+									onPlayNext = { player.playNextSingle(song) },
+									onAddToQueue = { player.addToQueueSingle(song) },
+									isOnline = isOnline
+								)
+							}
+						}
+					}
+				} else {
+					itemsIndexed(collection.songs) { index, song ->
+						val download = allDownloads.find { it.songId == song.id }
+						Box {
+							CollectionDetailScreenSongRow(
+								song = song,
+								index = index,
+								count = collection.songs.count(),
+								onClick = {
+									if (playerState.currentSong?.id != song.id) {
+										player.clearQueue()
+										player.addToQueue(collection)
+										player.playAt(index)
+									} else {
+										player.togglePlay()
+									}
+								},
+								onLongClick = {
+									viewModel.selectSong(song)
+								},
+								onPlayNext = { 
+									player.playNextSingle(song) 
+								},
+								onAddToQueue = {
+									player.addToQueueSingle(song)
+								},
+								download = download,
+								isOffline = !isOnline
+							)
+							CollectionDetailScreenSongRowDropdown(
+								expanded = selection == song,
+								onDismissRequest = { viewModel.clearSelection() },
+								onRemoveStar = { viewModel.unstarSelectedSong() },
+								onAddStar = { viewModel.starSelectedSong() },
+								onShare = { shareId = song.id },
+								collection = collection,
+								song = song,
+								onRemoveFromPlaylist = { viewModel.removeFromPlaylist() },
+								starredState = starredState,
+								downloadStatus = download?.status,
+								onDownload = { viewModel.downloadSong(song) },
+								onCancelDownload = { viewModel.cancelDownload(song.id) },
+								onDeleteDownload = { viewModel.deleteDownload(song.id) },
+								onPlayNext = { player.playNextSingle(song) },
+								onAddToQueue = { player.addToQueueSingle(song) },
+								isOnline = isOnline
+							)
+						}
 					}
 				}
 
