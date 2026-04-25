@@ -170,7 +170,7 @@ fun CollectionDetailScreen(
 									),
 									style = MaterialTheme.typography.titleMediumEmphasized,
 									fontWeight = FontWeight(600),
-									modifier = Modifier.heightIn(min = 32.dp).padding(top = 12.dp, bottom = 6.dp)
+									modifier = Modifier.heightIn(min = 32.dp).padding(top = if (key == 1) 0.dp else 12.dp, bottom = 4.dp)
 								)
 							}
 						}
