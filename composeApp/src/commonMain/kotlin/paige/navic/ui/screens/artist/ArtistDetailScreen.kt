@@ -44,6 +44,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -51,6 +52,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import navic.composeapp.generated.resources.Res
@@ -83,10 +85,12 @@ import paige.navic.ui.components.layouts.ArtCarousel
 import paige.navic.ui.components.layouts.ArtCarouselItem
 import paige.navic.ui.components.layouts.ArtGridItem
 import paige.navic.ui.components.layouts.RootBottomBar
+import paige.navic.ui.components.sheets.CollectionSheet
 import paige.navic.ui.screens.artist.components.ArtistActionButtons
 import paige.navic.ui.screens.artist.components.ArtistDetailScreenHeading
 import paige.navic.ui.screens.artist.components.ArtistDetailScreenTopBar
 import paige.navic.ui.screens.artist.viewmodels.ArtistDetailViewModel
+import paige.navic.ui.screens.playlist.dialogs.PlaylistUpdateDialog
 import paige.navic.ui.screens.share.dialogs.ShareDialog
 import paige.navic.utils.LocalBottomBarScrollManager
 import paige.navic.utils.UiState
@@ -107,6 +111,10 @@ fun ArtistDetailScreen(
 	val playerState by player.uiState.collectAsStateWithLifecycle()
 
 	val selection by viewModel.selectedSong.collectAsState()
+	val starredState by viewModel.starredState.collectAsState()
+
+	val selectedAlbum by viewModel.selectedAlbum.collectAsState()
+	val starredAlbumState by viewModel.starredAlbumState.collectAsState()
 
 	val downloadManager = koinInject<DownloadManager>()
 	val density = LocalDensity.current
@@ -115,7 +123,6 @@ fun ArtistDetailScreen(
 	val artistState by viewModel.artistState.collectAsState()
 	val isOnline by viewModel.isOnline.collectAsState()
 	val allDownloads by viewModel.allDownloads.collectAsState()
-	val starredState by viewModel.starredState.collectAsState()
 	val downloadStatus by viewModel.collectionDownloadStatus()
 		.collectAsState(DownloadStatus.NOT_DOWNLOADED)
 	val scope = rememberCoroutineScope()
@@ -133,6 +140,8 @@ fun ArtistDetailScreen(
 
 	var shareId by remember { mutableStateOf<String?>(null) }
 	var shareExpiry by remember { mutableStateOf<Duration?>(null) }
+
+	var playlistDialogShown by rememberSaveable { mutableStateOf(false) }
 
 	Scaffold(
 		topBar = {
@@ -315,8 +324,27 @@ fun ArtistDetailScreen(
 								state.albums.sortedByDescending { album -> album.playCount }
 									.toImmutableList()
 							) { album ->
-								ArtCarouselItem(album.coverArtId, album.name, null) {
+								val isStarred = (starredAlbumState as? UiState.Success)?.data
+								ArtCarouselItem(
+									coverArtId = album.coverArtId, 
+									title = album.name, 
+									contentDescription = null,
+									onSelect = { viewModel.selectAlbum(album) }
+								) {
 									backStack.add(Screen.CollectionDetail(album.id, "artist"))
+								}
+								if (selectedAlbum == album) {
+									CollectionSheet(
+										onDismissRequest = { viewModel.clearAlbumSelection() },
+										collection = album,
+										starred = if (isStarred == null) false else isStarred,
+										onShare = { shareId = album.id },
+										onPlayNext = { player.playNext(album) },
+										onAddToQueue = { player.addToQueue(album) },
+										onSetStarred = { viewModel.starAlbum(starredAlbumState) },
+										onAddAllToPlaylist = { playlistDialogShown = true },
+										isOnline = isOnline,
+									)
 								}
 							}
 							Text(
@@ -370,6 +398,14 @@ fun ArtistDetailScreen(
 		expiry = shareExpiry,
 		onExpiryChange = { shareExpiry = it }
 	)
+
+	if (playlistDialogShown) {
+		@Suppress("AssignedValueIsNeverRead")
+		PlaylistUpdateDialog(
+			songs = selectedAlbum?.songs.orEmpty().toPersistentList(),
+			onDismissRequest = { playlistDialogShown = false }
+		)
+	}
 }
 
 fun truncateText(text: String, limit: Int): String {

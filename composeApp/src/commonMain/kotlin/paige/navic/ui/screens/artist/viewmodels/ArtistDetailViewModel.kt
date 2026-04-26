@@ -24,6 +24,7 @@ import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainSong
 import paige.navic.domain.repositories.DbRepository
 import paige.navic.domain.repositories.CollectionRepository
+import paige.navic.domain.repositories.AlbumRepository
 import paige.navic.managers.ConnectivityManager
 import paige.navic.managers.DownloadManager
 import paige.navic.shared.Logger
@@ -42,6 +43,7 @@ class ArtistDetailViewModel(
 	private val artistId: String,
 	private val repository: DbRepository,
 	private val collectionRepository: CollectionRepository,
+	private val albumRepository: AlbumRepository,
 	private val artistDao: ArtistDao,
 	private val albumDao: AlbumDao,
 	private val downloadManager: DownloadManager,
@@ -55,6 +57,12 @@ class ArtistDetailViewModel(
 
 	private val _starredState = MutableStateFlow<UiState<Boolean>>(UiState.Success(false))
 	val starredState = _starredState.asStateFlow()
+
+	private val _selectedAlbum = MutableStateFlow<DomainAlbum?>(null)
+	val selectedAlbum: StateFlow<DomainAlbum?> = _selectedAlbum.asStateFlow()
+
+	private val _starredAlbumState = MutableStateFlow<UiState<Boolean>>(UiState.Success(false))
+	val starredAlbumState = _starredAlbumState.asStateFlow()
 
 	val isOnline = connectivityManager.isOnline
 
@@ -144,6 +152,23 @@ class ArtistDetailViewModel(
 		_selectedSong.value = null
 	}
 
+	fun selectAlbum(album: DomainAlbum) {
+		viewModelScope.launch {
+			_selectedAlbum.value = album
+			_starredAlbumState.value = UiState.Loading()
+			try {
+				val isStarred = albumRepository.isAlbumStarred(album)
+				_starredState.value = UiState.Success(isStarred)
+			} catch (e: Exception) {
+				_starredState.value = UiState.Error(e)
+			}
+		}
+	}
+
+	fun clearAlbumSelection() {
+		_selectedAlbum.value = null
+	}
+
 	fun starSelectedSong() {
 		viewModelScope.launch {
 			try {
@@ -160,6 +185,21 @@ class ArtistDetailViewModel(
 				collectionRepository.unstarSong(_selectedSong.value!!)
 			} catch (e: Exception) {
 				Logger.e("CollectionDetailViewModel", "Failed to unstar song", e)
+			}
+		}
+	}
+
+	fun starAlbum(starred: UiState<Boolean>) {
+		viewModelScope.launch {
+			val selection = _selectedAlbum.value ?: return@launch
+			val isStarred = (starredAlbumState as? UiState.Success<Boolean>)?.data
+			runCatching {
+				if (isStarred != null && isStarred) {
+					albumRepository.starAlbum(selection)
+				} else {
+					albumRepository.unstarAlbum(selection)
+				}
+				_starredAlbumState.value = starred
 			}
 		}
 	}
