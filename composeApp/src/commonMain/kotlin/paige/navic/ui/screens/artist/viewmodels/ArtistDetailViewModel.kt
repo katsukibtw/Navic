@@ -8,7 +8,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -22,9 +21,9 @@ import paige.navic.data.database.mappers.toDomainModel
 import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainSong
-import paige.navic.domain.repositories.DbRepository
-import paige.navic.domain.repositories.CollectionRepository
 import paige.navic.domain.repositories.AlbumRepository
+import paige.navic.domain.repositories.DbRepository
+import paige.navic.domain.repositories.SongRepository
 import paige.navic.managers.ConnectivityManager
 import paige.navic.managers.DownloadManager
 import paige.navic.shared.Logger
@@ -42,7 +41,7 @@ data class ArtistState(
 class ArtistDetailViewModel(
 	private val artistId: String,
 	private val repository: DbRepository,
-	private val collectionRepository: CollectionRepository,
+	private val songRepository: SongRepository,
 	private val albumRepository: AlbumRepository,
 	private val artistDao: ArtistDao,
 	private val albumDao: AlbumDao,
@@ -55,14 +54,20 @@ class ArtistDetailViewModel(
 	private val _selectedSong = MutableStateFlow<DomainSong?>(null)
 	val selectedSong = _selectedSong.asStateFlow()
 
-	private val _songStarredState = MutableStateFlow(false)
-	val songStarredState = _songStarredState.asStateFlow()
+	private val _selectedSongIsStarred = MutableStateFlow(false)
+	val selectedSongIsStarred = _selectedSongIsStarred.asStateFlow()
+
+	private val _selectedSongRating = MutableStateFlow(0)
+	val selectedSongRating = _selectedSongRating.asStateFlow()
 
 	private val _selectedAlbum = MutableStateFlow<DomainAlbum?>(null)
 	val selectedAlbum = _selectedAlbum.asStateFlow()
 
-	private val _albumStarredState = MutableStateFlow(false)
-	val albumStarredState = _albumStarredState.asStateFlow()
+	private val _selectedAlbumIsStarred = MutableStateFlow(false)
+	val selectedAlbumIsStarred = _selectedAlbumIsStarred.asStateFlow()
+
+	private val _selectedAlbumRating = MutableStateFlow(0)
+	val selectedAlbumRating = _selectedAlbumRating.asStateFlow()
 
 	val isOnline = connectivityManager.isOnline
 
@@ -138,7 +143,8 @@ class ArtistDetailViewModel(
 	fun selectSong(song: DomainSong) {
 		viewModelScope.launch {
 			_selectedSong.value = song
-			_songStarredState.value = collectionRepository.isSongStarred(song.id)
+			_selectedSongIsStarred.value = songRepository.isSongStarred(song)
+			_selectedSongRating.value = songRepository.getSongRating(song)
 		}
 	}
 
@@ -149,7 +155,18 @@ class ArtistDetailViewModel(
 	fun selectAlbum(album: DomainAlbum) {
 		viewModelScope.launch {
 			_selectedAlbum.value = album
-			_albumStarredState.value = albumRepository.isAlbumStarred(album)
+			_selectedAlbumIsStarred.value = albumRepository.isAlbumStarred(album)
+			_selectedAlbumRating.value = albumRepository.getAlbumRating(album)
+		}
+	}
+
+	fun rateSelectedAlbum(rating: Int) {
+		viewModelScope.launch {
+			val selection = _selectedAlbum.value ?: return@launch
+			runCatching {
+				_selectedAlbumRating.value = rating
+				albumRepository.rateAlbum(selection, rating)
+			}
 		}
 	}
 
@@ -159,20 +176,30 @@ class ArtistDetailViewModel(
 
 	fun starSelectedSong() {
 		viewModelScope.launch {
-			try {
-				collectionRepository.starSong(_selectedSong.value!!)
-			} catch (e: Exception) {
-				Logger.e("CollectionDetailViewModel", "Failed to star song", e)
+			val selection = _selectedSong.value ?: return@launch
+			runCatching {
+				_selectedSongIsStarred.value = true
+				songRepository.starSong(selection)
 			}
 		}
 	}
 
 	fun unstarSelectedSong() {
 		viewModelScope.launch {
-			try {
-				collectionRepository.unstarSong(_selectedSong.value!!)
-			} catch (e: Exception) {
-				Logger.e("CollectionDetailViewModel", "Failed to unstar song", e)
+			val selection = _selectedSong.value ?: return@launch
+			runCatching {
+				_selectedSongIsStarred.value = false
+				songRepository.unstarSong(selection)
+			}
+		}
+	}
+
+	fun rateSelectedSong(rating: Int) {
+		viewModelScope.launch {
+			val selection = _selectedSong.value ?: return@launch
+			runCatching {
+				_selectedSongRating.value = rating
+				songRepository.rateSong(selection, rating)
 			}
 		}
 	}
@@ -186,7 +213,7 @@ class ArtistDetailViewModel(
 				} else {
 					albumRepository.unstarAlbum(selection)
 				}
-				_albumStarredState.value = starred
+				_selectedAlbumIsStarred.value = starred
 			}
 		}
 	}

@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.verticalScroll
@@ -43,8 +42,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -52,8 +51,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_see_all
@@ -74,8 +73,6 @@ import paige.navic.data.database.entities.DownloadStatus
 import paige.navic.data.models.Screen
 import paige.navic.data.models.settings.Settings
 import paige.navic.data.models.settings.enums.BottomBarVisibilityMode
-import paige.navic.domain.models.DomainSong
-import paige.navic.domain.models.DomainSongCollection
 import paige.navic.managers.DownloadManager
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.components.common.ErrorBox
@@ -110,19 +107,21 @@ fun ArtistDetailScreen(
 	val player = koinViewModel<MediaPlayerViewModel>()
 	val playerState by player.uiState.collectAsStateWithLifecycle()
 
-	val selection by viewModel.selectedSong.collectAsState()
-	val songStarredState by viewModel.songStarredState.collectAsState()
+	val selection by viewModel.selectedSong.collectAsStateWithLifecycle()
+	val selectedSongIsStarred by viewModel.selectedSongIsStarred.collectAsStateWithLifecycle()
+	val selectedSongRating by viewModel.selectedSongRating.collectAsStateWithLifecycle()
 
-	val selectedAlbum by viewModel.selectedAlbum.collectAsState()
-	val albumStarredState by viewModel.albumStarredState.collectAsState()
+	val selectedAlbum by viewModel.selectedAlbum.collectAsStateWithLifecycle()
+	val selectedAlbumIsStarred by viewModel.selectedAlbumIsStarred.collectAsStateWithLifecycle()
+	val selectedAlbumRating by viewModel.selectedAlbumRating.collectAsStateWithLifecycle()
 
 	val downloadManager = koinInject<DownloadManager>()
 	val density = LocalDensity.current
 	val backStack = LocalNavStack.current
 	val layoutDirection = LocalLayoutDirection.current
-	val artistState by viewModel.artistState.collectAsState()
-	val isOnline by viewModel.isOnline.collectAsState()
-	val allDownloads by viewModel.allDownloads.collectAsState()
+	val artistState by viewModel.artistState.collectAsStateWithLifecycle()
+	val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+	val allDownloads by viewModel.allDownloads.collectAsStateWithLifecycle()
 	val downloadStatus by viewModel.collectionDownloadStatus()
 		.collectAsState(DownloadStatus.NOT_DOWNLOADED)
 	val scope = rememberCoroutineScope()
@@ -304,7 +303,7 @@ fun ArtistDetailScreen(
 													viewModel.selectSong(song)
 												},
 												onDismissRequest = { viewModel.clearSelection() },
-												starredState = songStarredState,
+												starredState = selectedSongIsStarred,
 												onAddStar = { viewModel.starSelectedSong() },
 												onRemoveStar = { viewModel.unstarSelectedSong() },
 												download = download,
@@ -314,7 +313,9 @@ fun ArtistDetailScreen(
 												onPlayNext = { player.playNextSingle(song) },
 												onAddToQueue = { player.addToQueueSingle(song) },
 												onShare = { shareId = song.id },
-												isOnline = isOnline
+												isOnline = isOnline,
+												rating = selectedSongRating,
+												onSetRating = { viewModel.rateSelectedSong(it) }
 											)
 										}
 									}
@@ -336,13 +337,15 @@ fun ArtistDetailScreen(
 									CollectionSheet(
 										onDismissRequest = { viewModel.clearAlbumSelection() },
 										collection = album,
-										starred = albumStarredState,
+										starred = selectedAlbumIsStarred,
 										onShare = { shareId = album.id },
 										onPlayNext = { player.playNext(album) },
 										onAddToQueue = { player.addToQueue(album) },
-										onSetStarred = { viewModel.starAlbum(!albumStarredState) },
+										onSetStarred = { viewModel.starAlbum(!selectedAlbumIsStarred) },
 										onAddAllToPlaylist = { playlistDialogShown = true },
 										isOnline = isOnline,
+										rating = selectedAlbumRating,
+										onSetRating = { viewModel.rateSelectedAlbum(it) }
 									)
 								}
 							}

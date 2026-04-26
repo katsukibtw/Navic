@@ -2,11 +2,11 @@ package paige.navic.ui.components.common
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -22,13 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kyant.capsule.ContinuousRoundedRectangle
+import kotlinx.collections.immutable.persistentListOf
 import navic.composeapp.generated.resources.Res
-import navic.composeapp.generated.resources.info_unknown_album
-import navic.composeapp.generated.resources.info_unknown_year
 import navic.composeapp.generated.resources.info_download_failed
 import navic.composeapp.generated.resources.info_downloaded
 import navic.composeapp.generated.resources.info_not_available_offline
-import kotlinx.collections.immutable.persistentListOf
+import navic.composeapp.generated.resources.info_unknown_album
+import navic.composeapp.generated.resources.info_unknown_year
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import paige.navic.LocalNavStack
@@ -42,11 +42,9 @@ import paige.navic.icons.outlined.Check
 import paige.navic.icons.outlined.DownloadOff
 import paige.navic.icons.outlined.Offline
 import paige.navic.shared.MediaPlayerViewModel
-import paige.navic.ui.components.common.MarqueeText
 import paige.navic.ui.components.dialogs.QueueDuplicateDialog
 import paige.navic.ui.components.sheets.SongSheet
 import paige.navic.ui.screens.playlist.dialogs.PlaylistUpdateDialog
-import paige.navic.utils.UiState
 
 @Composable
 fun SongRow(
@@ -67,6 +65,8 @@ fun SongRow(
 	onDeleteDownload: () -> Unit,
 	onPlayNext: () -> Unit,
 	onAddToQueue: () -> Unit,
+	rating: Int,
+	onSetRating: (Int) -> Unit
 ) {
 	val player = koinViewModel<MediaPlayerViewModel>()
 	val playerState by player.uiState.collectAsStateWithLifecycle()
@@ -167,6 +167,7 @@ fun SongRow(
 			onDismissRequest = onDismissRequest,
 			song = song,
 			starred = starredState,
+			rating = rating,
 			onSetStarred = { starred ->
 				if (starred) onAddStar() else onRemoveStar()
 			},
@@ -205,7 +206,8 @@ fun SongRow(
 			isOnline = isOnline,
 			onDownload = onDownload,
 			onCancelDownload = onCancelDownload,
-			onDeleteDownload = onDeleteDownload
+			onDeleteDownload = onDeleteDownload,
+			onSetRating = onSetRating
 		)
 	}
 
