@@ -101,7 +101,7 @@ fun ArtistDetailScreenHeading(
 							}
 						},
 						style = MaterialTheme.typography.bodySmall,
-						color = Color.LightGray,
+						color = MaterialTheme.colorScheme.onSurfaceVariant,
 						modifier = Modifier.widthIn(max = 500.dp)
 					)
 				}
@@ -109,7 +109,6 @@ fun ArtistDetailScreenHeading(
 					text = artistName,
 					style = MaterialTheme.typography.displaySmall.copy(
 						fontWeight = FontWeight.Bold,
-						color = Color.White
 					),
 					modifier = Modifier
 						.fillMaxWidth()
