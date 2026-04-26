@@ -2,13 +2,19 @@ package paige.navic.ui.screens.collection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,6 +41,7 @@ import paige.navic.data.models.settings.Settings
 import paige.navic.data.models.settings.enums.BottomBarVisibilityMode
 import paige.navic.domain.models.DomainAlbum
 import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Album
 import paige.navic.icons.outlined.Note
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.components.common.ContentUnavailable
@@ -155,7 +162,7 @@ fun CollectionDetailScreen(
 				}
 
 				if (collection is DomainAlbum) {
-					val groupedCollection = 
+					val groupedCollection =
 						collection.songs
 							.sortedBy { it.discNumber }
 							.groupBy { it.discNumber }
@@ -163,15 +170,33 @@ fun CollectionDetailScreen(
 					groupedCollection.forEach {
 						if (it.key != null && multipleDiscs) {
 							item {
-								Text(
-									text = stringResource(
-										Res.string.title_disc_number,
-										it.key as Int
-									),
-									style = MaterialTheme.typography.titleMediumEmphasized,
-									fontWeight = FontWeight(600),
-									modifier = Modifier.heightIn(min = 32.dp).padding(top = if (it.key == 1) 0.dp else 12.dp, bottom = 4.dp)
-								)
+								Row(
+									modifier = Modifier
+										.fillMaxWidth()
+										.padding(horizontal = 16.dp)
+										.padding(top = if (it.key == 1) 0.dp else 12.dp, bottom = 4.dp)
+										.heightIn(min = 32.dp),
+									verticalAlignment = Alignment.CenterVertically
+								) {
+									Icon(
+										imageVector = Icons.Outlined.Album,
+										contentDescription = null,
+										tint = MaterialTheme.colorScheme.onSurfaceVariant,
+										modifier = Modifier.size(20.dp)
+									)
+
+									Spacer(modifier = Modifier.width(8.dp))
+
+									Text(
+										text = stringResource(
+											Res.string.title_disc_number,
+											it.key as Int
+										),
+										style = MaterialTheme.typography.titleMediumEmphasized,
+										fontWeight = FontWeight(600),
+										color = MaterialTheme.colorScheme.onSurfaceVariant
+									)
+								}
 							}
 						}
 						itemsIndexed(it.value) { index, song ->
