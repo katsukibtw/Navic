@@ -108,7 +108,6 @@ internal class NowPlayingScene<T : Any>(
 		NavicTheme(colorSchemeForCurrentSong()) {
 			val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 			val scope = rememberCoroutineScope()
-			val ctx = LocalCtx.current
 			val backStack = LocalNavStack.current
 
 			val currentScreen = backStack.lastOrNull()
@@ -175,7 +174,6 @@ internal class NowPlayingScene<T : Any>(
 						) {
 							TopBarButton(
 								onClick = {
-									ctx.clickSound()
 									scope
 										.launch { sheetState.hide() }
 										.invokeOnCompletion {
@@ -223,7 +221,6 @@ internal class NowPlayingScene<T : Any>(
 									contentDescription = stringResource(Res.string.action_lyrics),
 									isStartRounded = true
 								) {
-									ctx.clickSound()
 									if (!backStack.contains(Screen.Lyrics)) backStack.add(Screen.Lyrics)
 								}
 								SheetTopButton(
@@ -231,7 +228,6 @@ internal class NowPlayingScene<T : Any>(
 									contentDescription = stringResource(Res.string.action_queue),
 									isEndRounded = true
 								) {
-									ctx.clickSound()
 									if (!backStack.contains(Screen.Queue)) backStack.add(Screen.Queue)
 								}
 							}

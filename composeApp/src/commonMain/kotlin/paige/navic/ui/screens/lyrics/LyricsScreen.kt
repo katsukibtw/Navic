@@ -62,6 +62,7 @@ import navic.composeapp.generated.resources.info_no_lyrics
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import paige.navic.LocalCtx
 import paige.navic.data.models.settings.Settings
 import paige.navic.domain.models.DomainSong
 import paige.navic.icons.Icons
@@ -88,6 +89,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun LyricsScreen(
 	song: DomainSong?
 ) {
+	val ctx = LocalCtx.current
 	val viewModel = koinViewModel<LyricsScreenViewModel>(
 		key = song?.id,
 		parameters = { parametersOf(song) }
@@ -382,6 +384,7 @@ fun LyricsScreen(
 						shape = MaterialTheme.shapes.medium
 					),
 				onClick = {
+					ctx.clickSound()
 					if (isSelectionMode) {
 						isSelectionMode = false
 						selectedIndices.clear()
@@ -412,7 +415,10 @@ fun LyricsScreen(
 							color = MaterialTheme.colorScheme.onPrimary,
 							shape = MaterialTheme.shapes.medium
 						),
-					onClick = { showShareSheet = true }
+					onClick = {
+						ctx.clickSound()
+						showShareSheet = true
+					}
 				) {
 					Icon(
 						imageVector = Icons.Outlined.Check,
