@@ -86,7 +86,8 @@ fun CollectionDetailScreen(
 	var shareExpiry by remember { mutableStateOf<Duration?>(null) }
 
 	val albumInfoState by viewModel.albumInfoState.collectAsState()
-	val starredState by viewModel.starredState.collectAsState()
+	val selectedSongIsStarred by viewModel.selectedSongIsStarred.collectAsState()
+	val selectedSongRating by viewModel.selectedSongRating.collectAsState()
 	val otherAlbums by viewModel.otherAlbums.collectAsState()
 	val allDownloads by viewModel.allDownloads.collectAsState()
 	val downloadStatus by viewModel.collectionDownloadStatus()
@@ -236,14 +237,16 @@ fun CollectionDetailScreen(
 									collection = collection,
 									song = song,
 									onRemoveFromPlaylist = { viewModel.removeFromPlaylist() },
-									starredState = starredState,
+									starred = selectedSongIsStarred,
 									downloadStatus = download?.status,
 									onDownload = { viewModel.downloadSong(song) },
 									onCancelDownload = { viewModel.cancelDownload(song.id) },
 									onDeleteDownload = { viewModel.deleteDownload(song.id) },
 									onPlayNext = { player.playNextSingle(song) },
 									onAddToQueue = { player.addToQueueSingle(song) },
-									isOnline = isOnline
+									isOnline = isOnline,
+									rating = selectedSongRating,
+									onSetRating = { viewModel.rateSelectedSong(it) }
 								)
 							}
 						}
@@ -286,14 +289,16 @@ fun CollectionDetailScreen(
 								collection = collection,
 								song = song,
 								onRemoveFromPlaylist = { viewModel.removeFromPlaylist() },
-								starredState = starredState,
+								starred = selectedSongIsStarred,
 								downloadStatus = download?.status,
 								onDownload = { viewModel.downloadSong(song) },
 								onCancelDownload = { viewModel.cancelDownload(song.id) },
 								onDeleteDownload = { viewModel.deleteDownload(song.id) },
 								onPlayNext = { player.playNextSingle(song) },
 								onAddToQueue = { player.addToQueueSingle(song) },
-								isOnline = isOnline
+								isOnline = isOnline,
+								rating = selectedSongRating,
+								onSetRating = { viewModel.rateSelectedSong(it) }
 							)
 						}
 					}
