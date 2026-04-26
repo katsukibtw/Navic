@@ -20,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kyant.capsule.ContinuousRoundedRectangle
 import navic.composeapp.generated.resources.Res
@@ -43,6 +42,7 @@ import paige.navic.icons.outlined.Check
 import paige.navic.icons.outlined.DownloadOff
 import paige.navic.icons.outlined.Offline
 import paige.navic.shared.MediaPlayerViewModel
+import paige.navic.ui.components.common.MarqueeText
 import paige.navic.ui.components.dialogs.QueueDuplicateDialog
 import paige.navic.ui.components.sheets.SongSheet
 import paige.navic.ui.screens.playlist.dialogs.PlaylistUpdateDialog
@@ -60,7 +60,7 @@ fun SongRow(
 	onRemoveStar: () -> Unit,
 	onAddStar: () -> Unit,
 	onShare: () -> Unit,
-	starredState: UiState<Boolean>,
+	starredState: Boolean,
 	download: DownloadEntity? = null,
 	onDownload: () -> Unit,
 	onCancelDownload: () -> Unit,
@@ -82,7 +82,7 @@ fun SongRow(
 
 	ListItem(
 		modifier = modifier
-			.width((LocalConfiguration.current.screenWidthDp * 0.875f).dp)
+			.width(350.dp)
 			.combinedClickable (
 				onClick = onClick,
 				onLongClick = onLongClick
@@ -91,15 +91,14 @@ fun SongRow(
 			Text(song.title)
 		},
 		supportingContent = {
-			Text(
-				buildString {
+			MarqueeText(
+				text = buildString {
 					append(song.albumTitle ?: stringResource(Res.string.info_unknown_album))
 					append(" • ")
 					append(song.artistName)
 					append(" • ")
 					append(song.year ?: stringResource(Res.string.info_unknown_year))
-				},
-				maxLines = 2
+				}
 			)
 		},
 		leadingContent = {
@@ -167,7 +166,7 @@ fun SongRow(
 		SongSheet(
 			onDismissRequest = onDismissRequest,
 			song = song,
-			starred = (starredState as? UiState.Success)?.data,
+			starred = starredState,
 			onSetStarred = { starred ->
 				if (starred) onAddStar() else onRemoveStar()
 			},

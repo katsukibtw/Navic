@@ -53,16 +53,16 @@ class ArtistDetailViewModel(
 	val artistState = _artistState.asStateFlow()
 
 	private val _selectedSong = MutableStateFlow<DomainSong?>(null)
-	val selectedSong: StateFlow<DomainSong?> = _selectedSong.asStateFlow()
+	val selectedSong = _selectedSong.asStateFlow()
 
-	private val _starredState = MutableStateFlow<UiState<Boolean>>(UiState.Success(false))
-	val starredState = _starredState.asStateFlow()
+	private val _songStarredState = MutableStateFlow(false)
+	val songStarredState = _songStarredState.asStateFlow()
 
 	private val _selectedAlbum = MutableStateFlow<DomainAlbum?>(null)
-	val selectedAlbum: StateFlow<DomainAlbum?> = _selectedAlbum.asStateFlow()
+	val selectedAlbum = _selectedAlbum.asStateFlow()
 
-	private val _starredAlbumState = MutableStateFlow<UiState<Boolean>>(UiState.Success(false))
-	val starredAlbumState = _starredAlbumState.asStateFlow()
+	private val _albumStarredState = MutableStateFlow(false)
+	val albumStarredState = _albumStarredState.asStateFlow()
 
 	val isOnline = connectivityManager.isOnline
 
@@ -138,13 +138,7 @@ class ArtistDetailViewModel(
 	fun selectSong(song: DomainSong) {
 		viewModelScope.launch {
 			_selectedSong.value = song
-			_starredState.value = UiState.Loading()
-			try {
-				val isStarred = collectionRepository.isSongStarred(song.id)
-				_starredState.value = UiState.Success(isStarred)
-			} catch (e: Exception) {
-				_starredState.value = UiState.Error(e)
-			}
+			_songStarredState.value = collectionRepository.isSongStarred(song.id)
 		}
 	}
 
@@ -155,13 +149,7 @@ class ArtistDetailViewModel(
 	fun selectAlbum(album: DomainAlbum) {
 		viewModelScope.launch {
 			_selectedAlbum.value = album
-			_starredAlbumState.value = UiState.Loading()
-			try {
-				val isStarred = albumRepository.isAlbumStarred(album)
-				_starredState.value = UiState.Success(isStarred)
-			} catch (e: Exception) {
-				_starredState.value = UiState.Error(e)
-			}
+			_albumStarredState.value = albumRepository.isAlbumStarred(album)
 		}
 	}
 
@@ -189,17 +177,16 @@ class ArtistDetailViewModel(
 		}
 	}
 
-	fun starAlbum(starred: UiState<Boolean>) {
+	fun starAlbum(starred: Boolean) {
 		viewModelScope.launch {
 			val selection = _selectedAlbum.value ?: return@launch
-			val isStarred = (starredAlbumState as? UiState.Success<Boolean>)?.data
 			runCatching {
-				if (isStarred != null && isStarred) {
+				if (starred) {
 					albumRepository.starAlbum(selection)
 				} else {
 					albumRepository.unstarAlbum(selection)
 				}
-				_starredAlbumState.value = starred
+				_albumStarredState.value = starred
 			}
 		}
 	}

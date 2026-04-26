@@ -111,10 +111,10 @@ fun ArtistDetailScreen(
 	val playerState by player.uiState.collectAsStateWithLifecycle()
 
 	val selection by viewModel.selectedSong.collectAsState()
-	val starredState by viewModel.starredState.collectAsState()
+	val songStarredState by viewModel.songStarredState.collectAsState()
 
 	val selectedAlbum by viewModel.selectedAlbum.collectAsState()
-	val starredAlbumState by viewModel.starredAlbumState.collectAsState()
+	val albumStarredState by viewModel.albumStarredState.collectAsState()
 
 	val downloadManager = koinInject<DownloadManager>()
 	val density = LocalDensity.current
@@ -304,7 +304,7 @@ fun ArtistDetailScreen(
 													viewModel.selectSong(song)
 												},
 												onDismissRequest = { viewModel.clearSelection() },
-												starredState = starredState,
+												starredState = songStarredState,
 												onAddStar = { viewModel.starSelectedSong() },
 												onRemoveStar = { viewModel.unstarSelectedSong() },
 												download = download,
@@ -324,7 +324,6 @@ fun ArtistDetailScreen(
 								state.albums.sortedByDescending { album -> album.playCount }
 									.toImmutableList()
 							) { album ->
-								val isStarred = (starredAlbumState as? UiState.Success)?.data
 								ArtCarouselItem(
 									coverArtId = album.coverArtId, 
 									title = album.name, 
@@ -337,11 +336,11 @@ fun ArtistDetailScreen(
 									CollectionSheet(
 										onDismissRequest = { viewModel.clearAlbumSelection() },
 										collection = album,
-										starred = if (isStarred == null) false else isStarred,
+										starred = albumStarredState,
 										onShare = { shareId = album.id },
 										onPlayNext = { player.playNext(album) },
 										onAddToQueue = { player.addToQueue(album) },
-										onSetStarred = { viewModel.starAlbum(starredAlbumState) },
+										onSetStarred = { viewModel.starAlbum(!albumStarredState) },
 										onAddAllToPlaylist = { playlistDialogShown = true },
 										isOnline = isOnline,
 									)
