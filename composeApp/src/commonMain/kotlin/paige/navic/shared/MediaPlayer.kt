@@ -1,11 +1,8 @@
 package paige.navic.shared
 
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,12 +11,11 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
-import paige.navic.data.models.settings.Settings
 import paige.navic.domain.models.DomainRadio
 import paige.navic.domain.models.DomainSong
 import paige.navic.domain.models.DomainSongCollection
-import paige.navic.domain.repositories.CollectionRepository
 import paige.navic.domain.repositories.PlayerStateRepository
+import paige.navic.domain.repositories.SongRepository
 import paige.navic.managers.ConnectivityManager
 import paige.navic.managers.DownloadManager
 import kotlin.time.Clock
@@ -39,7 +35,7 @@ data class PlayerUiState(
 
 abstract class MediaPlayerViewModel(
 	private val stateRepository: PlayerStateRepository,
-	private val collectionRepository: CollectionRepository,
+	private val songRepository: SongRepository,
 	protected val connectivityManager: ConnectivityManager,
 	protected val downloadManager: DownloadManager
 ) : ViewModel() {
@@ -95,7 +91,7 @@ abstract class MediaPlayerViewModel(
 				currentSong = song.copy(starredAt = Clock.System.now())
 			)
 
-			collectionRepository.starSong(song)
+			songRepository.starSong(song)
 		}
 	}
 
@@ -107,7 +103,7 @@ abstract class MediaPlayerViewModel(
 				currentSong = song.copy(starredAt = null)
 			)
 
-			collectionRepository.unstarSong(song)
+			songRepository.unstarSong(song)
 		}
 	}
 
