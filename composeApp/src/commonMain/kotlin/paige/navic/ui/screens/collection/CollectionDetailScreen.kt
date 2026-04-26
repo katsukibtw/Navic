@@ -86,8 +86,8 @@ fun CollectionDetailScreen(
 	var shareExpiry by remember { mutableStateOf<Duration?>(null) }
 
 	val albumInfoState by viewModel.albumInfoState.collectAsState()
-	val selectedSongIsStarred by viewModel.selectedSongIsStarred.collectAsState()
-	val selectedSongRating by viewModel.selectedSongRating.collectAsState()
+	val selectedSongIsStarred by viewModel.selectedSongIsStarred.collectAsStateWithLifecycle()
+	val selectedSongRating by viewModel.selectedSongRating.collectAsStateWithLifecycle()
 	val otherAlbums by viewModel.otherAlbums.collectAsState()
 	val allDownloads by viewModel.allDownloads.collectAsState()
 	val downloadStatus by viewModel.collectionDownloadStatus()
