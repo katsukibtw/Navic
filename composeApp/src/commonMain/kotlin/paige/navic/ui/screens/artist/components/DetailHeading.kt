@@ -1,6 +1,5 @@
 package paige.navic.ui.screens.artist.components
 
-import android.content.res.Resources
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +51,6 @@ fun ArtistDetailScreenHeading(
 ) {
 	val layoutDirection = LocalLayoutDirection.current
 	val progress by animateFloatAsState(if (scrolled) 0f else 1f)
-	val scale = Resources.getSystem().getDisplayMetrics().density
 	BoxWithConstraints(
 		modifier = Modifier.fillMaxWidth()
 	) {
