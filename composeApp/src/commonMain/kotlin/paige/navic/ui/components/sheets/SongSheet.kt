@@ -149,9 +149,8 @@ fun SongSheet(
 				rating = rating,
 				setRating = onSetRating
 			)
+			Spacer(Modifier.height(14.dp))
 		}
-
-		Spacer(Modifier.height(14.dp))
 
 		HorizontalDivider(Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
 
