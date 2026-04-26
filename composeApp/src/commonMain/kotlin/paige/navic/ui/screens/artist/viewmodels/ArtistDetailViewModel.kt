@@ -7,10 +7,13 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import paige.navic.data.database.dao.AlbumDao
 import paige.navic.data.database.dao.ArtistDao
@@ -20,6 +23,7 @@ import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainSong
 import paige.navic.domain.repositories.DbRepository
+import paige.navic.domain.repositories.CollectionRepository
 import paige.navic.managers.ConnectivityManager
 import paige.navic.managers.DownloadManager
 import paige.navic.shared.Logger
@@ -37,6 +41,7 @@ data class ArtistState(
 class ArtistDetailViewModel(
 	private val artistId: String,
 	private val repository: DbRepository,
+	private val collectionRepository: CollectionRepository,
 	private val artistDao: ArtistDao,
 	private val albumDao: AlbumDao,
 	private val downloadManager: DownloadManager,
@@ -45,7 +50,20 @@ class ArtistDetailViewModel(
 	private val _artistState = MutableStateFlow<UiState<ArtistState>>(UiState.Loading())
 	val artistState = _artistState.asStateFlow()
 
+	private val _selectedSong = MutableStateFlow<DomainSong?>(null)
+	val selectedSong: StateFlow<DomainSong?> = _selectedSong.asStateFlow()
+
+	private val _starredState = MutableStateFlow<UiState<Boolean>>(UiState.Success(false))
+	val starredState = _starredState.asStateFlow()
+
 	val isOnline = connectivityManager.isOnline
+
+	val allDownloads = downloadManager.allDownloads
+		.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.Lazily,
+			initialValue = emptyList()
+		)
 
 	val scrollState = ScrollState(initial = 0)
 
@@ -109,6 +127,43 @@ class ArtistDetailViewModel(
 		}
 	}
 
+	fun selectSong(song: DomainSong) {
+		viewModelScope.launch {
+			_selectedSong.value = song
+			_starredState.value = UiState.Loading()
+			try {
+				val isStarred = collectionRepository.isSongStarred(song.id)
+				_starredState.value = UiState.Success(isStarred)
+			} catch (e: Exception) {
+				_starredState.value = UiState.Error(e)
+			}
+		}
+	}
+
+	fun clearSelection() {
+		_selectedSong.value = null
+	}
+
+	fun starSelectedSong() {
+		viewModelScope.launch {
+			try {
+				collectionRepository.starSong(_selectedSong.value!!)
+			} catch (e: Exception) {
+				Logger.e("CollectionDetailViewModel", "Failed to star song", e)
+			}
+		}
+	}
+
+	fun unstarSelectedSong() {
+		viewModelScope.launch {
+			try {
+				collectionRepository.unstarSong(_selectedSong.value!!)
+			} catch (e: Exception) {
+				Logger.e("CollectionDetailViewModel", "Failed to unstar song", e)
+			}
+		}
+	}
+
 	fun playArtistAlbums(player: MediaPlayerViewModel) {
 		(_artistState.value as? UiState.Success)?.data?.let { state ->
 			player.clearQueue()
@@ -117,6 +172,18 @@ class ArtistDetailViewModel(
 			}
 			player.togglePlay()
 		}
+	}
+
+	fun downloadSong(song: DomainSong) {
+		downloadManager.downloadSong(song)
+	}
+
+	fun cancelDownload(songId: String) {
+		downloadManager.cancelDownload(songId)
+	}
+
+	fun deleteDownload(songId: String) {
+		downloadManager.deleteDownload(songId)
 	}
 
 	@OptIn(ExperimentalCoroutinesApi::class)

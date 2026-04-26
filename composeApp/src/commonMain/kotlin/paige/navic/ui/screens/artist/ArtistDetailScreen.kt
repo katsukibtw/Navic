@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -49,6 +50,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import navic.composeapp.generated.resources.Res
@@ -70,6 +72,8 @@ import paige.navic.data.database.entities.DownloadStatus
 import paige.navic.data.models.Screen
 import paige.navic.data.models.settings.Settings
 import paige.navic.data.models.settings.enums.BottomBarVisibilityMode
+import paige.navic.domain.models.DomainSong
+import paige.navic.domain.models.DomainSongCollection
 import paige.navic.managers.DownloadManager
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.components.common.ErrorBox
@@ -83,9 +87,11 @@ import paige.navic.ui.screens.artist.components.ArtistActionButtons
 import paige.navic.ui.screens.artist.components.ArtistDetailScreenHeading
 import paige.navic.ui.screens.artist.components.ArtistDetailScreenTopBar
 import paige.navic.ui.screens.artist.viewmodels.ArtistDetailViewModel
+import paige.navic.ui.screens.share.dialogs.ShareDialog
 import paige.navic.utils.LocalBottomBarScrollManager
 import paige.navic.utils.UiState
 import paige.navic.utils.fadeFromTop
+import kotlin.time.Duration
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -98,12 +104,18 @@ fun ArtistDetailScreen(
 	)
 	val ctx = LocalCtx.current
 	val player = koinViewModel<MediaPlayerViewModel>()
+	val playerState by player.uiState.collectAsStateWithLifecycle()
+
+	val selection by viewModel.selectedSong.collectAsState()
+
 	val downloadManager = koinInject<DownloadManager>()
 	val density = LocalDensity.current
 	val backStack = LocalNavStack.current
 	val layoutDirection = LocalLayoutDirection.current
 	val artistState by viewModel.artistState.collectAsState()
 	val isOnline by viewModel.isOnline.collectAsState()
+	val allDownloads by viewModel.allDownloads.collectAsState()
+	val starredState by viewModel.starredState.collectAsState()
 	val downloadStatus by viewModel.collectionDownloadStatus()
 		.collectAsState(DownloadStatus.NOT_DOWNLOADED)
 	val scope = rememberCoroutineScope()
@@ -118,6 +130,9 @@ fun ArtistDetailScreen(
 	}
 
 	var showDownloadDialog by remember { mutableStateOf(false) }
+
+	var shareId by remember { mutableStateOf<String?>(null) }
+	var shareExpiry by remember { mutableStateOf<Duration?>(null) }
 
 	Scaffold(
 		topBar = {
@@ -261,10 +276,36 @@ fun ArtistDetailScreen(
 										rows = GridCells.Fixed(3),
 										modifier = Modifier.fillMaxWidth().height(250.dp)
 									) {
-										items(songs) { song ->
+										itemsIndexed(songs) { index, song ->
+											val download = allDownloads.find { it.songId == song.id }
 											SongRow(
 												modifier = Modifier.weight(1f),
-												song = song
+												song = song,
+												selected = selection == song,
+												onClick = {
+													if (playerState.currentSong?.id != song.id) {
+														player.clearQueue()
+														songs.forEach { player.addToQueueSingle(it) }
+														player.playAt(index)
+													} else {
+														player.togglePlay()
+													}
+												},
+												onLongClick = {
+													viewModel.selectSong(song)
+												},
+												onDismissRequest = { viewModel.clearSelection() },
+												starredState = starredState,
+												onAddStar = { viewModel.starSelectedSong() },
+												onRemoveStar = { viewModel.unstarSelectedSong() },
+												download = download,
+												onDownload = { viewModel.downloadSong(song) },
+												onCancelDownload = { viewModel.cancelDownload(song.id) },
+												onDeleteDownload = { viewModel.deleteDownload(song.id) },
+												onPlayNext = { player.playNextSingle(song) },
+												onAddToQueue = { player.addToQueueSingle(song) },
+												onShare = { shareId = song.id },
+												isOnline = isOnline
 											)
 										}
 									}
@@ -321,6 +362,14 @@ fun ArtistDetailScreen(
 			}
 		}
 	}
+	
+	@Suppress("AssignedValueIsNeverRead")
+	ShareDialog(
+		id = shareId,
+		onIdClear = { shareId = null; viewModel.clearSelection() },
+		expiry = shareExpiry,
+		onExpiryChange = { shareExpiry = it }
+	)
 }
 
 fun truncateText(text: String, limit: Int): String {

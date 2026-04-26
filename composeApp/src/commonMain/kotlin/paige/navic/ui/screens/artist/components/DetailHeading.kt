@@ -1,5 +1,6 @@
 package paige.navic.ui.screens.artist.components
 
+import android.content.res.Resources
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +52,7 @@ fun ArtistDetailScreenHeading(
 ) {
 	val layoutDirection = LocalLayoutDirection.current
 	val progress by animateFloatAsState(if (scrolled) 0f else 1f)
+	val scale = Resources.getSystem().getDisplayMetrics().density
 	BoxWithConstraints(
 		modifier = Modifier.fillMaxWidth()
 	) {
@@ -70,9 +73,10 @@ fun ArtistDetailScreenHeading(
 					.fillMaxSize()
 					.background(
 						Brush.linearGradient(
-							colors = listOf(Color.Black, Color.Transparent),
+							0.025f to MaterialTheme.colorScheme.background,
+							1.0f to Color.Transparent,
 							start = Offset(0f, Float.POSITIVE_INFINITY),
-							end = Offset(Float.POSITIVE_INFINITY, 0f)
+							end = Offset(0f, 0f)
 						)
 					)
 			)
@@ -80,7 +84,7 @@ fun ArtistDetailScreenHeading(
 			Column(
 				modifier = Modifier
 					.align(Alignment.BottomStart)
-					.padding(horizontal = 20.dp, vertical = 24.dp)
+					.padding(horizontal = 20.dp)
 					.padding(start = innerPadding.calculateStartPadding(layoutDirection))
 					.padding(end = innerPadding.calculateEndPadding(layoutDirection)),
 				verticalArrangement = Arrangement.spacedBy(8.dp)
