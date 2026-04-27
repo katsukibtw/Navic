@@ -100,7 +100,8 @@ fun SongSheet(
 	onCancelDownload: (() -> Unit)? = null,
 	onDeleteDownload: (() -> Unit)? = null,
 	rating: Int? = null,
-	onSetRating: ((Int) -> Unit)? = null
+	onSetRating: ((Int) -> Unit)? = null,
+	showSleepTimer: Boolean = false
 ) {
 	val ctx = LocalCtx.current
 	var sleepTimerSheetShown by rememberSaveable { mutableStateOf(false) }
@@ -376,48 +377,53 @@ fun SongSheet(
 			)
 		}
 
-		if (sleepTimerLeft != null) {
-			ListItem(
-				content = {
-					Text(
-						stringResource(Res.string.action_sleep_timer_enabled, sleepTimerLeft.label()),
-						color = MaterialTheme.colorScheme.positive
-					)
-				},
-				leadingContent = {
-					Icon(
-						Icons.Outlined.Bedtime,
-						null,
-						tint = MaterialTheme.colorScheme.positive
-					)
-				},
-				onClick = {
-					ctx.clickSound()
-					sleepTimerSheetShown = true
-				},
-				colors = colors,
-				contentPadding = contentPadding
-			)
-		} else {
-			ListItem(
-				content = {
-					Text(
-						stringResource(Res.string.action_sleep_timer)
-					)
-				},
-				leadingContent = {
-					Icon(
-						Icons.Outlined.Bedtime,
-						null
-					)
-				},
-				onClick = {
-					ctx.clickSound()
-					sleepTimerSheetShown = true
-				},
-				colors = colors,
-				contentPadding = contentPadding
-			)
+		if (showSleepTimer) {
+			if (sleepTimerLeft != null) {
+				ListItem(
+					content = {
+						Text(
+							stringResource(
+								Res.string.action_sleep_timer_enabled,
+								sleepTimerLeft.label()
+							),
+							color = MaterialTheme.colorScheme.positive
+						)
+					},
+					leadingContent = {
+						Icon(
+							Icons.Outlined.Bedtime,
+							null,
+							tint = MaterialTheme.colorScheme.positive
+						)
+					},
+					onClick = {
+						ctx.clickSound()
+						sleepTimerSheetShown = true
+					},
+					colors = colors,
+					contentPadding = contentPadding
+				)
+			} else {
+				ListItem(
+					content = {
+						Text(
+							stringResource(Res.string.action_sleep_timer)
+						)
+					},
+					leadingContent = {
+						Icon(
+							Icons.Outlined.Bedtime,
+							null
+						)
+					},
+					onClick = {
+						ctx.clickSound()
+						sleepTimerSheetShown = true
+					},
+					colors = colors,
+					contentPadding = contentPadding
+				)
+			}
 		}
 
 		if (onTrackInfo != null) {
