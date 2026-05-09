@@ -15,6 +15,7 @@ import paige.navic.domain.repositories.ArtistRepository
 import paige.navic.utils.UiState
 
 class ArtistListViewModel(
+	initialListType: DomainArtistListType = DomainArtistListType.AlphabeticalByName,
 	private val repository: ArtistRepository
 ) : ViewModel() {
 	private val _artistsState =
@@ -27,7 +28,7 @@ class ArtistListViewModel(
 	private val _selectedArtist = MutableStateFlow<DomainArtist?>(null)
 	val selectedArtist = _selectedArtist.asStateFlow()
 
-	private val _listType = MutableStateFlow(DomainArtistListType.AlphabeticalByName)
+	private val _listType = MutableStateFlow(initialListType)
 	val listType = _listType.asStateFlow()
 
 	val gridState = LazyGridState()

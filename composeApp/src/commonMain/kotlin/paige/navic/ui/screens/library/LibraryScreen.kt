@@ -25,6 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import paige.navic.domain.models.DomainAlbumListType
+import paige.navic.domain.models.DomainArtistListType
 import paige.navic.domain.models.DomainSongCollection
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.components.common.ErrorSnackbar
@@ -62,7 +63,10 @@ fun LibraryScreen() {
 	val playlistsState by playlistsViewModel.playlistsState.collectAsStateWithLifecycle()
 	val selectedPlaylist by playlistsViewModel.selectedPlaylist.collectAsStateWithLifecycle()
 
-	val artistsViewModel = koinViewModel<ArtistListViewModel>()
+	val artistsViewModel = koinViewModel<ArtistListViewModel>(
+		key = "libraryArtists",
+		parameters = { parametersOf(DomainArtistListType.AlphabeticalByName) }
+	)
 	val artistsState by artistsViewModel.artistsState.collectAsStateWithLifecycle()
 	val selectedArtist by artistsViewModel.selectedArtist.collectAsStateWithLifecycle()
 	val selectedArtistIsStarred by artistsViewModel.starred.collectAsStateWithLifecycle()

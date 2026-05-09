@@ -20,6 +20,7 @@ import navic.composeapp.generated.resources.title_artists
 import paige.navic.data.models.Screen
 import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainAlbumListType
+import paige.navic.domain.models.DomainArtistListType
 import paige.navic.domain.models.DomainArtist
 import paige.navic.ui.components.layouts.horizontalSection
 import paige.navic.ui.components.layouts.pagedHorizontalSection
@@ -89,7 +90,7 @@ fun StarredScreenContent(
 
 		horizontalSection(
 			title = Res.string.title_artists,
-			destination = Screen.ArtistList(true),
+			destination = Screen.ArtistList(true, DomainArtistListType.Starred),
 			state = artistsState,
 			key = { it.id },
 			seeAll = true

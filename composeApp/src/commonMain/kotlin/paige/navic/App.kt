@@ -240,7 +240,7 @@ private fun entryProvider(
 			PlaylistListScreen(key.nested)
 		}
 		entry<Screen.ArtistList>(metadata = navtabMetadata) { key ->
-			ArtistListScreen(key.nested)
+			ArtistListScreen(key.nested, key.listType)
 		}
 		entry<Screen.GenreList>(metadata = navtabMetadata) { key ->
 			GenreListScreen(key.nested)

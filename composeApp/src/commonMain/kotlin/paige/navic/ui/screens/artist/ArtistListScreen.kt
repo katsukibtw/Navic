@@ -23,12 +23,14 @@ import navic.composeapp.generated.resources.title_artists
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.models.Screen
 import paige.navic.data.models.settings.Settings
 import paige.navic.data.models.settings.enums.BottomBarVisibilityMode
 import paige.navic.domain.models.DomainArtist
+import paige.navic.domain.models.DomainArtistListType
 import paige.navic.icons.Icons
 import paige.navic.icons.filled.Star
 import paige.navic.icons.outlined.Star
@@ -48,9 +50,13 @@ import paige.navic.utils.UiState
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ArtistListScreen(
-	nested: Boolean = false
+	nested: Boolean = false,
+	listType: DomainArtistListType
 ) {
-	val viewModel = koinViewModel<ArtistListViewModel>()
+	val viewModel = koinViewModel<ArtistListViewModel>(
+		key = listType.toString(),
+		parameters = { parametersOf(listType) }
+	)
 	val artistsState by viewModel.artistsState.collectAsState()
 	val selectedArtist by viewModel.selectedArtist.collectAsState()
 	val starred by viewModel.starred.collectAsState()

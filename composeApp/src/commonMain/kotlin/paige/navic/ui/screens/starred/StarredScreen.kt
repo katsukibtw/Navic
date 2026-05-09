@@ -25,6 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import paige.navic.domain.models.DomainAlbumListType
+import paige.navic.domain.models.DomainArtistListType
 import paige.navic.domain.models.DomainSongCollection
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.components.layouts.PullToRefreshBox
@@ -50,7 +51,10 @@ fun StarredScreen() {
 	val selectedAlbumIsStarred by albumsViewModel.starred.collectAsStateWithLifecycle()
 	val selectedAlbumRating by albumsViewModel.rating.collectAsStateWithLifecycle()
 
-	val artistsViewModel = koinViewModel<ArtistListViewModel>()
+	val artistsViewModel = koinViewModel<ArtistListViewModel>(
+		key = "starredArtists",
+		parameters = { parametersOf(DomainArtistListType.Starred) }
+	)
 	val artistsState by artistsViewModel.artistsState.collectAsStateWithLifecycle()
 	val selectedArtist by artistsViewModel.selectedArtist.collectAsStateWithLifecycle()
 	val selectedArtistIsStarred by artistsViewModel.starred.collectAsStateWithLifecycle()
