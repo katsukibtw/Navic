@@ -91,6 +91,7 @@ import paige.navic.ui.screens.settings.SettingsStreamingQualityScreen
 import paige.navic.ui.screens.share.ShareListScreen
 import paige.navic.ui.screens.song.SongDetailScreen
 import paige.navic.ui.screens.song.SongListScreen
+import paige.navic.ui.screens.starred.StarredScreen
 import paige.navic.ui.theme.NavicTheme
 import paige.navic.utils.BottomBarScrollManager
 import paige.navic.utils.LocalBottomBarScrollManager
@@ -228,6 +229,9 @@ private fun entryProvider(
 		// tabs
 		entry<Screen.Library>(metadata = navtabMetadata) {
 			LibraryScreen()
+		}
+		entry<Screen.Starred>(metadata = navtabMetadata) {
+			StarredScreen()
 		}
 		entry<Screen.AlbumList>(metadata = navtabMetadata) { key ->
 			AlbumListScreen(key.nested, key.listType)
