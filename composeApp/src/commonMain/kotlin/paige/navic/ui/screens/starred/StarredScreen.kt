@@ -42,8 +42,8 @@ import kotlin.time.Duration
 @Composable
 fun StarredScreen() {
 	val albumsViewModel = koinViewModel<AlbumListViewModel>(
-		key = "libraryAlbums",
-		parameters = { parametersOf(DomainAlbumListType.Recent) }
+		key = "starredAlbums",
+		parameters = { parametersOf(DomainAlbumListType.Starred) }
 	)
 	val pagedAlbums = albumsViewModel.pagedAlbums.collectAsLazyPagingItems()
 	val selectedAlbum by albumsViewModel.selectedAlbum.collectAsStateWithLifecycle()

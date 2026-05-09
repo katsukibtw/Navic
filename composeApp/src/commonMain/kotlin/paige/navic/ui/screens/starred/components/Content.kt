@@ -63,28 +63,29 @@ fun StarredScreenContent(
 		verticalArrangement = Arrangement.spacedBy(5.dp),
 		horizontalArrangement = Arrangement.spacedBy(5.dp),
 	) {
-		pagedHorizontalSection(
-			title = Res.string.title_albums,
-			destination = Screen.AlbumList(true, DomainAlbumListType.Starred),
-			items = pagedAlbums,
-			seeAll = true
-		) { album ->
-			AlbumListScreenItem(
-				modifier = Modifier.animateItem().width(150.dp),
-				tab = "library",
-				album = album,
-				selected = album == selectedAlbum,
-				starred = selectedAlbumIsStarred,
-				onSelect = { onSelectAlbum(album) },
-				onDeselect = { onClearAlbumSelection() },
-				onSetStarred = { onStarSelectedAlbum(it) },
-				onSetShareId = { onSetShareId(it) },
-				onPlayNext = onPlayAlbumNext,
-				onAddToQueue = onAddAlbumToQueue,
-				rating = selectedAlbumRating,
-				onSetRating = onRateSelectedAlbum
-			)
-		}
+		if (pagedAlbums.itemCount > 0)
+			pagedHorizontalSection(
+				title = Res.string.title_albums,
+				destination = Screen.AlbumList(true, DomainAlbumListType.Starred),
+				items = pagedAlbums,
+				seeAll = true
+			) { album ->
+				AlbumListScreenItem(
+					modifier = Modifier.animateItem().width(150.dp),
+					tab = "library",
+					album = album,
+					selected = album == selectedAlbum,
+					starred = selectedAlbumIsStarred,
+					onSelect = { onSelectAlbum(album) },
+					onDeselect = { onClearAlbumSelection() },
+					onSetStarred = { onStarSelectedAlbum(it) },
+					onSetShareId = { onSetShareId(it) },
+					onPlayNext = onPlayAlbumNext,
+					onAddToQueue = onAddAlbumToQueue,
+					rating = selectedAlbumRating,
+					onSetRating = onRateSelectedAlbum
+				)
+			}
 
 		horizontalSection(
 			title = Res.string.title_artists,
