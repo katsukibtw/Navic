@@ -1,6 +1,8 @@
 package paige.navic.ui.screens.starred.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -131,19 +133,12 @@ fun StarredScreenContent(
 	val layoutDirection = LocalLayoutDirection.current
 	var playlistDialogShown by rememberSaveable { mutableStateOf(false) }
 
+	val scrollState = rememberScrollState()
+
 	Column( 
 		modifier = Modifier
-			.fillMaxWidth()
-			.padding(
-				start = innerPadding.calculateStartPadding(
-					layoutDirection
-				)
-			)
-			.padding(
-				end = innerPadding.calculateEndPadding(
-					layoutDirection
-				)
-			),
+			.fillMaxSize()
+			.verticalScroll(state = scrollState),
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
@@ -268,8 +263,8 @@ fun StarredScreenContent(
 				}
 			)
 		}
-		Spacer(Modifier.height(innerPadding.calculateBottomPadding()))
 	}
+	Spacer(Modifier.height(innerPadding.calculateBottomPadding()))
 
 	if (playlistDialogShown) {
 		@Suppress("AssignedValueIsNeverRead")

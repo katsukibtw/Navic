@@ -24,6 +24,8 @@ import navic.composeapp.generated.resources.title_starred
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import paige.navic.data.models.settings.Settings
+import paige.navic.data.models.settings.enums.BottomBarVisibilityMode
 import paige.navic.domain.models.DomainAlbumListType
 import paige.navic.domain.models.DomainArtistListType
 import paige.navic.domain.models.DomainSong
@@ -88,7 +90,9 @@ fun StarredScreen() {
 		topBar = { NestedTopBar({ Text(stringResource(Res.string.title_starred)) }) },
 		bottomBar = {
 			val scrollManager = LocalBottomBarScrollManager.current
-			RootBottomBar(scrolled = scrollManager.isTriggered)
+			if (Settings.shared.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens) {
+				RootBottomBar(scrolled = scrollManager.isTriggered)
+			}
 		}
 	) { innerPadding ->
 		val isAlbumsLoading = pagedAlbums.loadState.refresh is LoadState.Loading
@@ -104,7 +108,7 @@ fun StarredScreen() {
 				artistsViewModel.refreshArtists(true)
 				songsViewModel.refreshSongs(true)
 			},
-			key = listOf(pagedAlbums.itemSnapshotList, artistsState)
+			key = listOf(pagedAlbums.itemSnapshotList, artistsState, songsState)
 		) {
 			StarredScreenContent(
 				scrollBehavior = scrollBehavior,
@@ -171,7 +175,6 @@ fun StarredScreen() {
 			)
 		}
 	}
-
 
 	@Suppress("AssignedValueIsNeverRead")
 	ShareDialog(
