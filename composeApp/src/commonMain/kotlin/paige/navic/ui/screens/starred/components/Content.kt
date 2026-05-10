@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.paging.compose.LazyPagingItems
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -51,6 +52,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_see_all
+import navic.composeapp.generated.resources.count_albums
 import navic.composeapp.generated.resources.title_albums
 import navic.composeapp.generated.resources.title_artists
 import navic.composeapp.generated.resources.title_songs
@@ -247,6 +249,7 @@ fun StarredScreenContent(
 				ArtCarouselItem(
 					coverArtId = album.coverArtId, 
 					title = album.name, 
+					subtitle = album.artistName,
 					contentDescription = null,
 					onSelect = { onSelectAlbum(album) },
 					onClick = dropUnlessResumed {
@@ -293,6 +296,11 @@ fun StarredScreenContent(
 				ArtCarouselItem(
 					coverArtId = artist.coverArtId, 
 					title = artist.name, 
+					subtitle = pluralStringResource(
+						Res.plurals.count_albums,
+						artist.albumCount,
+						artist.albumCount
+					),
 					contentDescription = null,
 					onClick = dropUnlessResumed {
 						backStack.add(Screen.ArtistDetail(artist.id))
