@@ -97,7 +97,8 @@ fun StarredScreen() {
 	) { innerPadding ->
 		val isAlbumsLoading = pagedAlbums.loadState.refresh is LoadState.Loading
 		val isAnythingLoading = isAlbumsLoading ||
-			artistsState is UiState.Loading
+			artistsState is UiState.Loading || 
+			songsState is UiState.Loading
 		PullToRefreshBox(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
