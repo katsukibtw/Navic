@@ -195,7 +195,7 @@ fun StarredScreenContent(
 				flingBehavior = rememberSnapFlingBehavior(lazyGridState = gridState),
 				modifier = Modifier.fillMaxWidth().height(250.dp)
 			) {
-				itemsIndexed(songs) { index, song ->
+				itemsIndexed(if (songs.size > 12) songs.slice(0..11) else songs) { index, song ->
 					val download = allDownloads.find { it.songId == song.id }
 					SongRow(
 						modifier = Modifier.weight(1f),
@@ -222,7 +222,8 @@ fun StarredScreenContent(
 			}
 			ArtCarousel(
 				stringResource(Res.string.title_albums),
-				pagedAlbums.itemSnapshotList.items.toImmutableList()
+				pagedAlbums.itemSnapshotList.items.toImmutableList(),
+				Screen.AlbumList(true, DomainAlbumListType.Starred)
 			) { album ->
 				val albumDownloadStatus by downloadManager
 					.getCollectionDownloadStatus(album.songs.map { it.id })
@@ -270,7 +271,8 @@ fun StarredScreenContent(
 			if (artists.isEmpty()) return@Column
 			ArtCarousel(
 				stringResource(Res.string.title_artists),
-				artists.toImmutableList()
+				artists.toImmutableList(),
+				Screen.ArtistList(true, DomainArtistListType.Starred)
 			) { artist ->
 				ArtCarouselItem(
 					coverArtId = artist.coverArtId, 
