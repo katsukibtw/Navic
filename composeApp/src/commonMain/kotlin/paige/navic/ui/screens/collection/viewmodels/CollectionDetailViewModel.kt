@@ -45,6 +45,9 @@ class CollectionDetailViewModel(
 	)
 	val collectionState: StateFlow<UiState<DomainSongCollection>> = _collectionState.asStateFlow()
 
+	private val _starred = MutableStateFlow(false)
+	val starred = _starred.asStateFlow()
+
 	val isOnline = connectivityManager.isOnline
 
 	val allDownloads = downloadManager.allDownloads
@@ -90,6 +93,7 @@ class CollectionDetailViewModel(
 			repository.getCollectionFlow(fullRefresh, collectionId).collect {
 				_collectionState.value = it
 				if (it.data is DomainAlbum) {
+					_starred.value = albumRepository.isAlbumStarred(it.data as DomainAlbum)
 					_rating.value = albumRepository.getAlbumRating(it.data as DomainAlbum)
 					try {
 						val albumInfo = repository.getAlbumInfo(collectionId)
@@ -172,6 +176,21 @@ class CollectionDetailViewModel(
 			(_collectionState.value.data as? DomainAlbum)?.let { album ->
 				albumRepository.rateAlbum(album, rating)
 				_rating.value = rating
+			}
+		}
+	}
+
+	fun starAlbum(starred: Boolean) {
+		viewModelScope.launch {
+			runCatching {
+				val collection = _collectionState.value.data ?: return@launch
+				if (collection !is DomainAlbum) return@launch
+				if (starred) {
+					albumRepository.starAlbum(collection)
+				} else {
+					albumRepository.unstarAlbum(collection)
+				}
+				refreshCollection(false)
 			}
 		}
 	}
