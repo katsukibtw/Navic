@@ -119,10 +119,12 @@ fun StarredScreen() {
 				songsState = songsState,
 				selectedSong = selectedSong,
 				allDownloads = allDownloads,
-				onPlaySong = { song ->
+				onPlaySong = { song, index ->
 					player.clearQueue()
-					player.addToQueueSingle(song)
-					player.playAt(0)
+					songsState.data.orEmpty().forEach {
+						player.addToQueueSingle(it)
+					}
+					player.playAt(index)
 				},
 				onSelectSong = {
 					songsViewModel.selectSong(it)
