@@ -47,7 +47,8 @@ fun CollectionDetailScreenTopBar(
 	rating: Int?,
 	onSetRating: ((Int) -> Unit)?,
 	starred: Boolean?,
-	onSetStarred: ((Boolean) -> Unit)? = null
+	onSetStarred: ((Boolean) -> Unit)? = null,
+	refreshCollection: () -> Unit
 ) {
 	val uriHandler = LocalUriHandler.current
 	var playlistDialogShown by rememberSaveable { mutableStateOf(false) }
@@ -67,6 +68,7 @@ fun CollectionDetailScreenTopBar(
 				var expanded by remember { mutableStateOf(false) }
 				TopBarButton({
 					expanded = true
+					refreshCollection()
 				}) {
 					Icon(
 						Icons.Outlined.MoreVert,

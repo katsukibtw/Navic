@@ -125,7 +125,8 @@ fun CollectionDetailScreen(
 				rating = if (collection !is DomainPlaylist) rating else null,
 				onSetRating = if (collection !is DomainPlaylist) { { viewModel.rateAlbum(it) } } else null,
 				starred = if (collection !is DomainPlaylist) starred else null,
-				onSetStarred = if (collection !is DomainPlaylist) { { viewModel.starAlbum(it) } } else null
+				onSetStarred = if (collection !is DomainPlaylist) { { viewModel.starAlbum(it) } } else null,
+				refreshCollection = { viewModel.refreshCollection(false) }
 			)
 		},
 		bottomBar = {
