@@ -142,129 +142,147 @@ fun StarredScreenContent(
 		verticalArrangement = Arrangement.spacedBy(12.dp),
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
-		Row(
+		Column(
 			modifier = Modifier
-				.heightIn(min = 32.dp)
-				.padding(top = 8.dp)
-				.padding(horizontal = 16.dp)
-				.fillMaxWidth(),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.SpaceBetween
-		) {
-			Text(
-				stringResource(Res.string.title_songs),
-				style = MaterialTheme.typography.titleMediumEmphasized,
-				fontWeight = FontWeight(600)
-			)
-			Text(
-				stringResource(Res.string.action_see_all),
-				style = MaterialTheme.typography.labelLarge,
-				color = MaterialTheme.colorScheme.primary,
-				modifier = Modifier.clickable(onClick = dropUnlessResumed {
-					ctx.clickSound()
-					backStack.add(
-						Screen.SongList(
-							nested = true,
-							listType = DomainSongListType.Starred
-						)
+				.fillMaxWidth()
+				.padding(
+					start = innerPadding.calculateStartPadding(
+						layoutDirection
 					)
-				})
-			)
-		}
-		LazyHorizontalGrid(
-			rows = GridCells.Fixed(3),
-			state = gridState,
-			flingBehavior = rememberSnapFlingBehavior(lazyGridState = gridState),
-			modifier = Modifier.fillMaxWidth().height(250.dp)
+				)
+				.padding(
+					end = innerPadding.calculateEndPadding(
+						layoutDirection
+					)
+				)
+				.padding(
+					bottom = innerPadding.calculateBottomPadding()
+				),
+			horizontalAlignment = Alignment.CenterHorizontally
 		) {
-			itemsIndexed(songs) { index, song ->
-				val download = allDownloads.find { it.songId == song.id }
-				SongRow(
-					modifier = Modifier.weight(1f),
-					song = song,
-					selected = selectedSong == song,
-					onClick = { onPlaySong(song) },
-					onLongClick = { onSelectSong(song) },
-					onDismissRequest = { onClearSongSelection() },
-					starredState = selectedSongIsStarred,
-					onAddStar = onAddSongStar,
-					onRemoveStar = onRemoveSongStar,
-					download = download,
-					onDownload = { onDownloadSong(song) },
-					onCancelDownload = { onCancelDownloadSong(song) },
-					onDeleteDownload = { onDeleteDownloadSong(song) },
-					onPlayNext = { onPlaySongNext(song) },
-					onAddToQueue = { onAddSongToQueue(song) },
-					onShare = { onSetShareId(song.id) },
-					isOnline = isOnline,
-					rating = selectedSongRating,
-					onSetRating = { onSetSongRating(it) }
+			Row(
+				modifier = Modifier
+					.heightIn(min = 32.dp)
+					.padding(top = 8.dp)
+					.padding(horizontal = 16.dp)
+					.fillMaxWidth(),
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween
+			) {
+				Text(
+					stringResource(Res.string.title_songs),
+					style = MaterialTheme.typography.titleMediumEmphasized,
+					fontWeight = FontWeight(600)
+				)
+				Text(
+					stringResource(Res.string.action_see_all),
+					style = MaterialTheme.typography.labelLarge,
+					color = MaterialTheme.colorScheme.primary,
+					modifier = Modifier.clickable(onClick = dropUnlessResumed {
+						ctx.clickSound()
+						backStack.add(
+							Screen.SongList(
+								nested = true,
+								listType = DomainSongListType.Starred
+							)
+						)
+					})
 				)
 			}
-		}
-		ArtCarousel(
-			stringResource(Res.string.title_albums),
-			pagedAlbums.itemSnapshotList.items.toImmutableList()
-		) { album ->
-			val albumDownloadStatus by downloadManager
-				.getCollectionDownloadStatus(album.songs.map { it.id })
-				.collectAsState(initial = DownloadStatus.NOT_DOWNLOADED)
-			ArtCarouselItem(
-				coverArtId = album.coverArtId, 
-				title = album.name, 
-				contentDescription = null,
-				onSelect = { onSelectAlbum(album) },
-				onClick = dropUnlessResumed {
-					backStack.add(Screen.CollectionDetail(album.id, "artist"))
+			LazyHorizontalGrid(
+				rows = GridCells.Fixed(3),
+				state = gridState,
+				flingBehavior = rememberSnapFlingBehavior(lazyGridState = gridState),
+				modifier = Modifier.fillMaxWidth().height(250.dp)
+			) {
+				itemsIndexed(songs) { index, song ->
+					val download = allDownloads.find { it.songId == song.id }
+					SongRow(
+						modifier = Modifier.weight(1f),
+						song = song,
+						selected = selectedSong == song,
+						onClick = { onPlaySong(song) },
+						onLongClick = { onSelectSong(song) },
+						onDismissRequest = { onClearSongSelection() },
+						starredState = selectedSongIsStarred,
+						onAddStar = onAddSongStar,
+						onRemoveStar = onRemoveSongStar,
+						download = download,
+						onDownload = { onDownloadSong(song) },
+						onCancelDownload = { onCancelDownloadSong(song) },
+						onDeleteDownload = { onDeleteDownloadSong(song) },
+						onPlayNext = { onPlaySongNext(song) },
+						onAddToQueue = { onAddSongToQueue(song) },
+						onShare = { onSetShareId(song.id) },
+						isOnline = isOnline,
+						rating = selectedSongRating,
+						onSetRating = { onSetSongRating(it) }
+					)
 				}
-			)
-			if (selectedAlbum == album) {
-				CollectionSheet(
-					onDismissRequest = { onClearAlbumSelection() },
-					collection = album,
-					starred = selectedAlbumIsStarred,
-					onShare = { onSetShareId(album.id) },
-					onPlayNext = onPlayAlbumNext,
-					onAddToQueue = onAddAlbumToQueue,
-					onSetStarred = { onStarSelectedAlbum(!selectedAlbumIsStarred) },
-					onAddAllToPlaylist = { playlistDialogShown = true },
-					downloadStatus = albumDownloadStatus,
-					onDownloadAll = { 
-						scope.launch {
-							downloadManager.downloadCollection(album)
-						}
-					},
-					onCancelDownloadAll = {
-						scope.launch {
-							album.songs.forEach { downloadManager.cancelDownload(it.id) }
-						}
-					},
-					onDeleteDownloadAll = {
-						scope.launch {
-							downloadManager.deleteDownloadedCollection(album)
-						}
-					},
-					rating = selectedAlbumRating,
-					onSetRating = onRateSelectedAlbum
+			}
+			ArtCarousel(
+				stringResource(Res.string.title_albums),
+				pagedAlbums.itemSnapshotList.items.toImmutableList()
+			) { album ->
+				val albumDownloadStatus by downloadManager
+					.getCollectionDownloadStatus(album.songs.map { it.id })
+					.collectAsState(initial = DownloadStatus.NOT_DOWNLOADED)
+				ArtCarouselItem(
+					coverArtId = album.coverArtId, 
+					title = album.name, 
+					contentDescription = null,
+					onSelect = { onSelectAlbum(album) },
+					onClick = dropUnlessResumed {
+						backStack.add(Screen.CollectionDetail(album.id, "artist"))
+					}
+				)
+				if (selectedAlbum == album) {
+					CollectionSheet(
+						onDismissRequest = { onClearAlbumSelection() },
+						collection = album,
+						starred = selectedAlbumIsStarred,
+						onShare = { onSetShareId(album.id) },
+						onPlayNext = onPlayAlbumNext,
+						onAddToQueue = onAddAlbumToQueue,
+						onSetStarred = { onStarSelectedAlbum(!selectedAlbumIsStarred) },
+						onAddAllToPlaylist = { playlistDialogShown = true },
+						downloadStatus = albumDownloadStatus,
+						onDownloadAll = { 
+							scope.launch {
+								downloadManager.downloadCollection(album)
+							}
+						},
+						onCancelDownloadAll = {
+							scope.launch {
+								album.songs.forEach { downloadManager.cancelDownload(it.id) }
+							}
+						},
+						onDeleteDownloadAll = {
+							scope.launch {
+								downloadManager.deleteDownloadedCollection(album)
+							}
+						},
+						rating = selectedAlbumRating,
+						onSetRating = onRateSelectedAlbum
+					)
+				}
+			}
+			if (artists.isEmpty()) return@Column
+			ArtCarousel(
+				stringResource(Res.string.title_artists),
+				artists.toImmutableList()
+			) { artist ->
+				ArtCarouselItem(
+					coverArtId = artist.coverArtId, 
+					title = artist.name, 
+					contentDescription = null,
+					onClick = dropUnlessResumed {
+						backStack.add(Screen.ArtistDetail(artist.id))
+					}
 				)
 			}
-		}
-		if (artists.isEmpty()) return@Column
-		ArtCarousel(
-			stringResource(Res.string.title_artists),
-			artists.toImmutableList()
-		) { artist ->
-			ArtCarouselItem(
-				coverArtId = artist.coverArtId, 
-				title = artist.name, 
-				contentDescription = null,
-				onClick = dropUnlessResumed {
-					backStack.add(Screen.ArtistDetail(artist.id))
-				}
-			)
 		}
 	}
-	Spacer(Modifier.height(innerPadding.calculateBottomPadding()))
 
 	if (playlistDialogShown) {
 		@Suppress("AssignedValueIsNeverRead")
