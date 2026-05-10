@@ -54,6 +54,7 @@ import navic.composeapp.generated.resources.action_see_all
 import navic.composeapp.generated.resources.title_albums
 import navic.composeapp.generated.resources.title_artists
 import navic.composeapp.generated.resources.title_songs
+import navic.composeapp.generated.resources.info_no_starred
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.models.Screen
@@ -66,6 +67,9 @@ import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainSong
 import paige.navic.domain.models.DomainSongListType
 import paige.navic.managers.DownloadManager
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.PlaylistRemove
+import paige.navic.ui.components.common.ContentUnavailable
 import paige.navic.ui.components.common.SongRow
 import paige.navic.ui.components.layouts.ArtCarousel
 import paige.navic.ui.components.layouts.ArtCarouselItem
@@ -139,9 +143,19 @@ fun StarredScreenContent(
 		modifier = Modifier
 			.fillMaxSize()
 			.verticalScroll(state = scrollState),
-		verticalArrangement = Arrangement.spacedBy(12.dp),
-		horizontalAlignment = Alignment.CenterHorizontally
+		verticalArrangement = Arrangement.spacedBy(
+			space = 12.dp,
+			alignment = if (pagedAlbums.itemCount == 0 && songs.isEmpty() && artists.isEmpty()) Alignment.CenterVertically else Alignment.Top
+		),
+		horizontalAlignment = Alignment.CenterHorizontally,
 	) {
+		if (pagedAlbums.itemCount == 0 && songs.isEmpty() && artists.isEmpty()) {
+			ContentUnavailable(
+				icon = Icons.Outlined.PlaylistRemove,
+				label = stringResource(Res.string.info_no_starred)
+			)
+			return@Column
+		}
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
@@ -160,64 +174,66 @@ fun StarredScreenContent(
 				),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
-			Row(
-				modifier = Modifier
-					.heightIn(min = 32.dp)
-					.padding(top = 8.dp)
-					.padding(horizontal = 16.dp)
-					.fillMaxWidth(),
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceBetween
-			) {
-				Text(
-					stringResource(Res.string.title_songs),
-					style = MaterialTheme.typography.titleMediumEmphasized,
-					fontWeight = FontWeight(600)
-				)
-				Text(
-					stringResource(Res.string.action_see_all),
-					style = MaterialTheme.typography.labelLarge,
-					color = MaterialTheme.colorScheme.primary,
-					modifier = Modifier.clickable(onClick = dropUnlessResumed {
-						ctx.clickSound()
-						backStack.add(
-							Screen.SongList(
-								nested = true,
-								listType = DomainSongListType.Starred
-							)
-						)
-					})
-				)
-			}
-			LazyHorizontalGrid(
-				rows = GridCells.Fixed(3),
-				state = gridState,
-				flingBehavior = rememberSnapFlingBehavior(lazyGridState = gridState),
-				modifier = Modifier.fillMaxWidth().height(250.dp)
-			) {
-				itemsIndexed(if (songs.size > 12) songs.slice(0..11) else songs) { index, song ->
-					val download = allDownloads.find { it.songId == song.id }
-					SongRow(
-						modifier = Modifier.weight(1f),
-						song = song,
-						selected = selectedSong == song,
-						onClick = { onPlaySong(song, index) },
-						onLongClick = { onSelectSong(song) },
-						onDismissRequest = { onClearSongSelection() },
-						starredState = selectedSongIsStarred,
-						onAddStar = onAddSongStar,
-						onRemoveStar = onRemoveSongStar,
-						download = download,
-						onDownload = { onDownloadSong(song) },
-						onCancelDownload = { onCancelDownloadSong(song) },
-						onDeleteDownload = { onDeleteDownloadSong(song) },
-						onPlayNext = { onPlaySongNext(song) },
-						onAddToQueue = { onAddSongToQueue(song) },
-						onShare = { onSetShareId(song.id) },
-						isOnline = isOnline,
-						rating = selectedSongRating,
-						onSetRating = { onSetSongRating(it) }
+			if (!songs.isEmpty()) {
+				Row(
+					modifier = Modifier
+						.heightIn(min = 32.dp)
+						.padding(top = 8.dp)
+						.padding(horizontal = 16.dp)
+						.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceBetween
+				) {
+					Text(
+						stringResource(Res.string.title_songs),
+						style = MaterialTheme.typography.titleMediumEmphasized,
+						fontWeight = FontWeight(600)
 					)
+					Text(
+						stringResource(Res.string.action_see_all),
+						style = MaterialTheme.typography.labelLarge,
+						color = MaterialTheme.colorScheme.primary,
+						modifier = Modifier.clickable(onClick = dropUnlessResumed {
+							ctx.clickSound()
+							backStack.add(
+								Screen.SongList(
+									nested = true,
+									listType = DomainSongListType.Starred
+								)
+							)
+						})
+					)
+				}
+				LazyHorizontalGrid(
+					rows = GridCells.Fixed(3),
+					state = gridState,
+					flingBehavior = rememberSnapFlingBehavior(lazyGridState = gridState),
+					modifier = Modifier.fillMaxWidth().height(250.dp)
+				) {
+					itemsIndexed(if (songs.size > 12) songs.slice(0..11) else songs) { index, song ->
+						val download = allDownloads.find { it.songId == song.id }
+						SongRow(
+							modifier = Modifier.weight(1f),
+							song = song,
+							selected = selectedSong == song,
+							onClick = { onPlaySong(song, index) },
+							onLongClick = { onSelectSong(song) },
+							onDismissRequest = { onClearSongSelection() },
+							starredState = selectedSongIsStarred,
+							onAddStar = onAddSongStar,
+							onRemoveStar = onRemoveSongStar,
+							download = download,
+							onDownload = { onDownloadSong(song) },
+							onCancelDownload = { onCancelDownloadSong(song) },
+							onDeleteDownload = { onDeleteDownloadSong(song) },
+							onPlayNext = { onPlaySongNext(song) },
+							onAddToQueue = { onAddSongToQueue(song) },
+							onShare = { onSetShareId(song.id) },
+							isOnline = isOnline,
+							rating = selectedSongRating,
+							onSetRating = { onSetSongRating(it) }
+						)
+					}
 				}
 			}
 			ArtCarousel(
