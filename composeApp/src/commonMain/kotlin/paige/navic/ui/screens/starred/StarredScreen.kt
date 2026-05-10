@@ -26,13 +26,17 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import paige.navic.domain.models.DomainAlbumListType
 import paige.navic.domain.models.DomainArtistListType
+import paige.navic.domain.models.DomainSong
+import paige.navic.domain.models.DomainSongListType
 import paige.navic.domain.models.DomainSongCollection
 import paige.navic.shared.MediaPlayerViewModel
+import paige.navic.ui.components.dialogs.QueueDuplicateDialog
 import paige.navic.ui.components.layouts.PullToRefreshBox
 import paige.navic.ui.components.layouts.RootBottomBar
 import paige.navic.ui.components.layouts.NestedTopBar
 import paige.navic.ui.screens.album.viewmodels.AlbumListViewModel
 import paige.navic.ui.screens.artist.viewmodels.ArtistListViewModel
+import paige.navic.ui.screens.song.viewmodels.SongListViewModel
 import paige.navic.ui.screens.starred.components.StarredScreenContent
 import paige.navic.ui.screens.share.dialogs.ShareDialog
 import paige.navic.utils.LocalBottomBarScrollManager
@@ -42,6 +46,16 @@ import kotlin.time.Duration
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun StarredScreen() {
+	val songsViewModel = koinViewModel<SongListViewModel>(
+		key = "starredSongs",
+		parameters = { parametersOf(DomainSongListType.Starred) }
+	)
+	val songsState by songsViewModel.songsState.collectAsStateWithLifecycle()
+	val selectedSong by songsViewModel.selectedSong.collectAsStateWithLifecycle()
+	val selectedSongIsStarred by songsViewModel.starred.collectAsStateWithLifecycle()
+	val selectedSongRating by songsViewModel.selectedSongRating.collectAsStateWithLifecycle()
+	val allDownloads by songsViewModel.allDownloads.collectAsStateWithLifecycle()
+
 	val albumsViewModel = koinViewModel<AlbumListViewModel>(
 		key = "starredAlbums",
 		parameters = { parametersOf(DomainAlbumListType.Starred) }
@@ -66,6 +80,10 @@ fun StarredScreen() {
 
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
+	var songToQueue by remember { mutableStateOf<DomainSong?>(null) }
+
+	val isOnline by songsViewModel.isOnline.collectAsStateWithLifecycle()
+
 	Scaffold(
 		topBar = { NestedTopBar({ Text(stringResource(Res.string.title_starred)) }) },
 		bottomBar = {
@@ -84,6 +102,7 @@ fun StarredScreen() {
 			onRefresh = {
 				pagedAlbums.refresh()
 				artistsViewModel.refreshArtists(true)
+				songsViewModel.refreshSongs(true)
 			},
 			key = listOf(pagedAlbums.itemSnapshotList, artistsState)
 		) {
@@ -91,6 +110,46 @@ fun StarredScreen() {
 				scrollBehavior = scrollBehavior,
 				innerPadding = innerPadding,
 				onSetShareId = { shareId = it },
+				isOnline = isOnline,
+
+				songsState = songsState,
+				selectedSong = selectedSong,
+				allDownloads = allDownloads,
+				onPlaySong = { song ->
+					player.clearQueue()
+					player.addToQueueSingle(song)
+					player.playAt(0)
+				},
+				onSelectSong = {
+					songsViewModel.selectSong(it)
+				},
+				onClearSongSelection = { songsViewModel.clearSelection() },
+				selectedSongIsStarred = selectedSongIsStarred,
+				onAddSongStar = { songsViewModel.starSong(true) },
+				onRemoveSongStar = { songsViewModel.starSong(false) },
+				onDownloadSong = { songsViewModel.downloadSong(it) },
+				onCancelDownloadSong = { song -> 
+					songsViewModel.cancelDownload(song.id)
+				},
+				onDeleteDownloadSong = { song -> 
+					songsViewModel.deleteDownload(song.id) 
+				},
+				onPlaySongNext = { song ->
+					if (player.uiState.value.queue.any { it.id == song.id }) {
+						songToQueue = song
+					} else {
+						player.playNextSingle(song)
+					}
+				},
+				onAddSongToQueue = { song ->
+					if (player.uiState.value.queue.any { it.id == song.id }) {
+						songToQueue = song
+					} else {
+						player.addToQueueSingle(song)
+					}
+				},
+				selectedSongRating = selectedSongRating,
+				onSetSongRating = { songsViewModel.rateSelectedSong(it) },
 
 				pagedAlbums = pagedAlbums,
 				selectedAlbum = selectedAlbum,
@@ -121,4 +180,13 @@ fun StarredScreen() {
 		expiry = shareExpiry,
 		onExpiryChange = { shareExpiry = it }
 	)
+
+	if (songToQueue != null) {
+		QueueDuplicateDialog(
+			onDismissRequest = { songToQueue = null },
+			onConfirm = {
+				songToQueue?.let { player.addToQueueSingle(it) }
+			}
+		)
+	}
 }

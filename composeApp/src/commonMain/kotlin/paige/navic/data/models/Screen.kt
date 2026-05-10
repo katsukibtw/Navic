@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 import paige.navic.domain.models.DomainAlbumListType
 import paige.navic.domain.models.DomainArtistListType
+import paige.navic.domain.models.DomainSongListType
 
 @Immutable
 @Serializable
@@ -55,7 +56,8 @@ sealed interface Screen : NavKey {
 	data class SongList(
 		val nested: Boolean = false,
 		val artistId: String? = null,
-		val artistName: String? = null
+		val artistName: String? = null,
+		val listType: DomainSongListType = DomainSongListType.FrequentlyPlayed
 	) : Screen
 	@Immutable
 	@Serializable
