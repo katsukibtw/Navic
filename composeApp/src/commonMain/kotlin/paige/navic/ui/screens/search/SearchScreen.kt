@@ -64,6 +64,7 @@ import paige.navic.data.models.settings.Settings
 import paige.navic.data.models.settings.enums.BottomBarVisibilityMode
 import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainAlbumListType
+import paige.navic.domain.models.DomainArtistListType
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainSong
 import paige.navic.domain.models.DomainSongCollection
@@ -109,7 +110,9 @@ fun SearchScreen(
 	val selectedSongIsStarred by viewModel.selectedSongIsStarred.collectAsStateWithLifecycle()
 	val selectedSongRating by viewModel.selectedSongRating.collectAsStateWithLifecycle()
 
-	val artistListViewModel = koinViewModel<ArtistListViewModel>()
+	val artistListViewModel = koinViewModel<ArtistListViewModel> {
+		parametersOf(DomainArtistListType.AlphabeticalByName)
+	}
 	val artistListSelection by artistListViewModel.selectedArtist.collectAsState()
 	val artistListStarred by artistListViewModel.starred.collectAsState()
 
