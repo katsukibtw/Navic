@@ -77,6 +77,15 @@ class CollectionDetailViewModel(
 	private val _selectedSongRating = MutableStateFlow(0)
 	val selectedSongRating = _selectedSongRating.asStateFlow()
 
+	private val _selectedAlbum = MutableStateFlow<DomainAlbum?>(null)
+	val selectedAlbum: StateFlow<DomainAlbum?> = _selectedAlbum.asStateFlow()
+
+	private val _selectedAlbumIsStarred = MutableStateFlow(false)
+	val selectedAlbumIsStarred = _selectedAlbumIsStarred.asStateFlow()
+
+	private val _selectedAlbumRating = MutableStateFlow(0)
+	val selectedAlbumRating = _selectedAlbumRating.asStateFlow()
+
 	private val _rating = MutableStateFlow(0)
 	val rating = _rating.asStateFlow()
 
@@ -114,8 +123,17 @@ class CollectionDetailViewModel(
 		}
 	}
 
+	fun selectAlbum(album: DomainAlbum) {
+		viewModelScope.launch {
+			_selectedAlbum.value = album
+			_selectedAlbumIsStarred.value = albumRepository.isAlbumStarred(album)
+			_selectedAlbumRating.value = albumRepository.getAlbumRating(album)
+		}
+	}
+
 	fun clearSelection() {
 		_selectedSong.value = null
+		_selectedAlbum.value = null
 	}
 
 	fun clearError() {
@@ -191,6 +209,29 @@ class CollectionDetailViewModel(
 					albumRepository.unstarAlbum(collection)
 				}
 				refreshCollection(false)
+			}
+		}
+	}
+
+	fun rateSelectedAlbum(rating: Int) {
+		viewModelScope.launch {
+			_selectedAlbum.value?.let { album ->
+				albumRepository.rateAlbum(album, rating)
+				_selectedAlbumRating.value = rating
+			}
+		}
+	}
+
+	fun starSelectedAlbum(starred: Boolean) {
+		viewModelScope.launch {
+			runCatching {
+				val collection = _selectedAlbum.value ?: return@launch
+				if (starred) {
+					albumRepository.starAlbum(collection)
+				} else {
+					albumRepository.unstarAlbum(collection)
+				}
+				_selectedAlbumIsStarred.value = starred
 			}
 		}
 	}
