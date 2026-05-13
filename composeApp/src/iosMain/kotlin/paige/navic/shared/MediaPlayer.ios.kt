@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.update
 import paige.navic.data.database.SyncManager
 import paige.navic.data.models.settings.Settings
 import paige.navic.data.session.SessionManager
+import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainExplicitStatus
 import paige.navic.domain.models.DomainRadio
 import paige.navic.domain.models.DomainSong
