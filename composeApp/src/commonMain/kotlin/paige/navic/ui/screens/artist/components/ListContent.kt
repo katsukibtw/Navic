@@ -49,7 +49,9 @@ fun ArtistListScreenContent(
 	selectedArtist: DomainArtist?,
 	onUpdateSelection: (DomainArtist) -> Unit,
 	onClearSelection: () -> Unit,
-	onSetStarred: (Boolean) -> Unit
+	onSetStarred: (Boolean) -> Unit,
+	onPlayNext: () -> Unit,
+	onAddToQueue: () -> Unit,
 ) {
 
 	val data = state.data.orEmpty()
@@ -121,7 +123,9 @@ fun ArtistListScreenContent(
 						starred = starred,
 						onSelect = { onUpdateSelection(artist) },
 						onDeselect = { onClearSelection() },
-						onSetStarred = { onSetStarred(it) }
+						onSetStarred = { onSetStarred(it) },
+						onPlayNext = onPlayNext,
+						onAddToQueue = onAddToQueue
 					)
 				}
 			}

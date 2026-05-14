@@ -7,16 +7,21 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import paige.navic.data.database.dao.AlbumDao
+import paige.navic.data.database.mappers.toDomainModel
 import paige.navic.data.session.SessionManager
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainArtistListType
 import paige.navic.domain.repositories.ArtistRepository
+import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.utils.UiState
 
 class ArtistListViewModel(
 	initialListType: DomainArtistListType = DomainArtistListType.AlphabeticalByName,
-	private val repository: ArtistRepository
+	private val repository: ArtistRepository,
+	private val albumDao: AlbumDao
 ) : ViewModel() {
 	private val _artistsState =
 		MutableStateFlow<UiState<ImmutableList<DomainArtist>>>(UiState.Loading())
@@ -68,6 +73,28 @@ class ArtistListViewModel(
 					repository.unstarArtist(artist)
 				}
 				_starred.value = starred
+			}
+		}
+	}
+
+	fun addArtistAlbumsToQueue(player: MediaPlayerViewModel) {
+		val artist = _selectedArtist.value ?: return
+		viewModelScope.launch {
+			val artistAlbums = 
+				albumDao.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
+			artistAlbums.map { it.toDomainModel() }.forEach { album ->
+				player.addToQueue(album)
+			}
+		}
+	}
+
+	fun playArtistAlbumsNext(player: MediaPlayerViewModel) {
+		val artist = _selectedArtist.value ?: return
+		viewModelScope.launch {
+			val artistAlbums = 
+				albumDao.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
+			artistAlbums.map { it.toDomainModel() }.forEach { album ->
+				player.playNext(album)
 			}
 		}
 	}

@@ -59,6 +59,8 @@ fun LibraryScreenContent(
 	onClearAlbumSelection: () -> Unit,
 	onStarSelectedAlbum: (Boolean) -> Unit,
 	onRateSelectedAlbum: (Int) -> Unit,
+	onPlayAlbumNext: () -> Unit,
+	onAddAlbumToQueue: () -> Unit,
 
 	// artists
 	artistsState: UiState<ImmutableList<DomainArtist>>,
@@ -67,8 +69,8 @@ fun LibraryScreenContent(
 	onSelectArtist: (DomainArtist) -> Unit,
 	onClearArtistSelection: () -> Unit,
 	onStarSelectedArtist: (Boolean) -> Unit,
-	onPlayAlbumNext: () -> Unit,
-	onAddAlbumToQueue: () -> Unit,
+	onPlayArtistNext: () -> Unit,
+	onAddArtistToQueue: () -> Unit,
 
 	// playlists
 	playlistsState: UiState<ImmutableList<DomainPlaylist>>,
@@ -173,7 +175,9 @@ fun LibraryScreenContent(
 				starred = selectedArtistIsStarred,
 				onSelect = { onSelectArtist(artist) },
 				onDeselect = { onClearArtistSelection() },
-				onSetStarred = { onStarSelectedArtist(it) }
+				onSetStarred = { onStarSelectedArtist(it) },
+				onPlayNext = onPlayArtistNext,
+				onAddToQueue = onAddArtistToQueue
 			)
 		}
 

@@ -373,7 +373,9 @@ fun SearchScreen(
 									starred = artistListStarred,
 									onSelect = { artistListViewModel.selectArtist(artist) },
 									onDeselect = { artistListViewModel.clearSelection() },
-									onSetStarred = { artistListViewModel.starArtist(it) }
+									onSetStarred = { artistListViewModel.starArtist(it) },
+									onPlayNext = { artistListViewModel.playArtistAlbumsNext(player) },
+									onAddToQueue = { artistListViewModel.addArtistAlbumsToQueue(player) }
 								)
 							}
 						} else {
