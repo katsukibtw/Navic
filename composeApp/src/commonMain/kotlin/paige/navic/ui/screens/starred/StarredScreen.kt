@@ -73,6 +73,7 @@ fun StarredScreen() {
 	)
 	val artistsState by artistsViewModel.artistsState.collectAsStateWithLifecycle()
 	val selectedArtist by artistsViewModel.selectedArtist.collectAsStateWithLifecycle()
+	val selectedArtistAlbums by artistsViewModel.selectedArtistAlbums.collectAsStateWithLifecycle()
 	val selectedArtistIsStarred by artistsViewModel.starred.collectAsStateWithLifecycle()
 
 	var shareId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -171,10 +172,13 @@ fun StarredScreen() {
 
 				artistsState = artistsState,
 				selectedArtist = selectedArtist,
+				selectedArtistAlbums = selectedArtistAlbums,
 				selectedArtistIsStarred = selectedArtistIsStarred,
 				onSelectArtist = { artistsViewModel.selectArtist(it) },
 				onClearArtistSelection = { artistsViewModel.clearSelection() },
 				onStarSelectedArtist = { artistsViewModel.starArtist(it) },
+				onPlayArtistNext = { if (selectedArtist != null) artistsViewModel.playArtistAlbumsNext(player)},
+				onAddArtistToQueue = { if (selectedArtist != null) artistsViewModel.addArtistAlbumsToQueue(player)},
 			)
 		}
 	}

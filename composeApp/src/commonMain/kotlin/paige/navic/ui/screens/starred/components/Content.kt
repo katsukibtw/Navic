@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.paging.compose.LazyPagingItems
@@ -47,7 +48,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import navic.composeapp.generated.resources.Res
@@ -75,6 +76,7 @@ import paige.navic.ui.components.common.ContentUnavailable
 import paige.navic.ui.components.common.SongRow
 import paige.navic.ui.components.layouts.ArtCarousel
 import paige.navic.ui.components.layouts.ArtCarouselItem
+import paige.navic.ui.components.sheets.ArtistSheet
 import paige.navic.ui.components.sheets.CollectionSheet
 import paige.navic.ui.screens.album.components.AlbumListScreenItem
 import paige.navic.ui.screens.artist.ArtistsScreenItem
@@ -116,16 +118,19 @@ fun StarredScreenContent(
 	onClearAlbumSelection: () -> Unit,
 	onStarSelectedAlbum: (Boolean) -> Unit,
 	onRateSelectedAlbum: (Int) -> Unit,
+	onPlayAlbumNext: () -> Unit,
+	onAddAlbumToQueue: () -> Unit,
 
 	// artists
 	artistsState: UiState<ImmutableList<DomainArtist>>,
 	selectedArtist: DomainArtist?,
+	selectedArtistAlbums: List<DomainAlbum>?,
 	selectedArtistIsStarred: Boolean,
 	onSelectArtist: (DomainArtist) -> Unit,
 	onClearArtistSelection: () -> Unit,
 	onStarSelectedArtist: (Boolean) -> Unit,
-	onPlayAlbumNext: () -> Unit,
-	onAddAlbumToQueue: () -> Unit,
+	onPlayArtistNext: () -> Unit,
+	onAddArtistToQueue: () -> Unit,
 ) {
 	val gridState = rememberLazyGridState()
 	val ctx = LocalCtx.current
@@ -133,11 +138,13 @@ fun StarredScreenContent(
 	val songs = songsState.data.orEmpty()
 	val artists = artistsState.data.orEmpty()
 	val downloadManager = koinInject<DownloadManager>()
+	val uriHandler = LocalUriHandler.current
 
 	val scope = rememberCoroutineScope()
 
 	val layoutDirection = LocalLayoutDirection.current
-	var playlistDialogShown by rememberSaveable { mutableStateOf(false) }
+
+	var songsToAddToPlaylist by rememberSaveable { mutableStateOf<ImmutableList<DomainSong>?>(null) }
 
 	val scrollState = rememberScrollState()
 
@@ -265,7 +272,9 @@ fun StarredScreenContent(
 						onPlayNext = onPlayAlbumNext,
 						onAddToQueue = onAddAlbumToQueue,
 						onSetStarred = { onStarSelectedAlbum(!selectedAlbumIsStarred) },
-						onAddAllToPlaylist = { playlistDialogShown = true },
+						onAddAllToPlaylist = { 
+							songsToAddToPlaylist = selectedAlbum.songs.orEmpty().toImmutableList()
+						},
 						downloadStatus = albumDownloadStatus,
 						onDownloadAll = { 
 							scope.launch {
@@ -302,19 +311,47 @@ fun StarredScreenContent(
 						artist.albumCount
 					),
 					contentDescription = null,
+					onSelect = { onSelectArtist(artist) },
 					onClick = dropUnlessResumed {
 						backStack.add(Screen.ArtistDetail(artist.id))
 					}
 				)
+				if (selectedArtist == artist) {
+					ArtistSheet(
+						onDismissRequest = onClearArtistSelection,
+						artist = artist,
+						onPlayNext = onPlayArtistNext,
+						onAddToQueue = onAddArtistToQueue,
+						onAddAllToPlaylist = { 
+							songsToAddToPlaylist = selectedArtistAlbums?.flatMap { it.songs }.orEmpty().toImmutableList()
+						},
+						onViewOnLastFm = { 
+							onClearArtistSelection()
+							artist.lastFmUrl?.let { url ->
+								uriHandler.openUri(url)
+							}
+						},
+						onViewOnMusicBrainz = { 								
+							onClearArtistSelection()
+							artist.musicBrainzId?.let { id ->
+								uriHandler.openUri(
+									"https://musicbrainz.org/artist/$id"
+								)
+							}
+						},
+						starred = selectedArtistIsStarred,
+						onSetStarred = { onStarSelectedArtist(!selectedArtistIsStarred) }
+					)
+				}
 			}
 		}
 	}
 
-	if (playlistDialogShown) {
+	songsToAddToPlaylist?.let {
 		@Suppress("AssignedValueIsNeverRead")
 		PlaylistUpdateDialog(
-			songs = selectedAlbum?.songs.orEmpty().toPersistentList(),
-			onDismissRequest = { playlistDialogShown = false }
+			songs = it,
+			onDismissRequest = { songsToAddToPlaylist = null }
 		)
 	}
 }
