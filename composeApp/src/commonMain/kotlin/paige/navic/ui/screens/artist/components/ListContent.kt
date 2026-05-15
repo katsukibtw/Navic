@@ -27,6 +27,7 @@ import navic.composeapp.generated.resources.count_artists
 import navic.composeapp.generated.resources.info_no_artists
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainArtist
 import paige.navic.icons.Icons
 import paige.navic.icons.outlined.Artist
@@ -47,6 +48,7 @@ fun ArtistListScreenContent(
 	innerPadding: PaddingValues,
 	nested: Boolean,
 	selectedArtist: DomainArtist?,
+	selectedArtistAlbums: List<DomainAlbum>?,
 	onUpdateSelection: (DomainArtist) -> Unit,
 	onClearSelection: () -> Unit,
 	onSetStarred: (Boolean) -> Unit,
@@ -120,6 +122,7 @@ fun ArtistListScreenContent(
 						tab = "artists",
 						artist = artist,
 						selected = artist == selectedArtist,
+						selectedArtistAlbums = selectedArtistAlbums,
 						starred = starred,
 						onSelect = { onUpdateSelection(artist) },
 						onDeselect = { onClearSelection() },

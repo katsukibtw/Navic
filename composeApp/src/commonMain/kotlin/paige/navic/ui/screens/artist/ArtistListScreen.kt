@@ -30,12 +30,14 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
+import kotlinx.collections.immutable.toPersistentList
 import paige.navic.LocalCtx
 import paige.navic.LocalNavStack
 import paige.navic.data.database.entities.DownloadStatus
 import paige.navic.data.models.Screen
 import paige.navic.data.models.settings.Settings
 import paige.navic.data.models.settings.enums.BottomBarVisibilityMode
+import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainArtistListType
 import paige.navic.managers.DownloadManager
@@ -70,6 +72,7 @@ fun ArtistListScreen(
 	)
 	val artistsState by viewModel.artistsState.collectAsState()
 	val selectedArtist by viewModel.selectedArtist.collectAsState()
+	val selectedArtistAlbums by viewModel.selectedArtistAlbums.collectAsState()
 	val starred by viewModel.starred.collectAsState()
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -102,6 +105,7 @@ fun ArtistListScreen(
 				state = artistsState,
 				starred = starred,
 				selectedArtist = selectedArtist,
+				selectedArtistAlbums = selectedArtistAlbums,
 				gridState = viewModel.gridState,
 				scrollBehavior = scrollBehavior,
 				innerPadding = innerPadding,
@@ -127,6 +131,7 @@ fun ArtistsScreenItem(
 	tab: String,
 	artist: DomainArtist,
 	selected: Boolean,
+	selectedArtistAlbums: List<DomainAlbum>?,
 	starred: Boolean,
 	onSelect: () -> Unit,
 	onDeselect: () -> Unit,
@@ -137,6 +142,8 @@ fun ArtistsScreenItem(
 	val ctx = LocalCtx.current
 	val backStack = LocalNavStack.current
 	val uriHandler = LocalUriHandler.current
+
+	var playlistDialogShown by rememberSaveable { mutableStateOf(false) }
 
 	Box(modifier) {
 		ArtGridItem(
@@ -161,6 +168,7 @@ fun ArtistsScreenItem(
 				artist = artist,
 				onPlayNext = onPlayNext,
 				onAddToQueue = onAddToQueue,
+				onAddAllToPlaylist = { playlistDialogShown = true },
 				onViewOnLastFm = { 
 					onDeselect()
 					artist.lastFmUrl?.let { url ->
@@ -177,6 +185,13 @@ fun ArtistsScreenItem(
 				},
 				starred = starred,
 				onSetStarred = { onSetStarred(!starred) }
+			)
+		}
+		if (playlistDialogShown) {
+			@Suppress("AssignedValueIsNeverRead")
+			PlaylistUpdateDialog(
+				songs = selectedArtistAlbums?.flatMap { it.songs }.orEmpty().toPersistentList(),
+				onDismissRequest = { playlistDialogShown = false }
 			)
 		}
 	}

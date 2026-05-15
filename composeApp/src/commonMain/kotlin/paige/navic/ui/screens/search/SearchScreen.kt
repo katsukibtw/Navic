@@ -114,6 +114,7 @@ fun SearchScreen(
 		parametersOf(DomainArtistListType.AlphabeticalByName)
 	}
 	val artistListSelection by artistListViewModel.selectedArtist.collectAsState()
+	val artistListSelectionAlbums by artistListViewModel.selectedArtistAlbums.collectAsState()
 	val artistListStarred by artistListViewModel.starred.collectAsState()
 
 	val albumListViewModel = koinViewModel<AlbumListViewModel> {
@@ -370,6 +371,7 @@ fun SearchScreen(
 									tab = "search",
 									artist = artist,
 									selected = artist == artistListSelection,
+									selectedArtistAlbums = artistListSelectionAlbums,
 									starred = artistListStarred,
 									onSelect = { artistListViewModel.selectArtist(artist) },
 									onDeselect = { artistListViewModel.clearSelection() },

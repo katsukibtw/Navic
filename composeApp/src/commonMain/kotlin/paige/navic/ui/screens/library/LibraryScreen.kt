@@ -69,6 +69,7 @@ fun LibraryScreen() {
 	)
 	val artistsState by artistsViewModel.artistsState.collectAsStateWithLifecycle()
 	val selectedArtist by artistsViewModel.selectedArtist.collectAsStateWithLifecycle()
+	val selectedArtistAlbums by artistsViewModel.selectedArtistAlbums.collectAsStateWithLifecycle()
 	val selectedArtistIsStarred by artistsViewModel.starred.collectAsStateWithLifecycle()
 
 	val genresViewModel = koinViewModel<GenreListViewModel>()
@@ -136,6 +137,7 @@ fun LibraryScreen() {
 
 				artistsState = artistsState,
 				selectedArtist = selectedArtist,
+				selectedArtistAlbums = selectedArtistAlbums,
 				selectedArtistIsStarred = selectedArtistIsStarred,
 				onSelectArtist = { artistsViewModel.selectArtist(it) },
 				onClearArtistSelection = { artistsViewModel.clearSelection() },

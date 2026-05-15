@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import paige.navic.data.database.dao.AlbumDao
 import paige.navic.data.database.mappers.toDomainModel
 import paige.navic.data.session.SessionManager
+import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainArtistListType
 import paige.navic.domain.repositories.ArtistRepository
@@ -32,6 +33,9 @@ class ArtistListViewModel(
 
 	private val _selectedArtist = MutableStateFlow<DomainArtist?>(null)
 	val selectedArtist = _selectedArtist.asStateFlow()
+
+	private val _selectedArtistAlbums = MutableStateFlow<List<DomainAlbum>?>(null)
+	val selectedArtistAlbums = _selectedArtistAlbums.asStateFlow()
 
 	private val _listType = MutableStateFlow(initialListType)
 	val listType = _listType.asStateFlow()
@@ -55,6 +59,9 @@ class ArtistListViewModel(
 	fun selectArtist(artist: DomainArtist) {
 		viewModelScope.launch {
 			_selectedArtist.value = artist
+			val artistAlbums = 
+				albumDao.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
+			_selectedArtistAlbums.value = artistAlbums.map { it.toDomainModel() }
 			_starred.value = repository.isArtistStarred(artist)
 		}
 	}

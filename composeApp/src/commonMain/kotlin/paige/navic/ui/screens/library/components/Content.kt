@@ -65,6 +65,7 @@ fun LibraryScreenContent(
 	// artists
 	artistsState: UiState<ImmutableList<DomainArtist>>,
 	selectedArtist: DomainArtist?,
+	selectedArtistAlbums: List<DomainAlbum>?,
 	selectedArtistIsStarred: Boolean,
 	onSelectArtist: (DomainArtist) -> Unit,
 	onClearArtistSelection: () -> Unit,
@@ -172,6 +173,7 @@ fun LibraryScreenContent(
 				tab = "library",
 				artist = artist,
 				selected = artist == selectedArtist,
+				selectedArtistAlbums = selectedArtistAlbums,
 				starred = selectedArtistIsStarred,
 				onSelect = { onSelectArtist(artist) },
 				onDeselect = { onClearArtistSelection() },
