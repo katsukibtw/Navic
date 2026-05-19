@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -213,11 +214,21 @@ fun StarredScreenContent(
 						})
 					)
 				}
+				val rowCount = remember(songs.size) {
+					songs.size.coerceIn(1, 3)
+				}
+				val gridHeight = remember(rowCount) {
+					when (rowCount) {
+						1 -> 82.dp
+						2 -> 164.dp
+						else -> 246.dp
+					}
+				}
 				LazyHorizontalGrid(
-					rows = GridCells.Fixed(3),
+					rows = GridCells.Fixed(rowCount),
 					state = gridState,
 					flingBehavior = rememberSnapFlingBehavior(lazyGridState = gridState),
-					modifier = Modifier.fillMaxWidth().height(250.dp)
+					modifier = Modifier.fillMaxWidth().height(gridHeight)
 				) {
 					itemsIndexed(if (songs.size > 12) songs.slice(0..11) else songs) { index, song ->
 						val download = allDownloads.find { it.songId == song.id }
