@@ -52,10 +52,10 @@ fun SongListScreen(
 	nested: Boolean,
 	artistId: String? = null,
 	artistName: String? = null,
-	listType: DomainSongListType
+	listType: DomainSongListType = DomainSongListType.FrequentlyPlayed
 ) {
 	val viewModel = koinViewModel<SongListViewModel>(
-		key = artistId,
+		key = "${if (listType == DomainSongListType.Starred) "starredSongs-" else ""}${artistId ?: ""}",
 		parameters = { parametersOf(listType, artistId) }
 	)
 	val player = koinViewModel<MediaPlayerViewModel>()
@@ -109,7 +109,7 @@ fun SongListScreen(
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = songs.loadState.refresh !is LoadState.Loading,
-			onRefresh = { viewModel.refreshSongs() },
+			onRefresh = { viewModel.refreshSongs(true) },
 			key = songs.loadState
 		) {
 			LazyColumn(

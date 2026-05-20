@@ -16,6 +16,7 @@ import paige.navic.data.database.mappers.toDomainModel
 import paige.navic.data.database.mappers.toEntity
 import paige.navic.data.session.SessionManager
 import paige.navic.domain.models.DomainSong
+import paige.navic.domain.models.DomainSongListType
 import kotlin.time.Clock
 
 class SongRepository(
@@ -24,7 +25,10 @@ class SongRepository(
 	private val syncManager: SyncManager
 ) {
 	@OptIn(ExperimentalCoroutinesApi::class)
-	fun getSongsPaging(artistId: String? = null): Flow<PagingData<DomainSong>> {
+	fun getSongsPaging(
+		listType: DomainSongListType,
+		artistId: String? = null
+	): Flow<PagingData<DomainSong>> {
 		return SessionManager.activeServerId.filterNotNull().flatMapLatest { serverId ->
 			Pager(
 				config = PagingConfig(
@@ -35,7 +39,11 @@ class SongRepository(
 					if (artistId != null) {
 						songDao.getSongsByArtistPaging(artistId, serverId)
 					} else {
-						songDao.getAllSongsPaging(serverId)
+						when (listType) {
+							// TODO: implement other list types
+							DomainSongListType.Starred -> songDao.getAllStarredSongsPaging(serverId)
+							else -> songDao.getAllSongsPaging(serverId)
+						}
 					}
 				}
 			).flow.map { pagingData ->

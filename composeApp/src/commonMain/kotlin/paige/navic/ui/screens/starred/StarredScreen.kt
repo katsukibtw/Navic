@@ -108,7 +108,7 @@ fun StarredScreen() {
 			onRefresh = {
 				pagedAlbums.refresh()
 				artistsViewModel.refreshArtists()
-				songsViewModel.refreshSongs()
+				songsViewModel.refreshSongs(true)
 			},
 			key = listOf(pagedAlbums.itemSnapshotList, artistsState.itemSnapshotList, songsState.itemSnapshotList)
 		) {

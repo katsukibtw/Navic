@@ -17,6 +17,9 @@ interface SongDao {
 	@Query("SELECT * FROM SongEntity WHERE serverId = :serverId ORDER BY title COLLATE NOCASE ASC")
 	fun getAllSongsPaging(serverId: String): PagingSource<Int, SongEntity>
 
+	@Query("SELECT * FROM SongEntity WHERE serverId = :serverId AND starredAt IS NOT NULL ORDER BY starredAt DESC")
+	fun getAllStarredSongsPaging(serverId: String): PagingSource<Int, SongEntity>
+
 	@Query("SELECT * FROM SongEntity WHERE serverId = :serverId AND artistId = :artistId ORDER BY title COLLATE NOCASE ASC")
 	fun getSongsByArtistPaging(artistId: String, serverId: String): PagingSource<Int, SongEntity>
 
