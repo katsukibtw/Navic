@@ -105,17 +105,48 @@ fun <T> ArtCarousel(
 fun <T : Any> PagedArtCarousel(
 	title: String,
 	items: LazyPagingItems<T>,
+	destination: NavKey? = null,
 	content: @Composable CarouselItemScope.(item: T) -> Unit
 ) {
+	val ctx = LocalCtx.current
+	val backStack = LocalNavStack.current
+
 	if (items.itemCount > 0) {
 		val state = rememberCarouselState { items.itemCount }
 		Column(Modifier.padding(horizontal = 16.dp)) {
-			Text(
-				title,
-				style = MaterialTheme.typography.titleMediumEmphasized,
-				fontWeight = FontWeight(600),
-				modifier = Modifier.heightIn(min = 32.dp).padding(top = 8.dp)
-			)
+			if (destination != null) {
+				Row(
+					modifier = Modifier
+						.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceBetween
+				) {
+					Text(
+						title,
+						style = MaterialTheme.typography.titleMediumEmphasized,
+						fontWeight = FontWeight(600),
+						modifier = Modifier.heightIn(min = 32.dp).padding(top = 8.dp)
+					)
+					Text(
+						stringResource(Res.string.action_see_all),
+						style = MaterialTheme.typography.labelLarge,
+						color = MaterialTheme.colorScheme.primary,
+						modifier = Modifier
+							.heightIn(min = 32.dp).padding(top = 8.dp)
+							.clickable(onClick = dropUnlessResumed {
+								ctx.clickSound()
+								backStack.add(destination)
+							})
+					)
+				}
+			} else {
+				Text(
+					title,
+					style = MaterialTheme.typography.titleMediumEmphasized,
+					fontWeight = FontWeight(600),
+					modifier = Modifier.heightIn(min = 32.dp).padding(top = 8.dp)
+				)
+			}
 			HorizontalUncontainedCarousel(
 				state = state,
 				flingBehavior = CarouselDefaults.multiBrowseFlingBehavior(

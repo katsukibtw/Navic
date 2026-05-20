@@ -8,6 +8,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import paige.navic.data.database.SyncManager
 import paige.navic.data.database.dao.AlbumDao
@@ -20,7 +21,6 @@ import paige.navic.data.session.SessionManager
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainArtistListType
 import kotlin.time.Clock
-import kotlinx.coroutines.flow.Flow
 
 class ArtistRepository(
 	private val albumDao: AlbumDao,
@@ -73,6 +73,11 @@ class ArtistRepository(
 	suspend fun isArtistStarred(artist: DomainArtist): Boolean {
 		val serverId = SessionManager.activeServerId.value ?: return false
 		return artistDao.isArtistStarred(artist.id, serverId)
+	}
+
+	suspend fun getAlbumsByArtist(artistId: String): Flow<List<AlbumWithSongs>> {
+		val serverId = SessionManager.activeServerId.value ?: return flowOf(emptyList<AlbumWithSongs>())
+		return albumDao.getAlbumsByArtist(artistId, serverId)
 	}
 
 	suspend fun starArtist(artist: DomainArtist) {

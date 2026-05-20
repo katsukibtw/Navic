@@ -94,7 +94,7 @@ fun CollectionDetailScreen(
 	val selectedSongRating by viewModel.selectedSongRating.collectAsStateWithLifecycle()
 	val selectedAlbumIsStarred by viewModel.selectedAlbumIsStarred.collectAsStateWithLifecycle()
 	val selectedAlbumRating by viewModel.selectedAlbumRating.collectAsStateWithLifecycle()
-	val otherAlbums by viewModel.otherAlbumsPaging.collectAsLazyPagingItems()
+	val otherAlbums = viewModel.otherAlbumsPaging.collectAsLazyPagingItems()
 	val allDownloads by viewModel.allDownloads.collectAsState()
 	val downloadStatus by viewModel.collectionDownloadStatus()
 		.collectAsState(DownloadStatus.NOT_DOWNLOADED)

@@ -44,6 +44,7 @@ import paige.navic.ui.screens.share.dialogs.ShareDialog
 import paige.navic.utils.LocalBottomBarScrollManager
 import paige.navic.utils.UiState
 import kotlin.time.Duration
+import kotlinx.coroutines.flow.flow
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +53,7 @@ fun StarredScreen() {
 		key = "starredSongs",
 		parameters = { parametersOf(DomainSongListType.Starred) }
 	)
-	val songsState by songsViewModel.songsState.collectAsStateWithLifecycle()
+	val songsState = songsViewModel.songsPaging.collectAsLazyPagingItems()
 	val selectedSong by songsViewModel.selectedSong.collectAsStateWithLifecycle()
 	val selectedSongIsStarred by songsViewModel.starred.collectAsStateWithLifecycle()
 	val selectedSongRating by songsViewModel.selectedSongRating.collectAsStateWithLifecycle()
@@ -71,7 +72,7 @@ fun StarredScreen() {
 		key = "starredArtists",
 		parameters = { parametersOf(DomainArtistListType.Starred) }
 	)
-	val artistsState by artistsViewModel.artistsState.collectAsStateWithLifecycle()
+	val artistsState = artistsViewModel.artistsPaging.collectAsLazyPagingItems()
 	val selectedArtist by artistsViewModel.selectedArtist.collectAsStateWithLifecycle()
 	val selectedArtistAlbums by artistsViewModel.selectedArtistAlbums.collectAsStateWithLifecycle()
 	val selectedArtistIsStarred by artistsViewModel.starred.collectAsStateWithLifecycle()
@@ -96,10 +97,9 @@ fun StarredScreen() {
 			}
 		}
 	) { innerPadding ->
-		val isAlbumsLoading = pagedAlbums.loadState.refresh is LoadState.Loading
-		val isAnythingLoading = isAlbumsLoading ||
-			artistsState is UiState.Loading || 
-			songsState is UiState.Loading
+		val isAnythingLoading = pagedAlbums.loadState.refresh is LoadState.Loading ||
+			artistsState.loadState.refresh is LoadState.Loading || 
+			songsState.loadState.refresh is LoadState.Loading
 		PullToRefreshBox(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
@@ -107,10 +107,10 @@ fun StarredScreen() {
 			finished = !isAnythingLoading,
 			onRefresh = {
 				pagedAlbums.refresh()
-				artistsViewModel.refreshArtists(true)
-				songsViewModel.refreshSongs(true)
+				artistsViewModel.refreshArtists()
+				songsViewModel.refreshSongs()
 			},
-			key = listOf(pagedAlbums.itemSnapshotList, artistsState, songsState)
+			key = listOf(pagedAlbums.itemSnapshotList, artistsState.itemSnapshotList, songsState.itemSnapshotList)
 		) {
 			StarredScreenContent(
 				scrollBehavior = scrollBehavior,
@@ -118,13 +118,13 @@ fun StarredScreen() {
 				onSetShareId = { shareId = it },
 				isOnline = isOnline,
 
-				songsState = songsState,
+				songs = songsState,
 				selectedSong = selectedSong,
 				allDownloads = allDownloads,
 				onPlaySong = { song, index ->
 					player.clearQueue()
-					songsState.data.orEmpty().forEach {
-						player.addToQueueSingle(it)
+					songsState.itemSnapshotList.forEach {
+						if (it != null) player.addToQueueSingle(it)
 					}
 					player.playAt(index)
 				},
@@ -170,7 +170,7 @@ fun StarredScreen() {
 				onAddAlbumToQueue = { if (selectedAlbum != null) player.addToQueue(selectedAlbum as DomainSongCollection)},
 				onRateSelectedAlbum = { albumsViewModel.setRating(it) },
 
-				artistsState = artistsState,
+				artists = artistsState,
 				selectedArtist = selectedArtist,
 				selectedArtistAlbums = selectedArtistAlbums,
 				selectedArtistIsStarred = selectedArtistIsStarred,

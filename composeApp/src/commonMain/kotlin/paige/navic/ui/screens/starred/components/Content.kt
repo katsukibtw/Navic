@@ -1,8 +1,8 @@
 package paige.navic.ui.screens.starred.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,6 +45,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import kotlinx.collections.immutable.ImmutableList
@@ -75,14 +77,13 @@ import paige.navic.icons.Icons
 import paige.navic.icons.outlined.PlaylistRemove
 import paige.navic.ui.components.common.ContentUnavailable
 import paige.navic.ui.components.common.SongRow
-import paige.navic.ui.components.layouts.ArtCarousel
+import paige.navic.ui.components.layouts.PagedArtCarousel
 import paige.navic.ui.components.layouts.ArtCarouselItem
 import paige.navic.ui.components.sheets.ArtistSheet
 import paige.navic.ui.components.sheets.CollectionSheet
 import paige.navic.ui.screens.album.components.AlbumListScreenItem
 import paige.navic.ui.screens.artist.ArtistsScreenItem
 import paige.navic.ui.screens.playlist.dialogs.PlaylistUpdateDialog
-import paige.navic.utils.UiState
 import paige.navic.utils.withoutTop
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +94,7 @@ fun StarredScreenContent(
 	onSetShareId: (String) -> Unit,
 	isOnline: Boolean = false,
 
-	songsState: UiState<ImmutableList<DomainSong>>,
+	songs: LazyPagingItems<DomainSong>,
 	selectedSong: DomainSong?,
 	selectedSongIsStarred: Boolean,
 	selectedSongRating: Int,
@@ -123,7 +124,7 @@ fun StarredScreenContent(
 	onAddAlbumToQueue: () -> Unit,
 
 	// artists
-	artistsState: UiState<ImmutableList<DomainArtist>>,
+	artists: LazyPagingItems<DomainArtist>,
 	selectedArtist: DomainArtist?,
 	selectedArtistAlbums: List<DomainAlbum>?,
 	selectedArtistIsStarred: Boolean,
@@ -136,8 +137,6 @@ fun StarredScreenContent(
 	val gridState = rememberLazyGridState()
 	val ctx = LocalCtx.current
 	val backStack = LocalNavStack.current
-	val songs = songsState.data.orEmpty()
-	val artists = artistsState.data.orEmpty()
 	val downloadManager = koinInject<DownloadManager>()
 	val uriHandler = LocalUriHandler.current
 
@@ -155,11 +154,15 @@ fun StarredScreenContent(
 			.verticalScroll(state = scrollState),
 		verticalArrangement = Arrangement.spacedBy(
 			space = 12.dp,
-			alignment = if (pagedAlbums.itemCount == 0 && songs.isEmpty() && artists.isEmpty()) Alignment.CenterVertically else Alignment.Top
+			alignment = if (
+				pagedAlbums.itemCount == 0 && 
+				songs.itemCount == 0 && 
+				artists.itemCount == 0
+			) Alignment.CenterVertically else Alignment.Top
 		),
 		horizontalAlignment = Alignment.CenterHorizontally,
 	) {
-		if (pagedAlbums.itemCount == 0 && songs.isEmpty() && artists.isEmpty()) {
+		if (pagedAlbums.itemCount == 0 && songs.itemCount == 0 && artists.itemCount == 0) {
 			ContentUnavailable(
 				icon = Icons.Outlined.PlaylistRemove,
 				label = stringResource(Res.string.info_no_starred)
@@ -184,7 +187,7 @@ fun StarredScreenContent(
 				),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
-			if (!songs.isEmpty()) {
+			if (songs.itemCount != 0) {
 				Row(
 					modifier = Modifier
 						.heightIn(min = 32.dp)
@@ -214,8 +217,8 @@ fun StarredScreenContent(
 						})
 					)
 				}
-				val rowCount = remember(songs.size) {
-					songs.size.coerceIn(1, 3)
+				val rowCount = remember(songs.itemCount) {
+					songs.itemCount.coerceIn(1, 3)
 				}
 				val gridHeight = remember(rowCount) {
 					when (rowCount) {
@@ -230,7 +233,12 @@ fun StarredScreenContent(
 					flingBehavior = rememberSnapFlingBehavior(lazyGridState = gridState),
 					modifier = Modifier.fillMaxWidth().height(gridHeight)
 				) {
-					itemsIndexed(if (songs.size > 12) songs.slice(0..11) else songs) { index, song ->
+					items(
+						count = songs.itemCount,
+						key = songs.itemKey { it.id },
+						contentType = songs.itemContentType { "Song" }
+					) { index ->
+						val song = songs[index] ?: return@items
 						val download = allDownloads.find { it.songId == song.id }
 						SongRow(
 							modifier = Modifier.weight(1f),
@@ -256,9 +264,9 @@ fun StarredScreenContent(
 					}
 				}
 			}
-			ArtCarousel(
+			PagedArtCarousel(
 				stringResource(Res.string.title_albums),
-				pagedAlbums.itemSnapshotList.items.toImmutableList(),
+				pagedAlbums,
 				Screen.AlbumList(true, DomainAlbumListType.Starred)
 			) { album ->
 				val albumDownloadStatus by downloadManager
@@ -307,10 +315,10 @@ fun StarredScreenContent(
 					)
 				}
 			}
-			if (artists.isEmpty()) return@Column
-			ArtCarousel(
+			if (artists.itemCount == 0) return@Column
+			PagedArtCarousel(
 				stringResource(Res.string.title_artists),
-				artists.toImmutableList(),
+				artists,
 				Screen.ArtistList(true, DomainArtistListType.Starred)
 			) { artist ->
 				ArtCarouselItem(

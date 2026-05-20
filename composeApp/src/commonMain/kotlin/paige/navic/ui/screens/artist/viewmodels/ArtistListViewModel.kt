@@ -30,7 +30,7 @@ class ArtistListViewModel(
 	private val repository: ArtistRepository,
 	private val albumDao: AlbumDao
 ) : ViewModel() {
-	private val _listType = MutableStateFlow(DomainArtistListType.AlphabeticalByName)
+	private val _listType = MutableStateFlow(initialListType)
 	val listType = _listType.asStateFlow()
 
 	@OptIn(ExperimentalCoroutinesApi::class)
@@ -56,9 +56,6 @@ class ArtistListViewModel(
 	private val _selectedArtistAlbums = MutableStateFlow<List<DomainAlbum>?>(null)
 	val selectedArtistAlbums = _selectedArtistAlbums.asStateFlow()
 
-	private val _listType = MutableStateFlow(initialListType)
-	val listType = _listType.asStateFlow()
-
 	val gridState = LazyGridState()
 
 	fun refreshArtists() {
@@ -71,7 +68,7 @@ class ArtistListViewModel(
 		viewModelScope.launch {
 			_selectedArtist.value = artist
 			val artistAlbums = 
-				albumDao.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
+				repository.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
 			_selectedArtistAlbums.value = artistAlbums.map { it.toDomainModel() }
 			_starred.value = repository.isArtistStarred(artist)
 		}
@@ -99,7 +96,7 @@ class ArtistListViewModel(
 		val artist = _selectedArtist.value ?: return
 		viewModelScope.launch {
 			val artistAlbums = 
-				albumDao.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
+				repository.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
 			artistAlbums.map { it.toDomainModel() }.forEach { album ->
 				player.addToQueue(album)
 			}
@@ -110,7 +107,7 @@ class ArtistListViewModel(
 		val artist = _selectedArtist.value ?: return
 		viewModelScope.launch {
 			val artistAlbums = 
-				albumDao.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
+				repository.getAlbumsByArtist(artist.id).firstOrNull() ?: emptyList()
 			artistAlbums.map { it.toDomainModel() }.forEach { album ->
 				player.playNext(album)
 			}
@@ -119,9 +116,5 @@ class ArtistListViewModel(
 
 	fun setListType(listType: DomainArtistListType) {
 		_listType.value = listType
-	}
-
-	fun clearError() {
-		_artistsState.value = UiState.Success(_artistsState.value.data ?: persistentListOf())
 	}
 }

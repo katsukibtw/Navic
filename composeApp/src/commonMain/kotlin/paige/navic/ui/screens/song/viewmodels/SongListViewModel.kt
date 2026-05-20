@@ -84,7 +84,7 @@ class SongListViewModel(
 					repository.unstarSong(selection)
 				}
 				_starred.value = starred
-				refreshSongs(false)
+				refreshSongs()
 			}
 		}
 	}
