@@ -4,6 +4,7 @@ import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import coil3.PlatformContext
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -13,6 +14,7 @@ import paige.navic.domain.repositories.PlayerStateRepository
 import paige.navic.managers.ConnectivityManager
 import paige.navic.managers.ShareManager
 import paige.navic.managers.StorageManager
+import paige.navic.managers.SyncScheduler
 import paige.navic.shared.IOSMediaPlayerViewModel
 import paige.navic.shared.MediaPlayerViewModel
 import platform.Foundation.NSDocumentDirectory
@@ -38,19 +40,19 @@ actual val platformModule = module {
 			.build()
 	}
 
-	single<PlayerStateRepository> {
-		val producePath = {
-			@OptIn(ExperimentalForeignApi::class)
-			val directory = NSFileManager.defaultManager.URLForDirectory(
-				directory = NSDocumentDirectory,
-				inDomain = NSUserDomainMask,
-				appropriateForURL = null,
-				create = true,
-				error = null
-			)
-			directory?.path + "/${PlayerStateRepository.DATASTORE_FILE_NAME}"
+	single {
+		Json {
+			ignoreUnknownKeys = true
+			coerceInputValues = true
+			encodeDefaults = true
 		}
-		PlayerStateRepository(PlayerStateRepository.getInstance(producePath))
+	}
+
+	single<PlayerStateRepository> {
+		PlayerStateRepository(
+			playerStateDao = get(),
+			json = get()
+		)
 	}
 
 	viewModel<MediaPlayerViewModel> {
@@ -63,6 +65,7 @@ actual val platformModule = module {
 	}
 
 	singleOf(::ShareManager)
+	singleOf(::SyncScheduler)
 	single<PlatformContext> { PlatformContext.INSTANCE }
 	single<StorageManager> { StorageManager() }
 	single<ConnectivityManager> { ConnectivityManager(get()) }

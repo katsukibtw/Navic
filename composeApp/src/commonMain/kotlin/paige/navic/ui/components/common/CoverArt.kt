@@ -32,7 +32,6 @@ import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.kyant.capsule.ContinuousRoundedRectangle
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.info_image_failed_to_load
 import org.jetbrains.compose.resources.stringResource
@@ -54,16 +53,21 @@ fun CoverArt(
 	crossfadeMs: Int = 500,
 	shadowElevation: Dp = 0.dp,
 	interactionSource: MutableInteractionSource? = null,
-	shape: Shape = ContinuousRoundedRectangle(Settings.shared.artGridRounding.dp)
+	shape: Shape = Settings.shared.coverArtShape.shape
 ) {
 	val platformContext = LocalPlatformContext.current
 	val customHeaders = Settings.shared.customHeaders
-	val model = remember(coverArtId, customHeaders) {
+	val highQualityCovers = Settings.shared.highQualityCovers
+	val model = remember(coverArtId, customHeaders, highQualityCovers) {
 		val networkHeaders = NetworkHeaders.Builder().apply {
 			Settings.shared.customHeadersMap().forEach { (key, value) -> add(key, value) }
 		}.build()
+		val url = coverArtId?.let { 
+			val baseUrl = SessionManager.api.getCoverArtUrl(it, auth = true)
+			if (highQualityCovers) baseUrl else "$baseUrl&size=512"
+		}
 		ImageRequest.Builder(platformContext)
-			.data(coverArtId?.let { SessionManager.api.getCoverArtUrl(it, auth = true) })
+			.data(url)
 			.memoryCacheKey(coverArtId)
 			.diskCacheKey(coverArtId)
 			.diskCachePolicy(CachePolicy.ENABLED)

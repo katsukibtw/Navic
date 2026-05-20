@@ -1,22 +1,26 @@
 package paige.navic.domain.repositories
 
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import paige.navic.data.database.SyncManager
 import paige.navic.data.database.dao.AlbumDao
 import paige.navic.data.database.dao.ArtistDao
 import paige.navic.data.database.entities.SyncActionType
 import paige.navic.data.database.mappers.toDomainModel
 import paige.navic.data.database.mappers.toEntity
+import paige.navic.data.database.relations.AlbumWithSongs
+import paige.navic.data.session.SessionManager
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainArtistListType
-import paige.navic.utils.UiState
 import kotlin.time.Clock
+import kotlinx.coroutines.flow.Flow
 
 class ArtistRepository(
 	private val albumDao: AlbumDao,
@@ -24,45 +28,57 @@ class ArtistRepository(
 	private val syncManager: SyncManager,
 	private val dbRepository: DbRepository
 ) {
-	private suspend fun getLocalData(
-		listType: DomainArtistListType
-	): ImmutableList<DomainArtist> {
-		return when (listType) {
-			DomainArtistListType.AlphabeticalByName -> artistDao.getArtistsAlphabeticalByName()
-			DomainArtistListType.Random -> artistDao.getArtistsRandom()
-			DomainArtistListType.Starred -> artistDao.getArtistsStarred()
-		}.map { it.toDomainModel() }.toImmutableList()
-	}
+	@OptIn(ExperimentalCoroutinesApi::class)
+	fun getArtistsCount(listType: DomainArtistListType): Flow<Int> {
+		return SessionManager.activeServerId.filterNotNull().flatMapLatest { serverId ->
+			when (listType) {
+				DomainArtistListType.AlphabeticalByName,
+				DomainArtistListType.Random -> artistDao.getArtistsCountFlow(serverId)
 
-	private suspend fun refreshLocalData(
-		listType: DomainArtistListType
-	): ImmutableList<DomainArtist> {
-		dbRepository.syncArtists().getOrThrow()
-		return getLocalData(listType)
-	}
-
-	fun getArtistsFlow(
-		fullRefresh: Boolean,
-		listType: DomainArtistListType
-	): Flow<UiState<ImmutableList<DomainArtist>>> = flow {
-		val localData = getLocalData(listType)
-		if (fullRefresh) {
-			emit(UiState.Loading(data = localData))
-			try {
-				emit(UiState.Success(data = refreshLocalData(listType)))
-			} catch (error: Exception) {
-				emit(UiState.Error(error = error, data = localData))
+				DomainArtistListType.Starred -> artistDao.getStarredArtistsCountFlow(serverId)
 			}
-		} else {
-			emit(UiState.Success(data = localData))
 		}
-	}.flowOn(Dispatchers.IO)
+	}
+	@OptIn(ExperimentalCoroutinesApi::class)
+	fun getArtistsPaging(
+		listType: DomainArtistListType
+	): Flow<PagingData<DomainArtist>> {
+		return SessionManager.activeServerId.filterNotNull().flatMapLatest { serverId ->
+			Pager(
+				config = PagingConfig(
+					pageSize = 30,
+					enablePlaceholders = false,
+					prefetchDistance = 15
+				),
+				pagingSourceFactory = {
+					when (listType) {
+						DomainArtistListType.AlphabeticalByName -> artistDao.getArtistsAlphabeticalByNamePaging(
+							serverId
+						)
 
-	suspend fun isArtistStarred(artist: DomainArtist) = artistDao.isArtistStarred(artist.id)
-	suspend fun getAlbumsByArtist(artistId: String) = albumDao.getAlbumsByArtist(artistId)
+						DomainArtistListType.Random -> artistDao.getArtistsRandomPaging(serverId)
+						DomainArtistListType.Starred -> artistDao.getArtistsStarredPaging(serverId)
+					}
+				}
+			).flow.map { pagingData ->
+				pagingData.map { it.toDomainModel() }
+			}
+		}
+	}
+
+	suspend fun syncArtists() {
+		dbRepository.syncArtists().getOrThrow()
+	}
+
+	suspend fun isArtistStarred(artist: DomainArtist): Boolean {
+		val serverId = SessionManager.activeServerId.value ?: return false
+		return artistDao.isArtistStarred(artist.id, serverId)
+	}
 
 	suspend fun starArtist(artist: DomainArtist) {
+		val serverId = SessionManager.activeServerId.value ?: return
 		val starredEntity = artist.toEntity().copy(
+			serverId = serverId,
 			starredAt = Clock.System.now()
 		)
 		artistDao.insertArtist(starredEntity)
@@ -70,7 +86,9 @@ class ArtistRepository(
 	}
 
 	suspend fun unstarArtist(artist: DomainArtist) {
+		val serverId = SessionManager.activeServerId.value ?: return
 		val unstarredEntity = artist.toEntity().copy(
+			serverId = serverId,
 			starredAt = null
 		)
 		artistDao.insertArtist(unstarredEntity)

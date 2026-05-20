@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.title_songs
 import org.jetbrains.compose.resources.stringResource
@@ -41,7 +43,6 @@ import paige.navic.ui.screens.song.components.SongListScreenSortButton
 import paige.navic.ui.screens.song.components.songListScreenContent
 import paige.navic.ui.screens.song.viewmodels.SongListViewModel
 import paige.navic.utils.LocalBottomBarScrollManager
-import paige.navic.utils.UiState
 import paige.navic.utils.withoutTop
 import kotlin.time.Duration
 
@@ -58,7 +59,7 @@ fun SongListScreen(
 		parameters = { parametersOf(listType, artistId) }
 	)
 	val player = koinViewModel<MediaPlayerViewModel>()
-	val songsState by viewModel.songsState.collectAsStateWithLifecycle()
+	val songs = viewModel.songsPaging.collectAsLazyPagingItems()
 	val selectedSong by viewModel.selectedSong.collectAsStateWithLifecycle()
 	val selectedSorting by viewModel.selectedSorting.collectAsStateWithLifecycle()
 	val selectedReversed by viewModel.selectedReversed.collectAsStateWithLifecycle()
@@ -107,21 +108,21 @@ fun SongListScreen(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
-			finished = songsState !is UiState.Loading,
-			onRefresh = { viewModel.refreshSongs(true) },
-			key = songsState
+			finished = songs.loadState.refresh !is LoadState.Loading,
+			onRefresh = { viewModel.refreshSongs() },
+			key = songs.loadState
 		) {
 			LazyColumn(
 				modifier = if (!nested)
 					Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
 				else Modifier.fillMaxSize(),
 				contentPadding = innerPadding.withoutTop(),
-				verticalArrangement = if ((songsState as? UiState.Success)?.data?.isEmpty() == true)
+				verticalArrangement = if (songs.itemCount == 0)
 					Arrangement.Center
 				else Arrangement.spacedBy(12.dp)
 			) {
 				songListScreenContent(
-					state = songsState,
+					songs = songs,
 					selectedSongIsStarred = starred,
 					selectedSongRating = selectedSongRating,
 					selectedSong = selectedSong,

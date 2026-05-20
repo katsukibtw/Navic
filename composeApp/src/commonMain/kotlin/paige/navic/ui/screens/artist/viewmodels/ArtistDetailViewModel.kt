@@ -4,13 +4,18 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -18,6 +23,7 @@ import paige.navic.data.database.dao.AlbumDao
 import paige.navic.data.database.dao.ArtistDao
 import paige.navic.data.database.entities.DownloadStatus
 import paige.navic.data.database.mappers.toDomainModel
+import paige.navic.data.session.SessionManager
 import paige.navic.domain.models.DomainAlbum
 import paige.navic.domain.models.DomainArtist
 import paige.navic.domain.models.DomainSong
@@ -34,9 +40,9 @@ import paige.navic.utils.UiState
 @Immutable
 data class ArtistState(
 	val artist: DomainArtist,
-	val albums: List<DomainAlbum>,
 	val topSongs: List<DomainSong>,
-	val similarArtists: List<DomainArtist> = emptyList()
+	val similarArtists: List<DomainArtist> = emptyList(),
+	val albums: List<DomainAlbum> = emptyList()
 )
 
 class ArtistDetailViewModel(
@@ -52,6 +58,11 @@ class ArtistDetailViewModel(
 ) : ViewModel() {
 	private val _artistState = MutableStateFlow<UiState<ArtistState>>(UiState.Loading())
 	val artistState = _artistState.asStateFlow()
+
+	@OptIn(ExperimentalCoroutinesApi::class)
+	val pagedAlbums = flowOf(artistId).flatMapLatest { id ->
+		albumRepository.getPagedAlbumsByArtist(id)
+	}.cachedIn(viewModelScope)
 
 	private val _starred = MutableStateFlow(false)
 	val starred = _starred.asStateFlow()
@@ -91,22 +102,23 @@ class ArtistDetailViewModel(
 
 	private fun loadArtistData() {
 		viewModelScope.launch {
+			val serverId = SessionManager.activeServerId.value ?: return@launch
 			try {
-				val artistEntity = artistDao.getArtistById(artistId)
+				val artistEntity = artistDao.getArtistById(artistId, serverId)
 					?: throw Exception("Artist not found in database")
 				val domainArtist = artistEntity.toDomainModel()
 
 				val albumsWithSongs =
-					albumDao.getAlbumsByArtist(artistId).firstOrNull() ?: emptyList()
+					albumDao.getAlbumsByArtist(artistId, serverId).firstOrNull() ?: emptyList()
 				val domainAlbums = albumsWithSongs.map { it.toDomainModel() }
 
 				val domainSongs = albumsWithSongs.flatMap { it.songs }
 					.map { it.toDomainModel() }
 					.sortedByDescending { it.playCount }
-					.take(10)
+					.take(12)
 
 				val initialSimilarArtists = domainArtist.similarArtistIds.mapNotNull { id ->
-					artistDao.getArtistById(id)?.toDomainModel()
+					artistDao.getArtistById(id, serverId)?.toDomainModel()
 				}
 
 				_starred.value = artistRepository.isArtistStarred(domainArtist)
@@ -114,9 +126,9 @@ class ArtistDetailViewModel(
 				_artistState.value = UiState.Success(
 					ArtistState(
 						artist = domainArtist,
-						albums = domainAlbums,
 						topSongs = domainSongs,
-						similarArtists = initialSimilarArtists
+						similarArtists = initialSimilarArtists,
+						albums = domainAlbums
 					)
 				)
 
@@ -127,13 +139,13 @@ class ArtistDetailViewModel(
 
 							val updatedSimilarArtists =
 								updatedArtist.similarArtistIds.mapNotNull { id ->
-									artistDao.getArtistById(id)?.toDomainModel()
+									artistDao.getArtistById(id, serverId)?.toDomainModel()
 								}
 
 							_artistState.value = UiState.Success(
 								currentState.copy(
 									artist = updatedArtist,
-									similarArtists = updatedSimilarArtists
+									similarArtists = updatedSimilarArtists,
 								)
 							)
 						}
@@ -240,10 +252,12 @@ class ArtistDetailViewModel(
 	}
 
 	fun playArtistAlbums(player: MediaPlayerViewModel) {
-		(_artistState.value as? UiState.Success)?.data?.let { state ->
+		viewModelScope.launch {
+			val serverId = SessionManager.activeServerId.value ?: return@launch
+			val albums = albumDao.getAlbumsByArtist(artistId, serverId).firstOrNull() ?: emptyList()
 			player.clearQueue()
-			state.albums.forEach { album ->
-				player.addToQueue(album)
+			albums.forEach { album ->
+				player.addToQueue(album.toDomainModel())
 			}
 			player.togglePlay()
 		}
@@ -263,19 +277,24 @@ class ArtistDetailViewModel(
 
 	@OptIn(ExperimentalCoroutinesApi::class)
 	fun collectionDownloadStatus(): Flow<DownloadStatus> {
-		return artistState.flatMapLatest { state ->
-			if (state is UiState.Success) {
-				val allArtistSongIds = state.data.albums.flatMap { album ->
-					album.songs.map { it.id }
-				}
+		return SessionManager.activeServerId.filterNotNull().flatMapLatest { serverId ->
+			artistState.flatMapLatest { state ->
+				if (state is UiState.Success) {
+					flow {
+						val albums = albumDao.getAlbumsByArtist(artistId, serverId).first()
+						val allArtistSongIds = albums.flatMap { album ->
+							album.songs.map { it.songId }
+						}
 
-				if (allArtistSongIds.isEmpty()) {
-					flowOf(DownloadStatus.NOT_DOWNLOADED)
+						if (allArtistSongIds.isEmpty()) {
+							emit(DownloadStatus.NOT_DOWNLOADED)
+						} else {
+							emitAll(downloadManager.getCollectionDownloadStatus(allArtistSongIds))
+						}
+					}
 				} else {
-					downloadManager.getCollectionDownloadStatus(allArtistSongIds)
+					flowOf(DownloadStatus.NOT_DOWNLOADED)
 				}
-			} else {
-				flowOf(DownloadStatus.NOT_DOWNLOADED)
 			}
 		}
 	}

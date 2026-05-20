@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.dropUnlessResumed
-import kotlinx.collections.immutable.toImmutableList
+import androidx.paging.compose.LazyPagingItems
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.title_more_by_artist
 import org.jetbrains.compose.resources.stringResource
@@ -22,12 +22,13 @@ import paige.navic.domain.models.DomainAlbum
 import paige.navic.managers.DownloadManager
 import paige.navic.ui.components.layouts.ArtCarousel
 import paige.navic.ui.components.layouts.ArtCarouselItem
+import paige.navic.ui.components.layouts.PagedArtCarousel
 import paige.navic.ui.components.sheets.CollectionSheet
 import paige.navic.ui.screens.playlist.dialogs.PlaylistUpdateDialog
 
 fun LazyListScope.collectionDetailScreenMoreByArtistRow(
 	artistName: String,
-	artistAlbums: List<DomainAlbum>,
+	artistAlbums: LazyPagingItems<DomainAlbum>,
 	selectedAlbum: DomainAlbum?,
 	onSetShareId: (String) -> Unit,
 	onPlayNext: (() -> Unit)?,
@@ -48,9 +49,9 @@ fun LazyListScope.collectionDetailScreenMoreByArtistRow(
 
 		val downloadManager = koinInject<DownloadManager>()
 
-		ArtCarousel(
+		PagedArtCarousel(
 			title = stringResource(Res.string.title_more_by_artist, artistName),
-			items = artistAlbums.sortedByDescending { it.playCount }.toImmutableList()
+			items = artistAlbums
 		) { album ->
 			val downloadStatus by downloadManager
 				.getCollectionDownloadStatus(album.songs.map { it.id })
