@@ -26,6 +26,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.title_songs
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import paige.navic.data.models.settings.Settings
@@ -58,7 +59,7 @@ fun SongListScreen(
 		key = "${if (listType == DomainSongListType.Starred) "starredSongs-" else ""}${artistId ?: ""}",
 		parameters = { parametersOf(listType, artistId) }
 	)
-	val player = koinViewModel<MediaPlayerViewModel>()
+	val player = koinInject<MediaPlayerViewModel>()
 	val songs = viewModel.songsPaging.collectAsLazyPagingItems()
 	val selectedSong by viewModel.selectedSong.collectAsStateWithLifecycle()
 	val selectedSorting by viewModel.selectedSorting.collectAsStateWithLifecycle()
